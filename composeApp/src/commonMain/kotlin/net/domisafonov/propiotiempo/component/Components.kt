@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.serialization.Serializable
@@ -14,6 +15,9 @@ import kotlinx.serialization.Serializable
 interface RootComponent : ComponentContext{
     val screenStack: Value<ChildStack<*, Child>>
     val dialogSlot: Value<ChildSlot<*, Dialog>>
+
+    fun onActivitiesSelection()
+    fun onSchemaSelection()
 
     sealed interface Child {
         data class Activities(val component: ActivitiesComponent) : Child
@@ -87,6 +91,14 @@ class RootComponentImpl private constructor(
         key = "DialogSlot",
     ) { config, ctx ->
         TODO()
+    }
+
+    override fun onActivitiesSelection() {
+        screenNavigation.replaceAll(ScreenConfig.Activities)
+    }
+
+    override fun onSchemaSelection() {
+        screenNavigation.replaceAll(ScreenConfig.Schema)
     }
 }
 
