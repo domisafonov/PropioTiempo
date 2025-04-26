@@ -1,0 +1,38 @@
+CREATE TABLE activities (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  older_version INTEGER,
+  FOREIGN KEY(older_version) REFERENCES activities(id)
+);
+
+CREATE TABLE time_activities (
+  id INTEGER NOT NULL PRIMARY KEY,
+  FOREIGN KEY(id) REFERENCES activities(id)
+);
+
+CREATE TABLE daily_checklist (
+  id INTEGER NOT NULL PRIMARY KEY,
+  FOREIGN KEY(id) REFERENCES activities(id)
+);
+
+CREATE TABLE daily_checklist_item (
+  checklist_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  PRIMARY KEY(checklist_id, name),
+  FOREIGN KEY(checklist_id) REFERENCES daily_checklist(id)
+);
+
+CREATE TABLE time_activity_intervals (
+  activity_id INTEGER NOT NULL,
+  start_time INTEGER NOT NULL,
+  end_time INTEGER,
+  PRIMARY KEY(activity_id, start_time),
+  FOREIGN KEY(activity_id) REFERENCES time_activities(id)
+);
+
+CREATE TABLE checklist_checks (
+  checklist_id INTEGER NOT NULL,
+  time INTEGER NOT NULL,
+  PRIMARY KEY(checklist_id, time),
+  FOREIGN KEY(checklist_id) REFERENCES daily_checklist(id)
+);
