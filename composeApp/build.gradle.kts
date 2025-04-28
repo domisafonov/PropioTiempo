@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.decompose)
             implementation(libs.decompose.ext.compose)
             implementation(libs.sqldelight.coroutines)
+            implementation(libs.sqldelight.async)
             implementation(libs.mvikotlin)
             implementation(libs.mvikotlin.main)
             implementation(libs.mvikotlin.coroutines)

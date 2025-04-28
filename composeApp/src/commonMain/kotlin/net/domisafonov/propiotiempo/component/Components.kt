@@ -1,5 +1,6 @@
 package net.domisafonov.propiotiempo.component
 
+import app.cash.sqldelight.db.SqlDriver
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.slot.SlotNavigation
@@ -11,6 +12,12 @@ import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.ActivityRepository
+import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
+import net.domisafonov.propiotiempo.data.ReportRepositoryImpl
+import net.domisafonov.propiotiempo.data.SchemaRepository
+import net.domisafonov.propiotiempo.data.SchemaRepositoryImpl
+import net.domisafonov.propiotiempo.data.db.DatabaseSource
 
 interface RootComponent : ComponentContext{
     val screenStack: Value<ChildStack<*, Child>>
@@ -46,30 +53,39 @@ private data class DialogConfig(
     val message: String?,
 )
 
-class RootComponentImpl private constructor(
+class RootComponentImpl(
     componentContext: ComponentContext,
-    private val activities: (ComponentContext) -> ActivitiesComponent,
-    private val schema: (ComponentContext) -> SchemaComponent,
+    storeFactory: StoreFactory,
+    databaseDriverProvider: Lazy<SqlDriver>,
 ) : RootComponent, ComponentContext by componentContext {
 
-    constructor(
-        componentContext: ComponentContext,
-        storeFactory: StoreFactory,
-    ) : this(
-        componentContext = componentContext,
-        activities = { componentContext ->
-            ActivitiesComponentImpl(
-                componentContext = componentContext,
-                storeFactory = storeFactory,
-            )
-        },
-        schema = { componentContext ->
-            SchemaComponentImpl(
-                componentContext = componentContext,
-                storeFactory = storeFactory,
-            )
-        },
-    )
+    private val database by lazy {
+        DatabaseSource(databaseDriverProvider.value)
+    }
+    private val activityRepositoryProvider = lazy {
+        ActivityRepositoryImpl(database = database)
+    }
+    private val schemaRepositoryProvider = lazy {
+        SchemaRepositoryImpl(database = database)
+    }
+    private val reportRepositoryProvider = lazy {
+        ReportRepositoryImpl(database = database)
+    }
+
+    private val activitiesComponent = { componentContext: ComponentContext ->
+        ActivitiesComponentImpl(
+            componentContext = componentContext,
+            storeFactory = storeFactory,
+            activityRepositoryProvider = activityRepositoryProvider,
+        )
+    }
+    private val schemaComponent = { componentContext: ComponentContext ->
+        SchemaComponentImpl(
+            componentContext = componentContext,
+            storeFactory = storeFactory,
+            schemaRepositoryProvider = schemaRepositoryProvider,
+        )
+    }
 
     private val screenNavigation = StackNavigation<ScreenConfig>()
     override val screenStack: Value<ChildStack<*, RootComponent.Child>> = childStack(
@@ -79,8 +95,8 @@ class RootComponentImpl private constructor(
         initialConfiguration = ScreenConfig.Activities,
     ) { config, ctx ->
         when (config) {
-            is ScreenConfig.Activities -> RootComponent.Child.Activities(activities(ctx))
-            is ScreenConfig.Schema -> RootComponent.Child.Schema(schema(ctx))
+            is ScreenConfig.Activities -> RootComponent.Child.Activities(activitiesComponent(ctx))
+            is ScreenConfig.Schema -> RootComponent.Child.Schema(schemaComponent(ctx))
         }
     }
 
@@ -105,14 +121,16 @@ class RootComponentImpl private constructor(
 private class ActivitiesComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
+    activityRepositoryProvider: Lazy<ActivityRepository>,
 ) : ActivitiesComponent, ComponentContext by componentContext
 
 private class SchemaComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
+    schemaRepositoryProvider: Lazy<SchemaRepository>,
 ) : SchemaComponent, ComponentContext by componentContext
 
 private class DialogComponentImpl(
     componentContext: ComponentContext,
-    storeFactory: StoreFactory,
+    storeFactoryProvider: Lazy<StoreFactory>,
 ) : DialogComponent, ComponentContext by componentContext

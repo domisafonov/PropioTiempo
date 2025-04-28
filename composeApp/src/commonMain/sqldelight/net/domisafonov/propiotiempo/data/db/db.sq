@@ -39,3 +39,20 @@ CREATE TABLE daily_checklist_checks (
   PRIMARY KEY(daily_checklist_item_id, time),
   FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist(id) ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
+
+-- TODO: write the test data right here
+
+get_inserted_autoid:
+SELECT last_insert_rowid();
+
+insert_activity:
+INSERT INTO activities(name, older_version) VALUES(?, ?);
+
+insert_time_activity:
+INSERT INTO time_activities(id) VALUES(?);
+
+insert_daily_checklist:
+INSERT INTO daily_checklist(id) VALUES(?);
+
+insert_daily_checklist_item:
+INSERT INTO daily_checklist_item VALUES(?, ?, ?, ?);
