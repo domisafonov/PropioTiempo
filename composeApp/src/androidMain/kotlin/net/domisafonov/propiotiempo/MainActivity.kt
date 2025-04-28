@@ -1,6 +1,7 @@
 package net.domisafonov.propiotiempo
 
 import android.os.Bundle
+import android.os.StrictMode
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,13 @@ import net.domisafonov.propiotiempo.ui.RootContent
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder().detectAll().penaltyDeath().build()
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build()
+        )
 
         val rootComponent = RootComponentImpl(
             componentContext = defaultComponentContext(),

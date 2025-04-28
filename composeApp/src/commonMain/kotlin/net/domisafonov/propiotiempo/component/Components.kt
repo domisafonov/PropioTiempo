@@ -17,7 +17,9 @@ import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.ReportRepositoryImpl
 import net.domisafonov.propiotiempo.data.SchemaRepository
 import net.domisafonov.propiotiempo.data.SchemaRepositoryImpl
+import net.domisafonov.propiotiempo.data.db.Daily_checklist_checks
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
+import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 
 interface RootComponent : ComponentContext{
     val screenStack: Value<ChildStack<*, Child>>
@@ -60,7 +62,12 @@ class RootComponentImpl(
 ) : RootComponent, ComponentContext by componentContext {
 
     private val database by lazy {
-        DatabaseSource(databaseDriverProvider.value)
+        DatabaseSource(
+            driver = databaseDriverProvider.value,
+            daily_checklist_checksAdapter = Daily_checklist_checks.Adapter(
+                timeAdapter = InstantLongAdapter,
+            )
+        )
     }
     private val activityRepositoryProvider = lazy {
         ActivityRepositoryImpl(database = database)

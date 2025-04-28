@@ -57,6 +57,7 @@ kotlin {
             implementation(libs.mvikotlin.main)
             implementation(libs.mvikotlin.coroutines)
             implementation(libs.mvikotlin.logging) // TODO: make optional
+            implementation(libs.kotlinx.datetime)
         }
     }
 }
