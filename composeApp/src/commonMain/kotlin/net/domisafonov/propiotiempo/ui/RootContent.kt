@@ -3,6 +3,7 @@ package net.domisafonov.propiotiempo.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
@@ -52,7 +53,10 @@ fun RootContent(modifier: Modifier = Modifier, rootComponent: RootComponent) {
     MaterialTheme {
         Column(modifier = modifier.fillMaxSize()) {
             CurrentScreen(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f)
+                    .consumeWindowInsets(
+                        WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
+                    ),
                 rootComponent = rootComponent,
             )
             BottomNav(

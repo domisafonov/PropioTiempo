@@ -36,7 +36,10 @@ interface RootComponent : ComponentContext{
     sealed interface Dialog
 }
 
-interface ActivitiesComponent : ComponentContext
+interface ActivitiesComponent : ComponentContext {
+    val activityRepository: ActivityRepository
+}
+
 interface SchemaComponent : ComponentContext
 interface DialogComponent : ComponentContext
 
@@ -128,8 +131,12 @@ class RootComponentImpl(
 private class ActivitiesComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
-    activityRepositoryProvider: Lazy<ActivityRepository>,
-) : ActivitiesComponent, ComponentContext by componentContext
+    private val activityRepositoryProvider: Lazy<ActivityRepository>,
+) : ActivitiesComponent, ComponentContext by componentContext {
+
+    override val activityRepository: ActivityRepository
+        get() = activityRepositoryProvider.value
+}
 
 private class SchemaComponentImpl(
     componentContext: ComponentContext,

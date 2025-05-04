@@ -1,4 +1,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
   <string name="nav_activities">Activities</string>
   <string name="nav_schema">Schema</string>
+  <string name="foldable_fold">Fold</string>
+  <string name="foldable_unfold">Unfold</string>
 </resources>

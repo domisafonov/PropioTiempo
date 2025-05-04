@@ -1,9 +1,12 @@
 import kotlinx.datetime.Instant;
 
+-- must be referenced with older_version _at most_ 1 time
+-- being referenced with older_version implies is_enabled=0
 CREATE TABLE activities (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   older_version INTEGER,
+  is_enabled INTEGER,
   FOREIGN KEY(older_version) REFERENCES activities(id) ON DELETE SET NULL ON UPDATE RESTRICT
 );
 CREATE UNIQUE INDEX activities_older_versions ON activities (older_version);
@@ -42,7 +45,23 @@ CREATE TABLE daily_checklist_checks (
   FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist(id) ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
 
--- TODO: write the test data right here
+-- TODO: remove test data
+INSERT INTO activities VALUES(1, 'emptyone', NULL, TRUE);
+INSERT INTO activities VALUES(2, 'hasdatatwo', NULL, TRUE);
+INSERT INTO activities VALUES(3, 'oldthree', NULL, FALSE);
+INSERT INTO activities VALUES(4, 'newfour', 3, TRUE);
+
+INSERT INTO time_activities VALUES (1);
+INSERT INTO time_activities VALUES (2);
+INSERT INTO time_activities VALUES (3);
+INSERT INTO time_activities VALUES (4);
+
+INSERT INTO time_activity_intervals VALUES (2, 1746304935, 1746305935);
+INSERT INTO time_activity_intervals VALUES (2, 1746204935, 1746205935);
+
+INSERT INTO time_activity_intervals VALUES (3, 1746305035, 1746305935);
+INSERT INTO time_activity_intervals VALUES (4, 1746305936, 1746306000);
+-- TODO: end remote test data
 
 get_inserted_autoid:
 SELECT last_insert_rowid();
