@@ -12,16 +12,14 @@ import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.serialization.Serializable
-import net.domisafonov.propiotiempo.data.ActivityRepository
 import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.ReportRepositoryImpl
-import net.domisafonov.propiotiempo.data.SchemaRepository
 import net.domisafonov.propiotiempo.data.SchemaRepositoryImpl
 import net.domisafonov.propiotiempo.data.db.Daily_checklist_checks
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 
-interface RootComponent : ComponentContext{
+interface RootComponent : ComponentContext {
     val screenStack: Value<ChildStack<*, Child>>
     val dialogSlot: Value<ChildSlot<*, Dialog>>
 
@@ -36,28 +34,6 @@ interface RootComponent : ComponentContext{
     sealed interface Dialog
 }
 
-interface ActivitiesComponent : ComponentContext {
-    val activityRepository: ActivityRepository
-}
-
-interface SchemaComponent : ComponentContext
-interface DialogComponent : ComponentContext
-
-// TODO: first run things
-// TODO: details
-@Serializable
-private sealed interface ScreenConfig {
-    @Serializable data object Activities : ScreenConfig
-    @Serializable data object Schema : ScreenConfig
-}
-
-// TODO
-@Serializable
-private data class DialogConfig(
-    val title: String?,
-    val message: String?,
-)
-
 class RootComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
@@ -65,7 +41,7 @@ class RootComponentImpl(
 ) : RootComponent, ComponentContext by componentContext {
 
     private val database by lazy {
-        DatabaseSource(
+        DatabaseSource.Companion(
             driver = databaseDriverProvider.value,
             daily_checklist_checksAdapter = Daily_checklist_checks.Adapter(
                 timeAdapter = InstantLongAdapter,
@@ -83,14 +59,14 @@ class RootComponentImpl(
     }
 
     private val activitiesComponent = { componentContext: ComponentContext ->
-        ActivitiesComponentImpl(
+        makeActivitiesComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             activityRepositoryProvider = activityRepositoryProvider,
         )
     }
     private val schemaComponent = { componentContext: ComponentContext ->
-        SchemaComponentImpl(
+        makeSchemaComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             schemaRepositoryProvider = schemaRepositoryProvider,
@@ -128,23 +104,12 @@ class RootComponentImpl(
     }
 }
 
-private class ActivitiesComponentImpl(
-    componentContext: ComponentContext,
-    storeFactory: StoreFactory,
-    private val activityRepositoryProvider: Lazy<ActivityRepository>,
-) : ActivitiesComponent, ComponentContext by componentContext {
-
-    override val activityRepository: ActivityRepository
-        get() = activityRepositoryProvider.value
+// TODO: first run things
+// TODO: details
+@Serializable
+private sealed interface ScreenConfig {
+    @Serializable
+    data object Activities : ScreenConfig
+    @Serializable
+    data object Schema : ScreenConfig
 }
-
-private class SchemaComponentImpl(
-    componentContext: ComponentContext,
-    storeFactory: StoreFactory,
-    schemaRepositoryProvider: Lazy<SchemaRepository>,
-) : SchemaComponent, ComponentContext by componentContext
-
-private class DialogComponentImpl(
-    componentContext: ComponentContext,
-    storeFactoryProvider: Lazy<StoreFactory>,
-) : DialogComponent, ComponentContext by componentContext
