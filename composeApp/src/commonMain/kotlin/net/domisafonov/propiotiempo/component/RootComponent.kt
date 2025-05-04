@@ -18,6 +18,7 @@ import net.domisafonov.propiotiempo.data.SchemaRepositoryImpl
 import net.domisafonov.propiotiempo.data.db.Daily_checklist_checks
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
+import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
 
 interface RootComponent : ComponentContext {
     val screenStack: Value<ChildStack<*, Child>>
@@ -45,6 +46,10 @@ class RootComponentImpl(
             driver = databaseDriverProvider.value,
             daily_checklist_checksAdapter = Daily_checklist_checks.Adapter(
                 timeAdapter = InstantLongAdapter,
+            ),
+            time_activity_intervalsAdapter = Time_activity_intervals.Adapter(
+                start_timeAdapter = InstantLongAdapter,
+                end_timeAdapter = InstantLongAdapter,
             )
         )
     }

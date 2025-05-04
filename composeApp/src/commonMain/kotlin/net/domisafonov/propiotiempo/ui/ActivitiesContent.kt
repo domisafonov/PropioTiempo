@@ -68,7 +68,7 @@ data class ActivitiesViewModel(
 // TODO: proper MVI
 @Composable
 fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesComponent) {
-    val repo = component.activityRepository
+//    val repo = component.activityRepository
     val vm = ActivitiesViewModel(
         emptyList(),
         emptyList(),

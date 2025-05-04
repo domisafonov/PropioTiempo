@@ -9,6 +9,7 @@ CREATE TABLE activities (
   is_enabled INTEGER,
   FOREIGN KEY(older_version) REFERENCES activities(id) ON DELETE SET NULL ON UPDATE RESTRICT
 );
+CREATE INDEX activities_names ON activities (name);
 CREATE UNIQUE INDEX activities_older_versions ON activities (older_version);
 
 CREATE TABLE time_activities (
@@ -21,14 +22,14 @@ CREATE TABLE daily_checklist (
   FOREIGN KEY(id) REFERENCES activities(id) ON DELETE CASCADE ON UPDATE RESTRICT
 );
 
-CREATE TABLE daily_checklist_item (
+CREATE TABLE daily_checklist_items (
   id TEXT NOT NULL PRIMARY KEY, -- UUID
   checklist_id INTEGER NOT NULL,
   ordinal INTEGER NOT NULL,
   name TEXT,
   FOREIGN KEY(checklist_id) REFERENCES daily_checklist(id) ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
-CREATE UNIQUE INDEX daily_checklist_item_order ON daily_checklist_item (checklist_id, ordinal);
+CREATE UNIQUE INDEX daily_checklist_item_order ON daily_checklist_items (checklist_id, ordinal);
 
 CREATE TABLE time_activity_intervals (
   activity_id INTEGER NOT NULL,
@@ -42,7 +43,7 @@ CREATE TABLE daily_checklist_checks (
   daily_checklist_item_id TEXT NOT NULL,
   time INTEGER AS Instant NOT NULL,
   PRIMARY KEY(daily_checklist_item_id, time),
-  FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist(id) ON DELETE CASCADE ON UPDATE RESTRICT
+  FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist_items(id) ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
 
 -- TODO: remove test data
@@ -76,7 +77,34 @@ insert_daily_checklist:
 INSERT INTO daily_checklist VALUES(?);
 
 insert_daily_checklist_item:
-INSERT INTO daily_checklist_item VALUES(?, ?, ?, ?);
+INSERT INTO daily_checklist_items VALUES(?, ?, ?, ?);
 
 insert_daily_checklist_check:
 INSERT INTO daily_checklist_checks VALUES(?, ?);
+
+get_daily_checklist_summary:
+SELECT a.id, a.name, (count(i.id) - count(cc.daily_checklist_item_id)) = 0 AS is_completed
+  FROM daily_checklist AS c
+  INNER JOIN activities AS a ON c.id = a.id
+  LEFT JOIN daily_checklist_items AS i ON c.id = i.checklist_id
+  LEFT JOIN daily_checklist_checks AS cc ON i.id = cc.daily_checklist_item_id
+  WHERE
+    a.is_enabled = TRUE
+    AND cc.time >= :day_start
+  ORDER BY a.name;
+
+get_time_activities_summary:
+SELECT
+  a.id,
+  a.name,
+  total(
+    ifnull(i.end_time, unixepoch())
+      - max(:day_start, ifnull(i.start_time, :day_start))
+  ) AS sum
+  FROM time_activities AS ta
+  INNER JOIN activities AS a ON ta.id = a.id
+  LEFT JOIN time_activity_intervals AS i ON ta.id = i.activity_id
+  WHERE
+    a.is_enabled = TRUE
+    AND (i.end_time IS NULL OR i.end_time >= :day_start)
+  ORDER BY a.name;
