@@ -19,10 +19,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         StrictMode.setThreadPolicy(
-            StrictMode.ThreadPolicy.Builder().detectAll().penaltyDeath().build()
+            StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build()
         )
         StrictMode.setVmPolicy(
-            StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build()
+            StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build()
         )
 
         val rootComponent = RootComponentImpl(
