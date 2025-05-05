@@ -14,7 +14,10 @@ import net.domisafonov.propiotiempo.data.ActivityRepository
 
 interface ActivitiesStore : Store<Intent, State, Label> {
 
-    sealed interface Intent
+    sealed interface Intent {
+        object ToggleDailyChecklists : Intent
+        object ToggleTimedActivities : Intent
+    }
 
     @Serializable
     data class State(
@@ -37,6 +40,9 @@ private sealed interface Message {
     data class TimedActivitiesUpdate(
         val timedActivities: List<ActivityRepository.TimeActivitySummary>,
     ) : Message
+
+    data class ActivateDailyChecklists(val isActive: Boolean) : Message
+    data class ActivateTimedActivities(val isActive: Boolean) : Message
 }
 
 private val INITIAL_STATE = State(
@@ -53,7 +59,10 @@ fun StoreFactory.makeActivitiesStore(
     object : ActivitiesStore, Store<Intent, State, Label> by create(
         name = ActivitiesStore::class.simpleName,
         initialState = stateKeeper
-            ?.consume(State::class.simpleName!!, State.serializer())
+            ?.consume(
+                key = State::class.simpleName!!,
+                strategy = State.serializer(),
+            )
             ?: INITIAL_STATE,
         bootstrapper = coroutineBootstrapper {
             launch {
@@ -68,11 +77,26 @@ fun StoreFactory.makeActivitiesStore(
             }
         },
         executorFactory = coroutineExecutorFactory {
-
+            onIntent<Intent.ToggleDailyChecklists> {
+                dispatch(
+                    message = Message.ActivateDailyChecklists(
+                        isActive = !state().isDailyChecklistViewActive,
+                    ),
+                )
+            }
+            onIntent<Intent.ToggleTimedActivities> {
+                dispatch(
+                    message = Message.ActivateTimedActivities(
+                        isActive = !state().isTimedActivitiesViewActive,
+                    ),
+                )
+            }
         },
         reducer = { message: Message -> when (message) {
             is Message.ChecklistsUpdate -> copy(dailyChecklists = dailyChecklists)
             is Message.TimedActivitiesUpdate -> copy(timedActivities = timedActivities)
+            is Message.ActivateDailyChecklists -> copy(isDailyChecklistViewActive = message.isActive)
+            is Message.ActivateTimedActivities -> copy(isTimedActivitiesViewActive = message.isActive)
         } },
     ) {}.also { store ->
         stateKeeper?.register(

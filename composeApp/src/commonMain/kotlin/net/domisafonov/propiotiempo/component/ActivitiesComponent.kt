@@ -18,6 +18,9 @@ import net.domisafonov.propiotiempo.ui.ActivitiesViewModel
 
 interface ActivitiesComponent : ComponentContext {
     val viewModel: StateFlow<ActivitiesViewModel>
+
+    fun onDailyChecklistToggled()
+    fun onTimedActivitiesToggled()
 }
 
 fun makeActivitiesComponent(
@@ -76,4 +79,12 @@ private class ActivitiesComponentImpl(
                 areTimeActivitiesShown = false,
             ),
         )
+
+    override fun onDailyChecklistToggled() {
+        store.accept(ActivitiesStore.Intent.ToggleDailyChecklists)
+    }
+
+    override fun onTimedActivitiesToggled() {
+        store.accept(ActivitiesStore.Intent.ToggleTimedActivities)
+    }
 }

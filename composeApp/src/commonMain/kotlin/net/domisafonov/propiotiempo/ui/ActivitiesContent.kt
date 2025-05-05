@@ -68,9 +68,8 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
         stickyHeader {
             TimeActivitiesHeader(
                 viewModel = viewModel,
-            ) {
-                TODO()
-            }
+                onClick = component::onTimedActivitiesToggled,
+            )
         }
         items(items = listOf<ActivitiesViewModel.TimeActivity>(), key = ActivitiesViewModel.TimeActivity::id) {
             TimeActivityItem()
@@ -79,9 +78,8 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
         stickyHeader {
             ChecklistsHeader(
                 viewModel = viewModel,
-            ) {
-                TODO()
-            }
+                onClick = component::onDailyChecklistToggled,
+            )
         }
         items(items = listOf<ActivitiesViewModel.Checklist>(), key = ActivitiesViewModel.Checklist::id) {
             ChecklistItem()
