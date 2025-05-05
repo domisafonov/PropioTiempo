@@ -5,6 +5,7 @@ import android.os.StrictMode
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.arkivanov.decompose.defaultComponentContext
@@ -28,10 +29,16 @@ class MainActivity : ComponentActivity() {
             componentContext = defaultComponentContext(),
             storeFactory = DefaultStoreFactory(),
             databaseDriverProvider = lazy {
+                val schema = DatabaseSource.Schema.synchronous()
                 AndroidSqliteDriver(
-                    schema = DatabaseSource.Schema.synchronous(),
+                    schema = schema,
                     context = this,
                     name = "propiotiempo.db", // TODO: proper path
+                    callback = object : AndroidSqliteDriver.Callback(schema = schema) {
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            db.setForeignKeyConstraintsEnabled(true)
+                        }
+                    }
                 )
             }
         )

@@ -23,10 +23,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import org.jetbrains.compose.resources.painterResource
@@ -37,7 +38,6 @@ import propiotiempo.composeapp.generated.resources.foldable_unfold
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_down
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_up
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -48,39 +48,26 @@ data class ActivitiesViewModel(
     data class Checklist(
         val id: Long,
         val name: String,
-        val items: List<Item>,
-    ) {
-        data class Item(
-            val id: Uuid,
-            val name: String?,
-            val checkTime: Instant?,
-        )
-    }
+        val isCompleted: Boolean
+    )
 
     data class TimeActivity(
         val id: Long,
         val name: String,
-        val previousPeriods: List<Pair<Instant, Instant>>,
-        val currentPeriod: Pair<Instant, Instant?>?,
+        val todaysSeconds: Long,
     )
 }
 
-// TODO: proper MVI
 @Composable
 fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesComponent) {
-//    val repo = component.activityRepository
-    val vm = ActivitiesViewModel(
-        emptyList(),
-        emptyList(),
-        false,
-        false,
-    )
+
+    val viewModel by component.viewModel.collectAsState()
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         item { Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.safeContent)) }
         stickyHeader {
             TimeActivitiesHeader(
-                viewModel = vm,
+                viewModel = viewModel,
             ) {
                 TODO()
             }
@@ -91,7 +78,7 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
         }
         stickyHeader {
             ChecklistsHeader(
-                viewModel = vm,
+                viewModel = viewModel,
             ) {
                 TODO()
             }

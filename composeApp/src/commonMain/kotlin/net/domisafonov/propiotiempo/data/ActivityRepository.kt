@@ -7,6 +7,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -17,7 +18,9 @@ interface ActivityRepository {
      *
      * Each entry sums up an enabled checklist without historical data.
      */
-    fun getTodaysChecklistSummary(): Flow<List<ChecklistSummary>>
+    fun observeTodaysChecklistSummary(): Flow<List<ChecklistSummary>>
+
+    @Serializable
     data class ChecklistSummary(
         val id: Long,
         val name: String,
@@ -29,7 +32,9 @@ interface ActivityRepository {
      *
      * Each entry sums up an enabled time activity without historical data.
      */
-    fun getTodaysTimeActivitySummary(): Flow<List<TimeActivitySummary>>
+    fun observeTodaysTimeActivitySummary(): Flow<List<TimeActivitySummary>>
+
+    @Serializable
     data class TimeActivitySummary(
         val id: Long,
         val name: String,
@@ -43,7 +48,7 @@ class ActivityRepositoryImpl(
 
     private val dbQueries = database.dbQueries
 
-    override fun getTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
+    override fun observeTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
         resetAtMidnight {
             dbQueries
                 .get_daily_checklist_summary(getDayStart()) { id, name, is_completed ->
@@ -56,7 +61,7 @@ class ActivityRepositoryImpl(
                 .asFlow()
         }.mapToList(Dispatchers.IO)
 
-    override fun getTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
+    override fun observeTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
         resetAtMidnight {
             dbQueries
                 .get_time_activities_summary(getDayStart().epochSeconds) { id, name, sum ->

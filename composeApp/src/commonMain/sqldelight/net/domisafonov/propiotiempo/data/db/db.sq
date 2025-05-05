@@ -83,7 +83,10 @@ insert_daily_checklist_check:
 INSERT INTO daily_checklist_checks VALUES(?, ?);
 
 get_daily_checklist_summary:
-SELECT a.id, a.name, (count(i.id) - count(cc.daily_checklist_item_id)) = 0 AS is_completed
+SELECT
+  a.id AS id,
+  a.name AS name,
+  (count(i.id) - count(cc.daily_checklist_item_id)) = 0 AS is_completed
   FROM daily_checklist AS c
   INNER JOIN activities AS a ON c.id = a.id
   LEFT JOIN daily_checklist_items AS i ON c.id = i.checklist_id
@@ -91,12 +94,13 @@ SELECT a.id, a.name, (count(i.id) - count(cc.daily_checklist_item_id)) = 0 AS is
   WHERE
     a.is_enabled = TRUE
     AND cc.time >= :day_start
+  GROUP BY a.id
   ORDER BY a.name;
 
 get_time_activities_summary:
 SELECT
-  a.id,
-  a.name,
+  a.id AS id,
+  a.name AS name,
   total(
     ifnull(i.end_time, unixepoch())
       - max(:day_start, ifnull(i.start_time, :day_start))
@@ -107,4 +111,5 @@ SELECT
   WHERE
     a.is_enabled = TRUE
     AND (i.end_time IS NULL OR i.end_time >= :day_start)
+  GROUP BY a.id
   ORDER BY a.name;

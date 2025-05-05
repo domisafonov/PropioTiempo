@@ -46,7 +46,26 @@ private class ActivitiesComponentImpl(
     }
 
     override val viewModel: StateFlow<ActivitiesViewModel> = store.states
-        .map { TODO() }
+        .map { state ->
+            ActivitiesViewModel(
+                dailyChecklists = state.dailyChecklists.map {
+                    ActivitiesViewModel.Checklist(
+                        id = it.id,
+                        name = it.name,
+                        isCompleted = it.isCompleted,
+                    )
+                },
+                timeActivities = state.timedActivities.map {
+                    ActivitiesViewModel.TimeActivity(
+                        id = it.id,
+                        name = it.name,
+                        todaysSeconds = it.todaysSeconds,
+                    )
+                },
+                areDailiesShown = state.isDailyChecklistViewActive,
+                areTimeActivitiesShown = state.isTimedActivitiesViewActive,
+            )
+        }
         .stateIn(
             scope = scope,
             started = SharingStarted.Lazily,
