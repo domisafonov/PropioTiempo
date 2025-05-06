@@ -30,11 +30,13 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     sealed interface Label
 }
 
-private sealed interface Action
+private sealed interface Action {
+    data object SubToActivities : Action
+}
 private sealed interface Message {
 
     data class ChecklistsUpdate(
-        val checklists: List<ActivityRepository.ChecklistSummary>,
+        val dailyChecklists: List<ActivityRepository.ChecklistSummary>,
     ) : Message
 
     data class TimedActivitiesUpdate(
@@ -65,18 +67,23 @@ fun StoreFactory.makeActivitiesStore(
             )
             ?: INITIAL_STATE,
         bootstrapper = coroutineBootstrapper {
-            launch {
-                activityRepository.observeTodaysChecklistSummary()
-                    .collect { dispatch(Message.ChecklistsUpdate(checklists = it)) }
-            }
-            launch {
-                activityRepository.observeTodaysTimeActivitySummary()
-                    .collect {
-                        dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
-                    }
-            }
+            dispatch(Action.SubToActivities)
         },
         executorFactory = coroutineExecutorFactory {
+            onAction<Action.SubToActivities> {
+                launch {
+                    activityRepository.observeTodaysChecklistSummary()
+                        .collect {
+                            dispatch(Message.ChecklistsUpdate(dailyChecklists = it))
+                        }
+                }
+                launch {
+                    activityRepository.observeTodaysTimeActivitySummary()
+                        .collect {
+                            dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
+                        }
+                }
+            }
             onIntent<Intent.ToggleDailyChecklists> {
                 dispatch(
                     message = Message.ActivateDailyChecklists(
@@ -93,8 +100,8 @@ fun StoreFactory.makeActivitiesStore(
             }
         },
         reducer = { message: Message -> when (message) {
-            is Message.ChecklistsUpdate -> copy(dailyChecklists = dailyChecklists)
-            is Message.TimedActivitiesUpdate -> copy(timedActivities = timedActivities)
+            is Message.ChecklistsUpdate -> copy(dailyChecklists = message.dailyChecklists)
+            is Message.TimedActivitiesUpdate -> copy(timedActivities = message.timedActivities)
             is Message.ActivateDailyChecklists -> copy(isDailyChecklistViewActive = message.isActive)
             is Message.ActivateTimedActivities -> copy(isTimedActivitiesViewActive = message.isActive)
         } },

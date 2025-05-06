@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package net.domisafonov.propiotiempo.data
 
 import app.cash.sqldelight.coroutines.asFlow
@@ -7,9 +5,9 @@ import app.cash.sqldelight.coroutines.mapToList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
-import kotlin.uuid.ExperimentalUuidApi
 
 interface ActivityRepository {
 

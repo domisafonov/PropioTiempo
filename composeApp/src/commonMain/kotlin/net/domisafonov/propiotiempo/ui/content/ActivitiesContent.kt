@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalUuidApi::class, ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class)
 
 package net.domisafonov.propiotiempo.ui.content
 
@@ -24,13 +24,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
-import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
@@ -41,7 +38,6 @@ import propiotiempo.composeapp.generated.resources.foldable_fold
 import propiotiempo.composeapp.generated.resources.foldable_unfold
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_down
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_up
-import kotlin.uuid.ExperimentalUuidApi
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -83,8 +79,11 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 onClick = component::onTimedActivitiesToggled,
             )
         }
-        items(items = listOf<ActivitiesViewModel.TimeActivity>(), key = ActivitiesViewModel.TimeActivity::id) {
-            TimeActivityItem()
+        items(
+            items = viewModel.timeActivities,
+            key = ActivitiesViewModel.TimeActivity::id,
+        ) { item ->
+            TimeActivityItem(viewModel = item)
             HorizontalDivider()
         }
         stickyHeader {
@@ -93,8 +92,11 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 onClick = component::onDailyChecklistToggled,
             )
         }
-        items(items = listOf<ActivitiesViewModel.Checklist>(), key = ActivitiesViewModel.Checklist::id) {
-            ChecklistItem()
+        items(
+            items = viewModel.dailyChecklists,
+            key = ActivitiesViewModel.Checklist::id,
+        ) { item ->
+            ChecklistItem(viewModel = item)
             HorizontalDivider()
         }
     }
@@ -165,11 +167,17 @@ fun FoldableListHeader(
 }
 
 @Composable
-fun TimeActivityItem(modifier: Modifier = Modifier) {
-
+fun TimeActivityItem(
+    modifier: Modifier = Modifier,
+    viewModel: ActivitiesViewModel.TimeActivity,
+) {
+    Text(modifier = modifier, text = "activity")
 }
 
 @Composable
-fun ChecklistItem(modifier: Modifier = Modifier) {
-
+fun ChecklistItem(
+    modifier: Modifier = Modifier,
+    viewModel: ActivitiesViewModel.Checklist
+) {
+    Text(modifier = modifier, text = "checklist")
 }

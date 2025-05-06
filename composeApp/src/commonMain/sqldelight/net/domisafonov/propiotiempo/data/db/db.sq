@@ -7,7 +7,8 @@ CREATE TABLE activities (
   name TEXT NOT NULL,
   older_version INTEGER,
   is_enabled INTEGER,
-  FOREIGN KEY(older_version) REFERENCES activities(id) ON DELETE SET NULL ON UPDATE RESTRICT
+  FOREIGN KEY(older_version) REFERENCES activities(id)
+    ON DELETE SET NULL ON UPDATE RESTRICT
 );
 CREATE INDEX activities_names ON activities (name);
 CREATE UNIQUE INDEX activities_older_versions ON activities (older_version);
@@ -23,27 +24,38 @@ CREATE TABLE daily_checklist (
 );
 
 CREATE TABLE daily_checklist_items (
-  id TEXT NOT NULL PRIMARY KEY, -- UUID
-  checklist_id INTEGER NOT NULL,
+  id INTEGER NOT NULL PRIMARY KEY,
+  name TEXT
+);
+
+CREATE TABLE daily_checklist_item_map (
+  daily_checklist_id INTEGER NOT NULL,
+  daily_checklist_item_id INTEGER NOT NULL,
   ordinal INTEGER NOT NULL,
-  name TEXT,
-  FOREIGN KEY(checklist_id) REFERENCES daily_checklist(id) ON DELETE CASCADE ON UPDATE RESTRICT
+  PRIMARY KEY(daily_checklist_id, daily_checklist_item_id),
+  FOREIGN KEY(daily_checklist_id) REFERENCES activities(id)
+    ON DELETE CASCADE ON UPDATE RESTRICT,
+  FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist_items(id)
+    ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
-CREATE UNIQUE INDEX daily_checklist_item_order ON daily_checklist_items (checklist_id, ordinal);
+CREATE UNIQUE INDEX daily_checklist_item_order
+  ON daily_checklist_item_map (daily_checklist_id, ordinal);
 
 CREATE TABLE time_activity_intervals (
   activity_id INTEGER NOT NULL,
   start_time INTEGER AS Instant NOT NULL,
   end_time INTEGER AS Instant,
   PRIMARY KEY(activity_id, start_time),
-  FOREIGN KEY(activity_id) REFERENCES time_activities(id) ON DELETE CASCADE ON UPDATE RESTRICT
+  FOREIGN KEY(activity_id) REFERENCES time_activities(id)
+    ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
 
 CREATE TABLE daily_checklist_checks (
-  daily_checklist_item_id TEXT NOT NULL,
+  daily_checklist_item_id INTEGER NOT NULL,
   time INTEGER AS Instant NOT NULL,
   PRIMARY KEY(daily_checklist_item_id, time),
-  FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist_items(id) ON DELETE CASCADE ON UPDATE RESTRICT
+  FOREIGN KEY(daily_checklist_item_id) REFERENCES daily_checklist_items(id)
+    ON DELETE CASCADE ON UPDATE RESTRICT
 ) WITHOUT ROWID;
 
 -- TODO: remove test data
@@ -51,18 +63,49 @@ INSERT INTO activities VALUES(1, 'emptyone', NULL, TRUE);
 INSERT INTO activities VALUES(2, 'hasdatatwo', NULL, TRUE);
 INSERT INTO activities VALUES(3, 'oldthree', NULL, FALSE);
 INSERT INTO activities VALUES(4, 'newfour', 3, TRUE);
+INSERT INTO activities VALUES(5, 'chl5', NULL, TRUE);
+INSERT INTO activities VALUES(6, 'oldchl6', NULL, FALSE);
+INSERT INTO activities VALUES(7, 'newchl7', 7, TRUE);
+INSERT INTO activities VALUES(8, 'mptchl8', 8, TRUE);
+INSERT INTO activities VALUES(9, 'nocheckschl9', 9, TRUE);
 
 INSERT INTO time_activities VALUES (1);
 INSERT INTO time_activities VALUES (2);
 INSERT INTO time_activities VALUES (3);
 INSERT INTO time_activities VALUES (4);
+INSERT INTO daily_checklist VALUES (5);
+INSERT INTO daily_checklist VALUES (6);
+INSERT INTO daily_checklist VALUES (7);
+INSERT INTO daily_checklist VALUES (8);
+INSERT INTO daily_checklist VALUES (9);
 
-INSERT INTO time_activity_intervals VALUES (2, 1746304935, 1746305935);
-INSERT INTO time_activity_intervals VALUES (2, 1746204935, 1746205935);
+INSERT INTO daily_checklist_items VALUES(1, '5i1');
+INSERT INTO daily_checklist_items VALUES(2, '5i2');
 
-INSERT INTO time_activity_intervals VALUES (3, 1746305035, 1746305935);
-INSERT INTO time_activity_intervals VALUES (4, 1746305936, 1746306000);
--- TODO: end remote test data
+INSERT INTO daily_checklist_items VALUES(3, '6i1');
+INSERT INTO daily_checklist_items VALUES(4, '6i2');
+
+INSERT INTO daily_checklist_items VALUES(5, '7i1');
+
+INSERT INTO daily_checklist_items VALUES(6, '9i1');
+
+INSERT INTO daily_checklist_item_map VALUES(5, 1, 0);
+INSERT INTO daily_checklist_item_map VALUES(5, 2, 1);
+
+INSERT INTO daily_checklist_item_map VALUES(6, 3, 0);
+INSERT INTO daily_checklist_item_map VALUES(6, 4, 1);
+
+INSERT INTO daily_checklist_item_map VALUES(7, 5, 1);
+INSERT INTO daily_checklist_item_map VALUES(7, 4, 0);
+
+INSERT INTO daily_checklist_item_map VALUES(9, 6, 0);
+
+INSERT INTO time_activity_intervals VALUES(2, 1746304935, 1746305935);
+INSERT INTO time_activity_intervals VALUES(2, 1746204935, 1746205935);
+
+INSERT INTO time_activity_intervals VALUES(3, 1746305035, 1746305935);
+INSERT INTO time_activity_intervals VALUES(4, 1746305936, 1746306000);
+-- TODO: end remove test data
 
 get_inserted_autoid:
 SELECT last_insert_rowid();
@@ -76,9 +119,6 @@ INSERT INTO time_activities VALUES(?);
 insert_daily_checklist:
 INSERT INTO daily_checklist VALUES(?);
 
-insert_daily_checklist_item:
-INSERT INTO daily_checklist_items VALUES(?, ?, ?, ?);
-
 insert_daily_checklist_check:
 INSERT INTO daily_checklist_checks VALUES(?, ?);
 
@@ -89,11 +129,12 @@ SELECT
   (count(i.id) - count(cc.daily_checklist_item_id)) = 0 AS is_completed
   FROM daily_checklist AS c
   INNER JOIN activities AS a ON c.id = a.id
-  LEFT JOIN daily_checklist_items AS i ON c.id = i.checklist_id
-  LEFT JOIN daily_checklist_checks AS cc ON i.id = cc.daily_checklist_item_id
-  WHERE
-    a.is_enabled = TRUE
+  INNER JOIN daily_checklist_item_map AS m ON c.id = m.daily_checklist_id
+  INNER JOIN daily_checklist_items AS i ON m.daily_checklist_item_id = i.id
+  LEFT JOIN daily_checklist_checks AS cc
+    ON m.daily_checklist_item_id = cc.daily_checklist_item_id
     AND cc.time >= :day_start
+  WHERE a.is_enabled = TRUE
   GROUP BY a.id
   ORDER BY a.name;
 
@@ -102,14 +143,18 @@ SELECT
   a.id AS id,
   a.name AS name,
   total(
-    ifnull(i.end_time, unixepoch())
-      - max(:day_start, ifnull(i.start_time, :day_start))
+    iif(
+      i.start_time IS NULL,
+      0,
+      ifnull(i.end_time, unixepoch()) - max(:day_start, i.start_time)
+    )
   ) AS sum
   FROM time_activities AS ta
   INNER JOIN activities AS a ON ta.id = a.id
-  LEFT JOIN time_activity_intervals AS i ON ta.id = i.activity_id
+  LEFT JOIN time_activity_intervals AS i
+    ON ta.id = i.activity_id
+    AND (i.end_time IS NULL OR i.end_time >= :day_start)
   WHERE
     a.is_enabled = TRUE
-    AND (i.end_time IS NULL OR i.end_time >= :day_start)
   GROUP BY a.id
   ORDER BY a.name;
