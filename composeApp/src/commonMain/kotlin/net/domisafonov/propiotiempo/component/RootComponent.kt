@@ -8,8 +8,11 @@ import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.navigate
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
@@ -84,6 +87,9 @@ class RootComponentImpl(
         serializer = ScreenConfig.serializer(),
         key = "ScreenSlot",
         initialConfiguration = ScreenConfig.Activities,
+
+        // TODO: find a way to return to the activities tab, but close the app if we are already there
+        handleBackButton = true,
     ) { config, ctx ->
         when (config) {
             is ScreenConfig.Activities -> RootComponent.Child.Activities(activitiesComponent(ctx))
@@ -96,6 +102,7 @@ class RootComponentImpl(
         source = dialogNavigation,
         serializer = DialogConfig.serializer(),
         key = "DialogSlot",
+        handleBackButton = true,
     ) { config, ctx ->
         TODO()
     }

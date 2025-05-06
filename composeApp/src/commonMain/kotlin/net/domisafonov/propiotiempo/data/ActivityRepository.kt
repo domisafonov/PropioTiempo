@@ -5,7 +5,8 @@ import app.cash.sqldelight.coroutines.mapToList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 
@@ -38,8 +39,11 @@ interface ActivityRepository {
         val name: String,
         val todaysSeconds: Long,
     )
+
+    suspend fun toggleTimedActivity(id: Long)
 }
 
+// TODO: extract time handling
 class ActivityRepositoryImpl(
     database: DatabaseSource,
 ) : ActivityRepository {
@@ -49,7 +53,9 @@ class ActivityRepositoryImpl(
     override fun observeTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
         resetAtMidnight {
             dbQueries
-                .get_daily_checklist_summary(getDayStart()) { id, name, is_completed ->
+                .get_daily_checklist_summary(
+                    day_start = getDayStart(),
+                ) { id, name, is_completed ->
                     ActivityRepository.ChecklistSummary(
                         id = id,
                         name = name,
@@ -62,7 +68,9 @@ class ActivityRepositoryImpl(
     override fun observeTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
         resetAtMidnight {
             dbQueries
-                .get_time_activities_summary(getDayStart().epochSeconds) { id, name, sum ->
+                .get_time_activities_summary(
+                    day_start = getDayStart().epochSeconds,
+                ) { id, name, sum ->
                     ActivityRepository.TimeActivitySummary(
                         id = id,
                         name = name,
@@ -71,4 +79,25 @@ class ActivityRepositoryImpl(
                 }
                 .asFlow()
         }.mapToList(Dispatchers.IO)
+
+    // TODO: error handling
+    override suspend fun toggleTimedActivity(id: Long) = withContext(Dispatchers.IO) {
+        dbQueries.transactionWithResult {
+            val startTime = dbQueries
+                .get_active_time_activity_interval(activity_id = id)
+                .executeAsOneOrNull()
+            if (startTime == null) {
+                dbQueries.insert_time_activity_interval(
+                    activity_id = id,
+                    start_time = Clock.System.now(),
+                )
+            } else {
+                dbQueries.end_time_activity_interval(
+                    activity_id = id,
+                    start_time = startTime,
+                    end_time = Clock.System.now(),
+                )
+            }
+        }
+    }
 }

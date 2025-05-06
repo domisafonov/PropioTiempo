@@ -22,6 +22,8 @@ interface ActivitiesComponent : ComponentContext {
 
     fun onDailyChecklistToggled()
     fun onTimedActivitiesToggled()
+    fun onTimedActivityClick(id: Long)
+    fun onDailyChecklistClick(id: Long)
 }
 
 fun makeActivitiesComponent(
@@ -84,5 +86,13 @@ private class ActivitiesComponentImpl(
 
     override fun onTimedActivitiesToggled() {
         store.accept(ActivitiesStore.Intent.ToggleTimedActivities)
+    }
+
+    override fun onTimedActivityClick(id: Long) {
+        store.accept(ActivitiesStore.Intent.ClickTimedActivity(id = id))
+    }
+
+    override fun onDailyChecklistClick(id: Long) {
+        store.accept(ActivitiesStore.Intent.ClickDailyChecklist(id = id))
     }
 }

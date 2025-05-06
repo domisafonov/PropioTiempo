@@ -17,6 +17,8 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     sealed interface Intent {
         object ToggleDailyChecklists : Intent
         object ToggleTimedActivities : Intent
+        data class ClickTimedActivity(val id: Long) : Intent
+        data class ClickDailyChecklist(val id: Long) : Intent
     }
 
     @Serializable
@@ -27,7 +29,9 @@ interface ActivitiesStore : Store<Intent, State, Label> {
         val isTimedActivitiesViewActive: Boolean,
     )
 
-    sealed interface Label
+    sealed interface Label {
+        data class NavigateToDailyChecklist(val id: Long) : Label
+    }
 
     companion object
 }
@@ -72,6 +76,7 @@ fun StoreFactory.makeActivitiesStore(
         dispatch(Action.SubToActivities)
     },
     executorFactory = coroutineExecutorFactory {
+
         onAction<Action.SubToActivities> {
             launch {
                 activityRepository.observeTodaysChecklistSummary()
@@ -86,6 +91,7 @@ fun StoreFactory.makeActivitiesStore(
                     }
             }
         }
+
         onIntent<Intent.ToggleDailyChecklists> {
             dispatch(
                 message = Message.ActivateDailyChecklists(
@@ -93,12 +99,23 @@ fun StoreFactory.makeActivitiesStore(
                 ),
             )
         }
+
         onIntent<Intent.ToggleTimedActivities> {
             dispatch(
                 message = Message.ActivateTimedActivities(
                     isActive = !state().isTimedActivitiesViewActive,
                 ),
             )
+        }
+
+        onIntent<Intent.ClickTimedActivity> {
+            launch {
+                activityRepository.toggleTimedActivity(id = it.id)
+            }
+        }
+
+        onIntent<Intent.ClickDailyChecklist> {
+            publish(Label.NavigateToDailyChecklist(it.id))
         }
     },
     reducer = { message: Message -> when (message) {
