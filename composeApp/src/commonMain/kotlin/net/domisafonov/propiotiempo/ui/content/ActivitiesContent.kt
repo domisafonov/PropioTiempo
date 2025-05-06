@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontFamily
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
@@ -37,6 +38,8 @@ import propiotiempo.composeapp.generated.resources.daily_checklist_pending
 import propiotiempo.composeapp.generated.resources.daily_checklists_header
 import propiotiempo.composeapp.generated.resources.pending
 import propiotiempo.composeapp.generated.resources.timed_activities_header
+import propiotiempo.composeapp.generated.resources.timed_activity_in_progress
+import propiotiempo.composeapp.generated.resources.timed_activity_inactive
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -47,13 +50,14 @@ data class ActivitiesViewModel(
     data class Checklist(
         val id: Long,
         val name: String,
-        val isCompleted: Boolean
+        val isCompleted: Boolean // TODO: change to n of m?
     )
 
     data class TimeActivity(
         val id: Long,
         val name: String,
         val todaysSeconds: Long,
+        val isActive: Boolean,
     )
 }
 
@@ -146,17 +150,30 @@ fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
 ) {
+    println(viewModel)
     ListItem(modifier = modifier) { Row {
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f),
             maxLines = 1,
             text = viewModel.name,
         )
         Text(
-            modifier = Modifier,
             maxLines = 1,
             text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
             fontFamily = FontFamily.Monospace,
+        )
+
+        val (alpha, description) = if (viewModel.isActive) {
+            1f to Res.string.timed_activity_in_progress
+        } else {
+            0f to Res.string.timed_activity_inactive
+        }
+        Icon(
+            modifier = Modifier
+                .alpha(alpha),
+            painter = painterResource(Res.drawable.pending),
+            contentDescription = stringResource(description),
         )
     } }
 }

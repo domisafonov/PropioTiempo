@@ -148,7 +148,8 @@ SELECT
       0,
       ifnull(i.end_time, unixepoch()) - max(:day_start, i.start_time)
     )
-  ) AS sum
+  ) AS sum,
+  sum((i.start_time IS NOT NULL) - (i.end_time IS NOT NULL)) > 0 AS is_active
   FROM time_activities AS ta
   INNER JOIN activities AS a ON ta.id = a.id
   LEFT JOIN time_activity_intervals AS i

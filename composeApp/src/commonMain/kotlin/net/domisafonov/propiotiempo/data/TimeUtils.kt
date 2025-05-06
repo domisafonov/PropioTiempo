@@ -18,6 +18,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes
+import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
 fun getDayStart(): Instant {
@@ -29,32 +30,51 @@ fun getDayStart(): Instant {
         .toInstant(timezone)
 }
 
-fun<T : Any> resetAtMidnight(flowProvider: () -> Flow<T>): Flow<T> =
-    dailyTimer(LocalTime.fromSecondOfDay(0))
+fun<T : Any> resetMinutelyAndAtMidnight(flowProvider: () -> Flow<T>): Flow<T> =
+    dailyAndMinutelyTimer(LocalTime.fromSecondOfDay(0))
         .flatMapLatest { flowProvider() }
 
-fun dailyTimer(startAt: LocalTime, emitAtStart: Boolean = true): Flow<Unit> = flow {
+private fun dailyAndMinutelyTimer(
+    startAt: LocalTime,
+    emitAtStart: Boolean = true,
+): Flow<Unit> = flow {
     if (emitAtStart) {
         emit(Unit)
     }
     while (true) {
-        delay(millisToDayEnd(dayTime = startAt))
+        val now = Clock.System.localTime()
+        delay(
+            min(
+                millisToDayTime(dayTime = startAt, now = now),
+                millisToMinuteEnd(now = now),
+            )
+        )
         emit(Unit)
     }
 }
 
-private fun millisToDayEnd(dayTime: LocalTime): Long {
-    val millisecondOfToday = Clock.System.now()
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .time
-        .toMillisecondOfDay()
+private fun millisToDayTime(
+    dayTime: LocalTime,
+    now: LocalTime = Clock.System.localTime(),
+): Long {
+    val millisecondOfToday = now.toMillisecondOfDay()
     val diff = millisecondOfToday - dayTime.toMillisecondOfDay()
     return if (diff > 0) {
-        diff
+        86400000 - diff
     } else {
-        diff + 86400000
+        diff
     }.toLong()
 }
+
+private fun millisToMinuteEnd(now: LocalTime = Clock.System.localTime()): Long =
+    (60_000_000_000L - (now.second * 1_000_000_000L + now.nanosecond)) /
+        1_000_000L
+
+private fun Clock.localTime(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): LocalTime = now()
+    .toLocalDateTime(timeZone = timeZone)
+    .time
 
 @Composable
 fun formatDurationHoursMinutes(seconds: Int): String {

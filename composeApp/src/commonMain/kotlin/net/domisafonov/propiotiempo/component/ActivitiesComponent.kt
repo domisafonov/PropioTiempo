@@ -74,6 +74,7 @@ private class ActivitiesComponentImpl(
                 id = it.id,
                 name = it.name,
                 todaysSeconds = it.todaysSeconds,
+                isActive = it.isActive,
             )
         },
         areDailiesShown = state.isDailyChecklistViewActive,

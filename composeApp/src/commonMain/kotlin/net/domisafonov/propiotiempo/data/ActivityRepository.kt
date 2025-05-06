@@ -38,6 +38,7 @@ interface ActivityRepository {
         val id: Long,
         val name: String,
         val todaysSeconds: Long,
+        val isActive: Boolean,
     )
 
     suspend fun toggleTimedActivity(id: Long)
@@ -51,7 +52,7 @@ class ActivityRepositoryImpl(
     private val dbQueries = database.dbQueries
 
     override fun observeTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
-        resetAtMidnight {
+        resetMinutelyAndAtMidnight {
             dbQueries
                 .get_daily_checklist_summary(
                     day_start = getDayStart(),
@@ -66,15 +67,16 @@ class ActivityRepositoryImpl(
         }.mapToList(Dispatchers.IO)
 
     override fun observeTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
-        resetAtMidnight {
+        resetMinutelyAndAtMidnight {
             dbQueries
                 .get_time_activities_summary(
                     day_start = getDayStart().epochSeconds,
-                ) { id, name, sum ->
+                ) { id, name, sum, is_active ->
                     ActivityRepository.TimeActivitySummary(
                         id = id,
                         name = name,
                         todaysSeconds = sum.toLong(),
+                        isActive = is_active,
                     )
                 }
                 .asFlow()
