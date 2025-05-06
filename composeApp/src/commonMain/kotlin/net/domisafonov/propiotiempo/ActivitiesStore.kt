@@ -60,57 +60,56 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
     activityRepository: ActivityRepository,
-): ActivitiesStore =
-    object : ActivitiesStore, Store<Intent, State, Label> by create(
-        name = ActivitiesStore::class.simpleName,
-        initialState = stateKeeper
-            ?.consume(
-                key = State::class.simpleName!!,
-                strategy = State.serializer(),
-            )
-            ?: ActivitiesStore.INITIAL_STATE,
-        bootstrapper = coroutineBootstrapper {
-            dispatch(Action.SubToActivities)
-        },
-        executorFactory = coroutineExecutorFactory {
-            onAction<Action.SubToActivities> {
-                launch {
-                    activityRepository.observeTodaysChecklistSummary()
-                        .collect {
-                            dispatch(Message.ChecklistsUpdate(dailyChecklists = it))
-                        }
-                }
-                launch {
-                    activityRepository.observeTodaysTimeActivitySummary()
-                        .collect {
-                            dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
-                        }
-                }
-            }
-            onIntent<Intent.ToggleDailyChecklists> {
-                dispatch(
-                    message = Message.ActivateDailyChecklists(
-                        isActive = !state().isDailyChecklistViewActive,
-                    ),
-                )
-            }
-            onIntent<Intent.ToggleTimedActivities> {
-                dispatch(
-                    message = Message.ActivateTimedActivities(
-                        isActive = !state().isTimedActivitiesViewActive,
-                    ),
-                )
-            }
-        },
-        reducer = { message: Message -> when (message) {
-            is Message.ChecklistsUpdate -> copy(dailyChecklists = message.dailyChecklists)
-            is Message.TimedActivitiesUpdate -> copy(timedActivities = message.timedActivities)
-            is Message.ActivateDailyChecklists -> copy(isDailyChecklistViewActive = message.isActive)
-            is Message.ActivateTimedActivities -> copy(isTimedActivitiesViewActive = message.isActive)
-        } },
-    ) {}.also { store ->
-        stateKeeper?.register(
+): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
+    name = ActivitiesStore::class.simpleName,
+    initialState = stateKeeper
+        ?.consume(
             key = State::class.simpleName!!,
             strategy = State.serializer(),
-        ) { ActivitiesStore.INITIAL_STATE }
-    }
+        )
+        ?: ActivitiesStore.INITIAL_STATE,
+    bootstrapper = coroutineBootstrapper {
+        dispatch(Action.SubToActivities)
+    },
+    executorFactory = coroutineExecutorFactory {
+        onAction<Action.SubToActivities> {
+            launch {
+                activityRepository.observeTodaysChecklistSummary()
+                    .collect {
+                        dispatch(Message.ChecklistsUpdate(dailyChecklists = it))
+                    }
+            }
+            launch {
+                activityRepository.observeTodaysTimeActivitySummary()
+                    .collect {
+                        dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
+                    }
+            }
+        }
+        onIntent<Intent.ToggleDailyChecklists> {
+            dispatch(
+                message = Message.ActivateDailyChecklists(
+                    isActive = !state().isDailyChecklistViewActive,
+                ),
+            )
+        }
+        onIntent<Intent.ToggleTimedActivities> {
+            dispatch(
+                message = Message.ActivateTimedActivities(
+                    isActive = !state().isTimedActivitiesViewActive,
+                ),
+            )
+        }
+    },
+    reducer = { message: Message -> when (message) {
+        is Message.ChecklistsUpdate -> copy(dailyChecklists = message.dailyChecklists)
+        is Message.TimedActivitiesUpdate -> copy(timedActivities = message.timedActivities)
+        is Message.ActivateDailyChecklists -> copy(isDailyChecklistViewActive = message.isActive)
+        is Message.ActivateTimedActivities -> copy(isTimedActivitiesViewActive = message.isActive)
+    } },
+) {}.also { store ->
+    stateKeeper?.register(
+        key = State::class.simpleName!!,
+        strategy = State.serializer(),
+    ) { ActivitiesStore.INITIAL_STATE }
+}

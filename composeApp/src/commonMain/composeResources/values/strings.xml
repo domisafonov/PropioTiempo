@@ -5,4 +5,7 @@
   <string name="foldable_unfold">Unfold</string>
   <string name="timed_activities_header">Timed Activities</string>
   <string name="daily_checklists_header">Daily Checklists</string>
+  <string name="daily_checklist_complete">Checklist complete</string>
+  <string name="daily_checklist_pending">Checklist pending completion</string>
+  <string name="double_digit_hours_minutes">%1$s:%2$s</string>
 </resources>

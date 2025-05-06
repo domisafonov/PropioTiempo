@@ -30,19 +30,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
+import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.check_circle
+import propiotiempo.composeapp.generated.resources.daily_checklist_complete
+import propiotiempo.composeapp.generated.resources.daily_checklist_pending
 import propiotiempo.composeapp.generated.resources.daily_checklists_header
 import propiotiempo.composeapp.generated.resources.foldable_fold
 import propiotiempo.composeapp.generated.resources.foldable_unfold
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_down
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_up
+import propiotiempo.composeapp.generated.resources.pending
 import propiotiempo.composeapp.generated.resources.timed_activities_header
+import kotlin.time.Duration.Companion.seconds
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -158,6 +167,7 @@ fun FoldableListHeader(
                 .windowInsetsPadding(WindowInsets.safeContent.only(WindowInsetsSides.Start))
                 .weight(1f),
             text = text,
+            fontWeight = FontWeight.Bold,
         )
 
         val (icon, desc) = if (isOpen) {
@@ -180,7 +190,19 @@ fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
 ) {
-    Text(modifier = modifier, text = "activity")
+    ListItem(modifier = modifier) { Row {
+        Text(
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            text = viewModel.name,
+        )
+        Text(
+            modifier = Modifier,
+            maxLines = 1,
+            text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
+            fontFamily = FontFamily.Monospace,
+        )
+    } }
 }
 
 @Composable
@@ -188,5 +210,37 @@ fun ChecklistItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.Checklist
 ) {
-    Text(modifier = modifier, text = "checklist")
+    ListItem(modifier = modifier) { Row {
+        Text(
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            text = viewModel.name,
+        )
+
+        val (icon, description) = if (viewModel.isCompleted) {
+            Res.drawable.check_circle to Res.string.daily_checklist_complete
+        } else {
+            Res.drawable.pending to Res.string.daily_checklist_pending
+        }
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = stringResource(description),
+        )
+    } }
+}
+
+@Composable
+fun ListItem(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Surface(
+        modifier = modifier
+            .windowInsetsPadding(
+                WindowInsets.safeContent.only(WindowInsetsSides.Horizontal)
+            )
+            .padding(vertical = 8.dp),
+    ) {
+        content()
+    }
 }

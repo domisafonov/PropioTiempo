@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
             }
         )
 
+        // TODO: fix status bar color not changing on toggling dark mode
+        //  until activity is restarted
         enableEdgeToEdge()
         setContent {
             RootContent(rootComponent = rootComponent)
