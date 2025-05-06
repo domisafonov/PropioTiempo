@@ -3,4 +3,6 @@
   <string name="nav_schema">Schema</string>
   <string name="foldable_fold">Fold</string>
   <string name="foldable_unfold">Unfold</string>
+  <string name="timed_activities_header">Timed Activities</string>
+  <string name="daily_checklists_header">Daily Checklists</string>
 </resources>

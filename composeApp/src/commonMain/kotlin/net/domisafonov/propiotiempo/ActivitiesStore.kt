@@ -28,11 +28,14 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     )
 
     sealed interface Label
+
+    companion object
 }
 
 private sealed interface Action {
     data object SubToActivities : Action
 }
+
 private sealed interface Message {
 
     data class ChecklistsUpdate(
@@ -47,11 +50,11 @@ private sealed interface Message {
     data class ActivateTimedActivities(val isActive: Boolean) : Message
 }
 
-private val INITIAL_STATE = State(
+val ActivitiesStore.Companion.INITIAL_STATE get() = State(
     dailyChecklists = emptyList(),
     timedActivities = emptyList(),
-    isDailyChecklistViewActive = false,
-    isTimedActivitiesViewActive = false,
+    isDailyChecklistViewActive = true,
+    isTimedActivitiesViewActive = true,
 )
 
 fun StoreFactory.makeActivitiesStore(
@@ -65,7 +68,7 @@ fun StoreFactory.makeActivitiesStore(
                 key = State::class.simpleName!!,
                 strategy = State.serializer(),
             )
-            ?: INITIAL_STATE,
+            ?: ActivitiesStore.INITIAL_STATE,
         bootstrapper = coroutineBootstrapper {
             dispatch(Action.SubToActivities)
         },
@@ -109,5 +112,5 @@ fun StoreFactory.makeActivitiesStore(
         stateKeeper?.register(
             key = State::class.simpleName!!,
             strategy = State.serializer(),
-        ) { INITIAL_STATE }
+        ) { ActivitiesStore.INITIAL_STATE }
     }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import net.domisafonov.propiotiempo.ActivitiesStore
+import net.domisafonov.propiotiempo.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.ActivityRepository
 import net.domisafonov.propiotiempo.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
@@ -49,36 +50,33 @@ private class ActivitiesComponentImpl(
     }
 
     override val viewModel: StateFlow<ActivitiesViewModel> = store.states
-        .map { state ->
-            ActivitiesViewModel(
-                dailyChecklists = state.dailyChecklists.map {
-                    ActivitiesViewModel.Checklist(
-                        id = it.id,
-                        name = it.name,
-                        isCompleted = it.isCompleted,
-                    )
-                },
-                timeActivities = state.timedActivities.map {
-                    ActivitiesViewModel.TimeActivity(
-                        id = it.id,
-                        name = it.name,
-                        todaysSeconds = it.todaysSeconds,
-                    )
-                },
-                areDailiesShown = state.isDailyChecklistViewActive,
-                areTimeActivitiesShown = state.isTimedActivitiesViewActive,
-            )
-        }
+        .map(this::mapToViewModel)
         .stateIn(
             scope = scope,
             started = SharingStarted.Lazily,
-            initialValue = ActivitiesViewModel(
-                dailyChecklists = emptyList(),
-                timeActivities = emptyList(),
-                areDailiesShown = false,
-                areTimeActivitiesShown = false,
-            ),
+            initialValue = mapToViewModel(state = ActivitiesStore.INITIAL_STATE),
         )
+
+    private fun mapToViewModel(
+        state: ActivitiesStore.State,
+    ): ActivitiesViewModel = ActivitiesViewModel(
+        dailyChecklists = state.dailyChecklists.map {
+            ActivitiesViewModel.Checklist(
+                id = it.id,
+                name = it.name,
+                isCompleted = it.isCompleted,
+            )
+        },
+        timeActivities = state.timedActivities.map {
+            ActivitiesViewModel.TimeActivity(
+                id = it.id,
+                name = it.name,
+                todaysSeconds = it.todaysSeconds,
+            )
+        },
+        areDailiesShown = state.isDailyChecklistViewActive,
+        areTimeActivitiesShown = state.isTimedActivitiesViewActive,
+    )
 
     override fun onDailyChecklistToggled() {
         store.accept(ActivitiesStore.Intent.ToggleDailyChecklists)

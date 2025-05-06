@@ -5,6 +5,7 @@ package net.domisafonov.propiotiempo.ui.content
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -31,13 +33,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.daily_checklists_header
 import propiotiempo.composeapp.generated.resources.foldable_fold
 import propiotiempo.composeapp.generated.resources.foldable_unfold
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_down
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_up
+import propiotiempo.composeapp.generated.resources.timed_activities_header
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -79,12 +84,14 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 onClick = component::onTimedActivitiesToggled,
             )
         }
-        items(
-            items = viewModel.timeActivities,
-            key = ActivitiesViewModel.TimeActivity::id,
-        ) { item ->
-            TimeActivityItem(viewModel = item)
-            HorizontalDivider()
+        if (viewModel.areTimeActivitiesShown) {
+            items(
+                items = viewModel.timeActivities,
+                key = ActivitiesViewModel.TimeActivity::id,
+            ) { item -> Column(modifier = Modifier.animateItem()) {
+                TimeActivityItem(viewModel = item)
+                HorizontalDivider()
+            } }
         }
         stickyHeader {
             ChecklistsHeader(
@@ -92,12 +99,14 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 onClick = component::onDailyChecklistToggled,
             )
         }
-        items(
-            items = viewModel.dailyChecklists,
-            key = ActivitiesViewModel.Checklist::id,
-        ) { item ->
-            ChecklistItem(viewModel = item)
-            HorizontalDivider()
+        if (viewModel.areDailiesShown) {
+            items(
+                items = viewModel.dailyChecklists,
+                key = ActivitiesViewModel.Checklist::id,
+            ) { item -> Column(modifier = Modifier.animateItem()) {
+                ChecklistItem(viewModel = item)
+                HorizontalDivider()
+            } }
         }
     }
 }
@@ -111,7 +120,7 @@ fun TimeActivitiesHeader(
     FoldableListHeader(
         modifier = modifier,
         isOpen = viewModel.areTimeActivitiesShown,
-        text = "AAAaaaaaaa",
+        text = stringResource(Res.string.timed_activities_header),
         onClick = onClick,
     )
 }
@@ -125,7 +134,7 @@ fun ChecklistsHeader(
     FoldableListHeader(
         modifier = modifier,
         isOpen = viewModel.areDailiesShown,
-        text = "Bbbbbbbbbbb",
+        text = stringResource(Res.string.daily_checklists_header),
         onClick = onClick,
     )
 }
