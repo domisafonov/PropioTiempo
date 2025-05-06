@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalUuidApi::class, ExperimentalFoundationApi::class)
 
-package net.domisafonov.propiotiempo.ui
+package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -21,12 +21,16 @@ import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
@@ -63,8 +67,16 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
 
     val viewModel by component.viewModel.collectAsState()
 
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        item { Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.safeContent)) }
+    LazyColumn(
+        modifier = modifier.fillMaxSize()
+            .background(MaterialTheme.colors.surface)
+    ) {
+        item {
+            Spacer(
+                modifier = Modifier.windowInsetsTopHeight(WindowInsets.safeContent)
+                    .fillMaxWidth(),
+            )
+        }
         stickyHeader {
             TimeActivitiesHeader(
                 viewModel = viewModel,
@@ -123,13 +135,13 @@ fun FoldableListHeader(
     text: String,
     onClick: () -> Unit = {},
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth()
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
             .clickable(onClick = onClick)
-            .background(color = Color.Red)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-            .padding(PaddingValues(vertical = 12.dp))
-    ) {
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
+        elevation = 2.dp,
+    ) { Row(modifier = Modifier.padding(PaddingValues(vertical = 12.dp))) {
         Text(
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.safeContent.only(WindowInsetsSides.Start))
@@ -149,7 +161,7 @@ fun FoldableListHeader(
             painter = painterResource(icon),
             contentDescription = stringResource(desc),
         )
-    }
+    } }
 }
 
 @Composable

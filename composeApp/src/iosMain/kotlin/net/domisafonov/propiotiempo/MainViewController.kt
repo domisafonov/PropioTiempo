@@ -9,7 +9,7 @@ import com.arkivanov.essenty.lifecycle.ApplicationLifecycle
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import net.domisafonov.propiotiempo.component.RootComponentImpl
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
-import net.domisafonov.propiotiempo.ui.RootContent
+import net.domisafonov.propiotiempo.ui.content.RootContent
 
 fun MainViewController() = ComposeUIViewController {
     val rootComponent = RootComponentImpl(

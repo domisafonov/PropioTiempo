@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import net.domisafonov.propiotiempo.ActivitiesStore
 import net.domisafonov.propiotiempo.data.ActivityRepository
 import net.domisafonov.propiotiempo.makeActivitiesStore
-import net.domisafonov.propiotiempo.ui.ActivitiesViewModel
+import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 
 interface ActivitiesComponent : ComponentContext {
     val viewModel: StateFlow<ActivitiesViewModel>

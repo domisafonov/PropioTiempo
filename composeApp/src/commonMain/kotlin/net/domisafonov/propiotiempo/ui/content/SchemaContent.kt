@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo.ui
+package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeContent

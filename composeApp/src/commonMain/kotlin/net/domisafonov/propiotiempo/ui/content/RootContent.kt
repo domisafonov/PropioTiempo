@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo.ui
+package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import net.domisafonov.propiotiempo.component.RootComponent
+import net.domisafonov.propiotiempo.ui.AppTheme
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -50,7 +51,7 @@ private data class Tab(
 
 @Composable
 fun RootContent(modifier: Modifier = Modifier, rootComponent: RootComponent) {
-    MaterialTheme {
+    AppTheme {
         Column(modifier = modifier.fillMaxSize()) {
             CurrentScreen(
                 modifier = Modifier.weight(1f)

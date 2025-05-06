@@ -12,7 +12,7 @@ import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import net.domisafonov.propiotiempo.component.RootComponentImpl
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
-import net.domisafonov.propiotiempo.ui.RootContent
+import net.domisafonov.propiotiempo.ui.content.RootContent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
