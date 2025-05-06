@@ -30,25 +30,45 @@ fun getDayStart(): Instant {
         .toInstant(timezone)
 }
 
-fun<T : Any> resetMinutelyAndAtMidnight(flowProvider: () -> Flow<T>): Flow<T> =
-    dailyAndMinutelyTimer(LocalTime.fromSecondOfDay(0))
-        .flatMapLatest { flowProvider() }
-
-private fun dailyAndMinutelyTimer(
-    startAt: LocalTime,
+fun<T : Any> resetPeriodically(
+    dayTime: LocalTime? = LocalTime.fromSecondOfDay(0),
+    doResetMinutely: Boolean = false,
     emitAtStart: Boolean = true,
+    flowProvider: () -> Flow<T>,
+): Flow<T> {
+    if (dayTime == null && !doResetMinutely) {
+        throw IllegalArgumentException()
+    }
+    return periodicalTimer(
+        startAt = dayTime,
+        doResetMinutely = doResetMinutely,
+        emitAtStart = emitAtStart,
+    ).flatMapLatest { flowProvider() }
+}
+
+private fun periodicalTimer(
+    startAt: LocalTime?,
+    doResetMinutely: Boolean,
+    emitAtStart: Boolean,
 ): Flow<Unit> = flow {
+    if (startAt == null && !doResetMinutely) {
+        throw IllegalArgumentException()
+    }
+
     if (emitAtStart) {
         emit(Unit)
     }
     while (true) {
         val now = Clock.System.localTime()
-        delay(
-            min(
-                millisToDayTime(dayTime = startAt, now = now),
-                millisToMinuteEnd(now = now),
-            )
-        )
+        val one = startAt
+            ?.let { millisToDayTime(dayTime = startAt, now = now) }
+            ?: Long.MAX_VALUE
+        val two = if (doResetMinutely) {
+            millisToMinuteEnd(now = now)
+        } else {
+            Long.MAX_VALUE
+        }
+        delay(min(one, two))
         emit(Unit)
     }
 }

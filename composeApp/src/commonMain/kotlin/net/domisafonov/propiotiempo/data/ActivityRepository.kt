@@ -52,7 +52,7 @@ class ActivityRepositoryImpl(
     private val dbQueries = database.dbQueries
 
     override fun observeTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
-        resetMinutelyAndAtMidnight {
+        resetPeriodically {
             dbQueries
                 .get_daily_checklist_summary(
                     day_start = getDayStart(),
@@ -67,7 +67,7 @@ class ActivityRepositoryImpl(
         }.mapToList(Dispatchers.IO)
 
     override fun observeTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
-        resetMinutelyAndAtMidnight {
+        resetPeriodically(doResetMinutely = true) {
             dbQueries
                 .get_time_activities_summary(
                     day_start = getDayStart().epochSeconds,

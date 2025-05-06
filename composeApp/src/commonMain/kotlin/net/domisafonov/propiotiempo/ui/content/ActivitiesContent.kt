@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.FoldableListHeader
@@ -39,7 +41,6 @@ import propiotiempo.composeapp.generated.resources.daily_checklists_header
 import propiotiempo.composeapp.generated.resources.pending
 import propiotiempo.composeapp.generated.resources.timed_activities_header
 import propiotiempo.composeapp.generated.resources.timed_activity_in_progress
-import propiotiempo.composeapp.generated.resources.timed_activity_inactive
 
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
@@ -150,7 +151,6 @@ fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
 ) {
-    println(viewModel)
     ListItem(modifier = modifier) { Row {
         Text(
             modifier = Modifier
@@ -158,22 +158,20 @@ fun TimeActivityItem(
             maxLines = 1,
             text = viewModel.name,
         )
+
+        if (viewModel.isActive) {
+            Icon(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
+                painter = painterResource(Res.drawable.pending),
+                contentDescription = stringResource(Res.string.timed_activity_in_progress),
+            )
+        }
+
         Text(
             maxLines = 1,
             text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
             fontFamily = FontFamily.Monospace,
-        )
-
-        val (alpha, description) = if (viewModel.isActive) {
-            1f to Res.string.timed_activity_in_progress
-        } else {
-            0f to Res.string.timed_activity_inactive
-        }
-        Icon(
-            modifier = Modifier
-                .alpha(alpha),
-            painter = painterResource(Res.drawable.pending),
-            contentDescription = stringResource(description),
         )
     } }
 }
