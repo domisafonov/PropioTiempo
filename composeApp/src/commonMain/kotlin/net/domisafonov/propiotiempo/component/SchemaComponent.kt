@@ -2,7 +2,7 @@ package net.domisafonov.propiotiempo.component
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import net.domisafonov.propiotiempo.data.SchemaRepository
+import net.domisafonov.propiotiempo.data.repository.SchemaRepository
 
 interface SchemaComponent : ComponentContext
 

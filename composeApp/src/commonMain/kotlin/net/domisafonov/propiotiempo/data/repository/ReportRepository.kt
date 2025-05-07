@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo.data
+package net.domisafonov.propiotiempo.data.repository
 
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 

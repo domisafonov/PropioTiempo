@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo.data
+package net.domisafonov.propiotiempo.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
@@ -9,6 +9,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
+import net.domisafonov.propiotiempo.data.getDayStart
+import net.domisafonov.propiotiempo.data.resetPeriodically
 
 interface ActivityRepository {
 

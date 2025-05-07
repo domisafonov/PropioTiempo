@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
-import net.domisafonov.propiotiempo.data.ActivityRepository
-import net.domisafonov.propiotiempo.data.SettingsRepository
+import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import net.domisafonov.propiotiempo.data.repository.SettingsRepository
+import net.domisafonov.propiotiempo.data.usecase.GetSettingsUcImpl
+import net.domisafonov.propiotiempo.data.usecase.SetSettingUcImpl
 import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 
@@ -53,7 +55,12 @@ private class ActivitiesComponentImpl(
         storeFactory.makeActivitiesStore(
             stateKeeper = stateKeeper,
             activityRepository = activityRepositoryProvider.value,
-            settingsRepositoryProvider = settingsRepositoryProvider,
+            getSettingsUc = GetSettingsUcImpl(
+                settingsRepositoryProvider = settingsRepositoryProvider,
+            ),
+            setSettingsUc = SetSettingUcImpl(
+                settingsRepositoryProvider = settingsRepositoryProvider,
+            ),
         )
     }
 

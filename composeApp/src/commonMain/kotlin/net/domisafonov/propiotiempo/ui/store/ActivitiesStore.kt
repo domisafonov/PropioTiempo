@@ -5,16 +5,15 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.model.PtSettings
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
-import net.domisafonov.propiotiempo.data.ActivityRepository
-import net.domisafonov.propiotiempo.data.SettingsRepository
+import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import net.domisafonov.propiotiempo.data.usecase.GetSettingsUc
+import net.domisafonov.propiotiempo.data.usecase.SetSettingUc
 
 interface ActivitiesStore : Store<Intent, State, Label> {
 
@@ -74,7 +73,8 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
     activityRepository: ActivityRepository,
-    settingsRepositoryProvider: Lazy<SettingsRepository>,
+    getSettingsUc: GetSettingsUc,
+    setSettingsUc: SetSettingUc,
 ): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
     name = ActivitiesStore::class.simpleName,
     initialState = stateKeeper
@@ -91,9 +91,7 @@ fun StoreFactory.makeActivitiesStore(
 
         onAction<Action.ReadSettings> {
             launch {
-                val settings = withContext(Dispatchers.IO) {
-                    settingsRepositoryProvider.value.settings.value
-                }
+                val settings = getSettingsUc.execute()
                 dispatch(
                     Message.SetSettings(
                         isDailyChecklistViewActive = settings.isActivityTabDailyChecklistsSectionOpen,
@@ -120,10 +118,12 @@ fun StoreFactory.makeActivitiesStore(
 
         onIntent<Intent.ToggleDailyChecklists> {
             val new = !state().isDailyChecklistViewActive
-            settingsRepositoryProvider.value.updateSetting(
-                property = SettingsRepository.PtSettings::isActivityTabDailyChecklistsSectionOpen,
-                value = new,
-            )
+            launch {
+                setSettingsUc.execute(
+                    property = PtSettings::isActivityTabDailyChecklistsSectionOpen,
+                    value = new,
+                )
+            }
             dispatch(
                 message = Message.ActivateDailyChecklists(
                     isActive = new,
@@ -133,10 +133,12 @@ fun StoreFactory.makeActivitiesStore(
 
         onIntent<Intent.ToggleTimedActivities> {
             val new = !state().isTimedActivitiesViewActive
-            settingsRepositoryProvider.value.updateSetting(
-                property = SettingsRepository.PtSettings::isActivityTabTimedActivitiesSectionOpen,
-                value = new,
-            )
+            launch {
+                setSettingsUc.execute(
+                    property = PtSettings::isActivityTabTimedActivitiesSectionOpen,
+                    value = new,
+                )
+            }
             dispatch(
                 message = Message.ActivateTimedActivities(
                     isActive = new,

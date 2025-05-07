@@ -1,16 +1,16 @@
-package net.domisafonov.propiotiempo.data
+package net.domisafonov.propiotiempo.data.repository
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.domisafonov.propiotiempo.data.model.PtSettings
+import kotlin.collections.iterator
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 
@@ -18,15 +18,10 @@ interface SettingsRepository {
 
     val settings: StateFlow<PtSettings>
 
-    fun<T : Any> updateSetting(property: KProperty1<PtSettings, T>, value: T)
-
-    interface PtSettings {
-        val isActivityTabTimedActivitiesSectionOpen: Boolean
-        val isActivityTabDailyChecklistsSectionOpen: Boolean
-    }
+    suspend fun<T : Any> updateSetting(property: KProperty1<PtSettings, T>, value: T)
 }
 
-private class PtSettingsImpl : SettingsRepository.PtSettings {
+private class PtSettingsImpl : PtSettings {
 
     companion object {
         val PROPS: Map<String, PropWithType> = listOf(
@@ -63,20 +58,19 @@ private data class PropWithType(
 )
 
 private class SettingsRepositoryImpl(
-    private val scope: CoroutineScope,
     private val settingsSource: Settings,
     initValue: PtSettingsImpl,
 ) : SettingsRepository {
 
     private val settingsImpl = MutableStateFlow(initValue)
-    override val settings: StateFlow<SettingsRepository.PtSettings> =
+    override val settings: StateFlow<PtSettings> =
         settingsImpl.asStateFlow()
 
-    override fun <T : Any> updateSetting(
-        property: KProperty1<SettingsRepository.PtSettings, T>,
+    override suspend fun <T : Any> updateSetting(
+        property: KProperty1<PtSettings, T>,
         value: T,
     ) {
-        scope.launch {
+        withContext(Dispatchers.Main.immediate) {
             val realProp = PtSettingsImpl.PROPS[property.name]!!.property
 
             val new = settingsImpl.value.clone()
@@ -107,12 +101,9 @@ private fun readFromSource(
     }
 }
 
-fun makeSettingsRepositoryImpl(
-    scope: CoroutineScope, // Dispatchers.Main.immediate
-) : SettingsRepository {
+fun makeSettingsRepositoryImpl() : SettingsRepository {
     val settingsSource = Settings()
     return SettingsRepositoryImpl(
-        scope = scope,
         settingsSource = settingsSource,
         initValue = readFromSource(settingsSource = settingsSource),
     )

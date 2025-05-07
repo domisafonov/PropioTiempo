@@ -14,14 +14,14 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
-import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
-import net.domisafonov.propiotiempo.data.ReportRepositoryImpl
-import net.domisafonov.propiotiempo.data.SchemaRepositoryImpl
+import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
+import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
+import net.domisafonov.propiotiempo.data.repository.SchemaRepositoryImpl
 import net.domisafonov.propiotiempo.data.db.Daily_checklist_checks
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
-import net.domisafonov.propiotiempo.data.makeSettingsRepositoryImpl
+import net.domisafonov.propiotiempo.data.repository.makeSettingsRepositoryImpl
 
 interface RootComponent : ComponentContext {
     val screenStack: Value<ChildStack<*, Child>>
@@ -68,9 +68,8 @@ class RootComponentImpl(
 
     // TODO: the current idea is to load it in a special way on the starting screen
     //  IO on main/composer threads is still not impossible
-    private val settingsRepositoryScope = coroutineScope(Dispatchers.Main.immediate)
     private val settingsRepositoryProvider = lazy {
-        makeSettingsRepositoryImpl(scope = settingsRepositoryScope)
+        makeSettingsRepositoryImpl()
     }
 
     private val activitiesComponent = { componentContext: ComponentContext ->
