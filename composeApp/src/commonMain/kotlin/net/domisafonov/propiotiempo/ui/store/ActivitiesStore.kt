@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo
+package net.domisafonov.propiotiempo.ui.store
 
 import com.arkivanov.essenty.statekeeper.StateKeeper
 import com.arkivanov.mvikotlin.core.store.Store
@@ -7,9 +7,9 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import net.domisafonov.propiotiempo.ActivitiesStore.Intent
-import net.domisafonov.propiotiempo.ActivitiesStore.Label
-import net.domisafonov.propiotiempo.ActivitiesStore.State
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
 import net.domisafonov.propiotiempo.data.ActivityRepository
 
 interface ActivitiesStore : Store<Intent, State, Label> {
@@ -25,8 +25,8 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     data class State(
         val dailyChecklists: List<ActivityRepository.ChecklistSummary>,
         val timedActivities: List<ActivityRepository.TimeActivitySummary>,
-        val isDailyChecklistViewActive: Boolean,
-        val isTimedActivitiesViewActive: Boolean,
+        val isDailyChecklistViewActive: Boolean, // TODO: persist
+        val isTimedActivitiesViewActive: Boolean, // TODO: persist
     )
 
     sealed interface Label {

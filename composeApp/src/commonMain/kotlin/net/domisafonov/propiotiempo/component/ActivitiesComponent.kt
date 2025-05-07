@@ -11,13 +11,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import net.domisafonov.propiotiempo.ActivitiesStore
-import net.domisafonov.propiotiempo.INITIAL_STATE
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
+import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.ActivityRepository
-import net.domisafonov.propiotiempo.makeActivitiesStore
+import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 
 interface ActivitiesComponent : ComponentContext {
+
     val viewModel: StateFlow<ActivitiesViewModel>
 
     fun onDailyChecklistToggled()
