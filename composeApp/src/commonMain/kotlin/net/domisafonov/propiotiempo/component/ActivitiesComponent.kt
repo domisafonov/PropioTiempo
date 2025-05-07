@@ -53,7 +53,7 @@ private class ActivitiesComponentImpl(
         storeFactory.makeActivitiesStore(
             stateKeeper = stateKeeper,
             activityRepository = activityRepositoryProvider.value,
-            settingsRepository = settingsRepositoryProvider.value,
+            settingsRepositoryProvider = settingsRepositoryProvider,
         )
     }
 

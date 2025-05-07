@@ -65,8 +65,12 @@ class RootComponentImpl(
     private val reportRepositoryProvider = lazy {
         ReportRepositoryImpl(database = database)
     }
+
+    // TODO: the current idea is to load it in a special way on the starting screen
+    //  IO on main/composer threads is still not impossible
+    private val settingsRepositoryScope = coroutineScope(Dispatchers.Main.immediate)
     private val settingsRepositoryProvider = lazy {
-        makeSettingsRepositoryImpl(coroutineScope(Dispatchers.Main.immediate))
+        makeSettingsRepositoryImpl(scope = settingsRepositoryScope)
     }
 
     private val activitiesComponent = { componentContext: ComponentContext ->

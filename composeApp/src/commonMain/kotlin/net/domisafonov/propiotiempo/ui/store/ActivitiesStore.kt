@@ -5,7 +5,10 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
@@ -38,10 +41,16 @@ interface ActivitiesStore : Store<Intent, State, Label> {
 }
 
 private sealed interface Action {
+    data object ReadSettings : Action
     data object SubToActivities : Action
 }
 
 private sealed interface Message {
+
+    data class SetSettings(
+        val isDailyChecklistViewActive: Boolean,
+        val isTimedActivitiesViewActive: Boolean,
+    ) : Message
 
     data class ChecklistsUpdate(
         val dailyChecklists: List<ActivityRepository.ChecklistSummary>,
@@ -65,7 +74,7 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
     activityRepository: ActivityRepository,
-    settingsRepository: SettingsRepository,
+    settingsRepositoryProvider: Lazy<SettingsRepository>,
 ): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
     name = ActivitiesStore::class.simpleName,
     initialState = stateKeeper
@@ -73,17 +82,26 @@ fun StoreFactory.makeActivitiesStore(
             key = State::class.simpleName!!,
             strategy = State.serializer(),
         )
-        ?: ActivitiesStore.INITIAL_STATE.let { initial ->
-            val settings = settingsRepository.settings.value
-            initial.copy(
-                isDailyChecklistViewActive = settings.isActivityTabDailyChecklistsSectionOpen,
-                isTimedActivitiesViewActive = settings.isActivityTabTimedActivitiesSectionOpen,
-            )
-        },
+        ?: ActivitiesStore.INITIAL_STATE,
     bootstrapper = coroutineBootstrapper {
+        dispatch(Action.ReadSettings)
         dispatch(Action.SubToActivities)
     },
     executorFactory = coroutineExecutorFactory {
+
+        onAction<Action.ReadSettings> {
+            launch {
+                val settings = withContext(Dispatchers.IO) {
+                    settingsRepositoryProvider.value.settings.value
+                }
+                dispatch(
+                    Message.SetSettings(
+                        isDailyChecklistViewActive = settings.isActivityTabDailyChecklistsSectionOpen,
+                        isTimedActivitiesViewActive = settings.isActivityTabTimedActivitiesSectionOpen,
+                    )
+                )
+            }
+        }
 
         onAction<Action.SubToActivities> {
             launch {
@@ -102,7 +120,7 @@ fun StoreFactory.makeActivitiesStore(
 
         onIntent<Intent.ToggleDailyChecklists> {
             val new = !state().isDailyChecklistViewActive
-            settingsRepository.updateSetting(
+            settingsRepositoryProvider.value.updateSetting(
                 property = SettingsRepository.PtSettings::isActivityTabDailyChecklistsSectionOpen,
                 value = new,
             )
@@ -115,7 +133,7 @@ fun StoreFactory.makeActivitiesStore(
 
         onIntent<Intent.ToggleTimedActivities> {
             val new = !state().isTimedActivitiesViewActive
-            settingsRepository.updateSetting(
+            settingsRepositoryProvider.value.updateSetting(
                 property = SettingsRepository.PtSettings::isActivityTabTimedActivitiesSectionOpen,
                 value = new,
             )
@@ -137,6 +155,10 @@ fun StoreFactory.makeActivitiesStore(
         }
     },
     reducer = { message: Message -> when (message) {
+        is Message.SetSettings -> copy(
+            isDailyChecklistViewActive = message.isDailyChecklistViewActive,
+            isTimedActivitiesViewActive = message.isTimedActivitiesViewActive,
+        )
         is Message.ChecklistsUpdate -> copy(dailyChecklists = message.dailyChecklists)
         is Message.TimedActivitiesUpdate -> copy(timedActivities = message.timedActivities)
         is Message.ActivateDailyChecklists -> copy(isDailyChecklistViewActive = message.isActive)

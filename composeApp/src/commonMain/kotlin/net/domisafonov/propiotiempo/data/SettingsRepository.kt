@@ -107,7 +107,6 @@ private fun readFromSource(
     }
 }
 
-// TODO: probably, there is a way to do it off the main/composition threads
 fun makeSettingsRepositoryImpl(
     scope: CoroutineScope, // Dispatchers.Main.immediate
 ) : SettingsRepository {
