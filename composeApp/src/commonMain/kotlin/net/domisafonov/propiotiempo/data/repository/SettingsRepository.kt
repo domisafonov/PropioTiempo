@@ -3,6 +3,7 @@ package net.domisafonov.propiotiempo.data.repository
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,8 @@ private data class PropWithType(
 private class SettingsRepositoryImpl(
     private val settingsSource: Settings,
     initValue: PtSettingsImpl,
+    private val mainDispatcher: CoroutineDispatcher,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : SettingsRepository {
 
     private val settingsImpl = MutableStateFlow(initValue)
@@ -70,7 +73,7 @@ private class SettingsRepositoryImpl(
         property: KProperty1<PtSettings, T>,
         value: T,
     ) {
-        withContext(Dispatchers.Main.immediate) {
+        withContext(mainDispatcher) {
             val realProp = PtSettingsImpl.PROPS[property.name]!!.property
 
             val new = settingsImpl.value.clone()
@@ -84,7 +87,7 @@ private class SettingsRepositoryImpl(
 
     private suspend fun updateSource(
         value: PtSettingsImpl,
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(ioDispatcher) {
         for ((name, pwt) in PtSettingsImpl.PROPS) {
             val (p, t) = pwt
             t.setter(settingsSource, name, p.get(value))
@@ -101,11 +104,16 @@ private fun readFromSource(
     }
 }
 
-fun makeSettingsRepositoryImpl() : SettingsRepository {
+fun makeSettingsRepositoryImpl(
+    mainDispatcher: CoroutineDispatcher,
+    ioDispatcher: CoroutineDispatcher,
+) : SettingsRepository {
     val settingsSource = Settings()
     return SettingsRepositoryImpl(
         settingsSource = settingsSource,
         initValue = readFromSource(settingsSource = settingsSource),
+        mainDispatcher = mainDispatcher,
+        ioDispatcher = ioDispatcher,
     )
 }
 

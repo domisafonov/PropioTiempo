@@ -5,7 +5,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.states
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,11 +38,15 @@ fun makeActivitiesComponent(
     storeFactory: StoreFactory,
     activityRepositoryProvider: Lazy<ActivityRepository>,
     settingsRepositoryProvider: Lazy<SettingsRepository>,
+    mainDispatcher: CoroutineDispatcher,
+    ioDispatcher: CoroutineDispatcher,
 ): ActivitiesComponent = ActivitiesComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
     activityRepositoryProvider = activityRepositoryProvider,
     settingsRepositoryProvider = settingsRepositoryProvider,
+    mainDispatcher = mainDispatcher,
+    ioDispatcher = ioDispatcher,
 )
 
 private class ActivitiesComponentImpl(
@@ -50,9 +54,11 @@ private class ActivitiesComponentImpl(
     storeFactory: StoreFactory,
     private val activityRepositoryProvider: Lazy<ActivityRepository>,
     private val settingsRepositoryProvider: Lazy<SettingsRepository>,
+    private val mainDispatcher: CoroutineDispatcher,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : ActivitiesComponent, ComponentContext by componentContext {
 
-    private val scope = coroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    private val scope = coroutineScope(mainDispatcher + SupervisorJob())
 
     private val store = instanceKeeper.getStore(key = ActivitiesStore::class) {
         storeFactory.makeActivitiesStore(
@@ -68,6 +74,7 @@ private class ActivitiesComponentImpl(
             ),
             getSettingsUc = GetSettingsUcImpl(
                 settingsRepositoryProvider = settingsRepositoryProvider,
+                ioDispatcher = ioDispatcher,
             ),
             setSettingsUc = SetSettingUcImpl(
                 settingsRepositoryProvider = settingsRepositoryProvider,

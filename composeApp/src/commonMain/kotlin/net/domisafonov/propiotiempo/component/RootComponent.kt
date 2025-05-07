@@ -10,7 +10,6 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -70,7 +69,10 @@ class RootComponentImpl(
     // TODO: the current idea is to load it in a special way on the starting screen
     //  IO on main/composer threads is still not impossible
     private val settingsRepositoryProvider = lazy {
-        makeSettingsRepositoryImpl()
+        makeSettingsRepositoryImpl(
+            mainDispatcher = Dispatchers.Main.immediate,
+            ioDispatcher = Dispatchers.IO,
+        )
     }
 
     private val activitiesComponent = { componentContext: ComponentContext ->
@@ -79,6 +81,8 @@ class RootComponentImpl(
             storeFactory = storeFactory,
             activityRepositoryProvider = activityRepositoryProvider,
             settingsRepositoryProvider = settingsRepositoryProvider,
+            mainDispatcher = Dispatchers.Main.immediate,
+            ioDispatcher = Dispatchers.IO,
         )
     }
     private val schemaComponent = { componentContext: ComponentContext ->

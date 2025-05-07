@@ -1,7 +1,6 @@
 package net.domisafonov.propiotiempo.data.usecase
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import net.domisafonov.propiotiempo.data.model.PtSettings
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
@@ -11,12 +10,16 @@ interface GetSettingsUc {
 }
 
 class GetSettingsUcImpl(
-    settingsRepositoryProvider: Lazy<SettingsRepository>,
+    private val settingsRepositoryProvider: Lazy<SettingsRepository>,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : GetSettingsUc {
 
-    private val settingsRepository by settingsRepositoryProvider
+    override suspend fun execute(): PtSettings =
+        if (settingsRepositoryProvider.isInitialized()) {
+            get()
+        } else {
+            withContext(ioDispatcher) { get() }
+        }
 
-    override suspend fun execute(): PtSettings = withContext(Dispatchers.IO) {
-        settingsRepository.settings.value
-    }
+    private fun get(): PtSettings = settingsRepositoryProvider.value.settings.value
 }
