@@ -22,8 +22,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
@@ -151,29 +151,33 @@ fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
 ) {
-    ListItem(modifier = modifier) { Row {
-        Text(
-            modifier = Modifier
-                .weight(1f),
-            maxLines = 1,
-            text = viewModel.name,
-        )
-
-        if (viewModel.isActive) {
-            Icon(
+    ListItem(modifier = modifier, minSurfaceContentsSize = 24.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp),
-                painter = painterResource(Res.drawable.pending),
-                contentDescription = stringResource(Res.string.timed_activity_in_progress),
+                    .weight(1f),
+                maxLines = 1,
+                text = viewModel.name,
+            )
+
+            if (viewModel.isActive) {
+                Icon(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp),
+                    painter = painterResource(Res.drawable.pending),
+                    contentDescription = stringResource(
+                        Res.string.timed_activity_in_progress
+                    ),
+                )
+            }
+
+            Text(
+                maxLines = 1,
+                text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
+                fontFamily = FontFamily.Monospace,
             )
         }
-
-        Text(
-            maxLines = 1,
-            text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
-            fontFamily = FontFamily.Monospace,
-        )
-    } }
+    }
 }
 
 @Composable
@@ -181,21 +185,23 @@ fun ChecklistItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.Checklist,
 ) {
-    ListItem(modifier = modifier) { Row {
-        Text(
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            text = viewModel.name,
-        )
+    ListItem(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                text = viewModel.name,
+            )
 
-        val (icon, description) = if (viewModel.isCompleted) {
-            Res.drawable.check_circle to Res.string.daily_checklist_complete
-        } else {
-            Res.drawable.pending to Res.string.daily_checklist_pending
+            val (icon, description) = if (viewModel.isCompleted) {
+                Res.drawable.check_circle to Res.string.daily_checklist_complete
+            } else {
+                Res.drawable.pending to Res.string.daily_checklist_pending
+            }
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = stringResource(description),
+            )
         }
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = stringResource(description),
-        )
-    } }
+    }
 }

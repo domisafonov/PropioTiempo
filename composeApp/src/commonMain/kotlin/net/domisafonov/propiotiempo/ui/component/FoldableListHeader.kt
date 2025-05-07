@@ -16,6 +16,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ fun FoldableListHeader(
                         .union(WindowInsets(4.dp, 0.dp, 4.dp, 0.dp)),
                 )
                 .padding(PaddingValues(4.dp, 12.dp, 0.dp, 12.dp)),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier
