@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.mvikotlin.logging) // TODO: make optional
             implementation(libs.kotlinx.datetime)
             implementation(libs.essenty.lifecycle.coroutines)
+            implementation(libs.multiplatform.settings.noarg)
         }
     }
 }

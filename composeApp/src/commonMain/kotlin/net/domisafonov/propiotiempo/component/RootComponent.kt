@@ -8,12 +8,11 @@ import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
-import com.arkivanov.decompose.router.stack.navigate
-import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.ReportRepositoryImpl
@@ -22,6 +21,7 @@ import net.domisafonov.propiotiempo.data.db.Daily_checklist_checks
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
+import net.domisafonov.propiotiempo.data.makeSettingsRepositoryImpl
 
 interface RootComponent : ComponentContext {
     val screenStack: Value<ChildStack<*, Child>>
@@ -65,12 +65,16 @@ class RootComponentImpl(
     private val reportRepositoryProvider = lazy {
         ReportRepositoryImpl(database = database)
     }
+    private val settingsRepositoryProvider = lazy {
+        makeSettingsRepositoryImpl(coroutineScope(Dispatchers.Main.immediate))
+    }
 
     private val activitiesComponent = { componentContext: ComponentContext ->
         makeActivitiesComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             activityRepositoryProvider = activityRepositoryProvider,
+            settingsRepositoryProvider = settingsRepositoryProvider,
         )
     }
     private val schemaComponent = { componentContext: ComponentContext ->

@@ -11,6 +11,7 @@ import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
 import net.domisafonov.propiotiempo.data.ActivityRepository
+import net.domisafonov.propiotiempo.data.SettingsRepository
 
 interface ActivitiesStore : Store<Intent, State, Label> {
 
@@ -64,6 +65,7 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
     activityRepository: ActivityRepository,
+    settingsRepository: SettingsRepository,
 ): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
     name = ActivitiesStore::class.simpleName,
     initialState = stateKeeper
@@ -71,7 +73,13 @@ fun StoreFactory.makeActivitiesStore(
             key = State::class.simpleName!!,
             strategy = State.serializer(),
         )
-        ?: ActivitiesStore.INITIAL_STATE,
+        ?: ActivitiesStore.INITIAL_STATE.let { initial ->
+            val settings = settingsRepository.settings.value
+            initial.copy(
+                isDailyChecklistViewActive = settings.isActivityTabDailyChecklistsSectionOpen,
+                isTimedActivitiesViewActive = settings.isActivityTabTimedActivitiesSectionOpen,
+            )
+        },
     bootstrapper = coroutineBootstrapper {
         dispatch(Action.SubToActivities)
     },
@@ -93,17 +101,27 @@ fun StoreFactory.makeActivitiesStore(
         }
 
         onIntent<Intent.ToggleDailyChecklists> {
+            val new = !state().isDailyChecklistViewActive
+            settingsRepository.updateSetting(
+                property = SettingsRepository.PtSettings::isActivityTabDailyChecklistsSectionOpen,
+                value = new,
+            )
             dispatch(
                 message = Message.ActivateDailyChecklists(
-                    isActive = !state().isDailyChecklistViewActive,
+                    isActive = new,
                 ),
             )
         }
 
         onIntent<Intent.ToggleTimedActivities> {
+            val new = !state().isTimedActivitiesViewActive
+            settingsRepository.updateSetting(
+                property = SettingsRepository.PtSettings::isActivityTabTimedActivitiesSectionOpen,
+                value = new,
+            )
             dispatch(
                 message = Message.ActivateTimedActivities(
-                    isActive = !state().isTimedActivitiesViewActive,
+                    isActive = new,
                 ),
             )
         }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.ActivityRepository
+import net.domisafonov.propiotiempo.data.SettingsRepository
 import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 
@@ -31,16 +32,19 @@ fun makeActivitiesComponent(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
     activityRepositoryProvider: Lazy<ActivityRepository>,
+    settingsRepositoryProvider: Lazy<SettingsRepository>,
 ): ActivitiesComponent = ActivitiesComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
     activityRepositoryProvider = activityRepositoryProvider,
+    settingsRepositoryProvider = settingsRepositoryProvider,
 )
 
 private class ActivitiesComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
     private val activityRepositoryProvider: Lazy<ActivityRepository>,
+    private val settingsRepositoryProvider: Lazy<SettingsRepository>,
 ) : ActivitiesComponent, ComponentContext by componentContext {
 
     private val scope = coroutineScope(Dispatchers.Main.immediate + SupervisorJob())
@@ -49,6 +53,7 @@ private class ActivitiesComponentImpl(
         storeFactory.makeActivitiesStore(
             stateKeeper = stateKeeper,
             activityRepository = activityRepositoryProvider.value,
+            settingsRepository = settingsRepositoryProvider.value,
         )
     }
 
