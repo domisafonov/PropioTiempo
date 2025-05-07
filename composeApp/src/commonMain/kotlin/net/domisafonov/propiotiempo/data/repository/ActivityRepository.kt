@@ -2,15 +2,13 @@ package net.domisafonov.propiotiempo.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.serialization.Serializable
+import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
-import net.domisafonov.propiotiempo.data.getDayStart
-import net.domisafonov.propiotiempo.data.resetPeriodically
+import net.domisafonov.propiotiempo.data.model.ChecklistSummary
+import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
 
 interface ActivityRepository {
 
@@ -19,73 +17,67 @@ interface ActivityRepository {
      *
      * Each entry sums up an enabled checklist without historical data.
      */
-    fun observeTodaysChecklistSummary(): Flow<List<ChecklistSummary>>
-
-    @Serializable
-    data class ChecklistSummary(
-        val id: Long,
-        val name: String,
-        val isCompleted: Boolean,
-    )
+    fun observeTodaysChecklistSummary(
+        dayStart: Instant,
+    ): Flow<List<ChecklistSummary>>
 
     /**
      * Observe summary of time activities, sorted by name
      *
      * Each entry sums up an enabled time activity without historical data.
      */
-    fun observeTodaysTimeActivitySummary(): Flow<List<TimeActivitySummary>>
+    fun observeTodaysTimeActivitySummary(
+        dayStart: Instant,
+    ): Flow<List<TimeActivitySummary>>
 
-    @Serializable
-    data class TimeActivitySummary(
-        val id: Long,
-        val name: String,
-        val todaysSeconds: Long,
-        val isActive: Boolean,
-    )
-
-    suspend fun toggleTimedActivity(id: Long)
+    suspend fun toggleTimedActivity(id: Long, now: Instant)
 }
 
-// TODO: extract time handling
 class ActivityRepositoryImpl(
     database: DatabaseSource,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : ActivityRepository {
 
     private val dbQueries = database.dbQueries
 
-    override fun observeTodaysChecklistSummary(): Flow<List<ActivityRepository.ChecklistSummary>> =
-        resetPeriodically {
-            dbQueries
-                .get_daily_checklist_summary(
-                    day_start = getDayStart(),
-                ) { id, name, is_completed ->
-                    ActivityRepository.ChecklistSummary(
-                        id = id,
-                        name = name,
-                        isCompleted = is_completed,
-                    )
-                }
-                .asFlow()
-        }.mapToList(Dispatchers.IO)
+    override fun observeTodaysChecklistSummary(
+        dayStart: Instant,
+    ): Flow<List<ChecklistSummary>> =
+        dbQueries
+            .get_daily_checklist_summary(
+                day_start = dayStart,
+            ) { id, name, is_completed ->
+                ChecklistSummary(
+                    id = id,
+                    name = name,
+                    isCompleted = is_completed,
+                )
+            }
+            .asFlow()
+            .mapToList(ioDispatcher)
 
-    override fun observeTodaysTimeActivitySummary(): Flow<List<ActivityRepository.TimeActivitySummary>> =
-        resetPeriodically(doResetMinutely = true) {
-            dbQueries
-                .get_time_activities_summary(
-                    day_start = getDayStart().epochSeconds,
-                ) { id, name, sum, is_active ->
-                    ActivityRepository.TimeActivitySummary(
-                        id = id,
-                        name = name,
-                        todaysSeconds = sum.toLong(),
-                        isActive = is_active,
-                    )
-                }
-                .asFlow()
-        }.mapToList(Dispatchers.IO)
+    override fun observeTodaysTimeActivitySummary(
+        dayStart: Instant,
+    ): Flow<List<TimeActivitySummary>> =
+        dbQueries
+            .get_time_activities_summary(
+                day_start = dayStart.epochSeconds,
+            ) { id, name, sum, is_active ->
+                TimeActivitySummary(
+                    id = id,
+                    name = name,
+                    todaysSeconds = sum.toLong(),
+                    isActive = is_active,
+                )
+            }
+            .asFlow()
+            .mapToList(ioDispatcher)
 
     // TODO: error handling
-    override suspend fun toggleTimedActivity(id: Long) = withContext(Dispatchers.IO) {
+    override suspend fun toggleTimedActivity(
+        id: Long,
+        now: Instant,
+    ) = withContext(ioDispatcher) {
         dbQueries.transactionWithResult {
             val startTime = dbQueries
                 .get_active_time_activity_interval(activity_id = id)
@@ -93,13 +85,13 @@ class ActivityRepositoryImpl(
             if (startTime == null) {
                 dbQueries.insert_time_activity_interval(
                     activity_id = id,
-                    start_time = Clock.System.now(),
+                    start_time = now,
                 )
             } else {
                 dbQueries.end_time_activity_interval(
                     activity_id = id,
                     start_time = startTime,
-                    end_time = Clock.System.now(),
+                    end_time = now,
                 )
             }
         }

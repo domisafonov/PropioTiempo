@@ -13,6 +13,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
@@ -57,7 +58,7 @@ class RootComponentImpl(
         )
     }
     private val activityRepositoryProvider = lazy {
-        ActivityRepositoryImpl(database = database)
+        ActivityRepositoryImpl(database = database, ioDispatcher = Dispatchers.IO)
     }
     private val schemaRepositoryProvider = lazy {
         SchemaRepositoryImpl(database = database)

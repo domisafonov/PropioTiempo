@@ -7,13 +7,17 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.PtSettings
+import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
-import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.usecase.GetSettingsUc
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysChecklistSummaryUc
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimeActivitySummaryUc
 import net.domisafonov.propiotiempo.data.usecase.SetSettingUc
+import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUc
 
 interface ActivitiesStore : Store<Intent, State, Label> {
 
@@ -26,8 +30,8 @@ interface ActivitiesStore : Store<Intent, State, Label> {
 
     @Serializable
     data class State(
-        val dailyChecklists: List<ActivityRepository.ChecklistSummary>,
-        val timedActivities: List<ActivityRepository.TimeActivitySummary>,
+        val dailyChecklists: List<ChecklistSummary>,
+        val timedActivities: List<TimeActivitySummary>,
         val isDailyChecklistViewActive: Boolean, // TODO: persist
         val isTimedActivitiesViewActive: Boolean, // TODO: persist
     )
@@ -52,11 +56,11 @@ private sealed interface Message {
     ) : Message
 
     data class ChecklistsUpdate(
-        val dailyChecklists: List<ActivityRepository.ChecklistSummary>,
+        val dailyChecklists: List<ChecklistSummary>,
     ) : Message
 
     data class TimedActivitiesUpdate(
-        val timedActivities: List<ActivityRepository.TimeActivitySummary>,
+        val timedActivities: List<TimeActivitySummary>,
     ) : Message
 
     data class ActivateDailyChecklists(val isActive: Boolean) : Message
@@ -72,7 +76,9 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
-    activityRepository: ActivityRepository,
+    observeTodaysChecklistSummaryUc: ObserveTodaysChecklistSummaryUc,
+    observeTodaysTimeActivitySummaryUc: ObserveTodaysTimeActivitySummaryUc,
+    toggleTimedActivityUc: ToggleTimedActivityUc,
     getSettingsUc: GetSettingsUc,
     setSettingsUc: SetSettingUc,
 ): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
@@ -103,13 +109,13 @@ fun StoreFactory.makeActivitiesStore(
 
         onAction<Action.SubToActivities> {
             launch {
-                activityRepository.observeTodaysChecklistSummary()
+                observeTodaysChecklistSummaryUc.execute()
                     .collect {
                         dispatch(Message.ChecklistsUpdate(dailyChecklists = it))
                     }
             }
             launch {
-                activityRepository.observeTodaysTimeActivitySummary()
+            observeTodaysTimeActivitySummaryUc.execute()
                     .collect {
                         dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
                     }
@@ -148,7 +154,7 @@ fun StoreFactory.makeActivitiesStore(
 
         onIntent<Intent.ClickTimedActivity> {
             launch {
-                activityRepository.toggleTimedActivity(id = it.id)
+                toggleTimedActivityUc.execute(id = it.id)
             }
         }
 

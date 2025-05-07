@@ -16,7 +16,10 @@ import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.usecase.GetSettingsUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysChecklistSummaryUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimeActivitySummaryUcImpl
 import net.domisafonov.propiotiempo.data.usecase.SetSettingUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUcImpl
 import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 
@@ -54,7 +57,15 @@ private class ActivitiesComponentImpl(
     private val store = instanceKeeper.getStore(key = ActivitiesStore::class) {
         storeFactory.makeActivitiesStore(
             stateKeeper = stateKeeper,
-            activityRepository = activityRepositoryProvider.value,
+            observeTodaysChecklistSummaryUc = ObserveTodaysChecklistSummaryUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
+            observeTodaysTimeActivitySummaryUc = ObserveTodaysTimeActivitySummaryUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
+            toggleTimedActivityUc = ToggleTimedActivityUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
             getSettingsUc = GetSettingsUcImpl(
                 settingsRepositoryProvider = settingsRepositoryProvider,
             ),
