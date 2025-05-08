@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -22,6 +24,9 @@ import net.domisafonov.propiotiempo.data.usecase.SetSettingUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUcImpl
 import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
 import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
 
 interface ActivitiesComponent : ComponentContext {
 
@@ -40,6 +45,7 @@ fun makeActivitiesComponent(
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
     ioDispatcher: CoroutineDispatcher,
+    navigateToChecklist: (Long) -> Unit,
 ): ActivitiesComponent = ActivitiesComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
@@ -47,6 +53,7 @@ fun makeActivitiesComponent(
     settingsRepositoryProvider = settingsRepositoryProvider,
     mainDispatcher = mainDispatcher,
     ioDispatcher = ioDispatcher,
+    navigateToChecklist = navigateToChecklist,
 )
 
 private class ActivitiesComponentImpl(
@@ -54,8 +61,9 @@ private class ActivitiesComponentImpl(
     storeFactory: StoreFactory,
     private val activityRepositoryProvider: Lazy<ActivityRepository>,
     private val settingsRepositoryProvider: Lazy<SettingsRepository>,
-    private val mainDispatcher: CoroutineDispatcher,
+    mainDispatcher: CoroutineDispatcher,
     private val ioDispatcher: CoroutineDispatcher,
+    private val navigateToChecklist: (id: Long) -> Unit,
 ) : ActivitiesComponent, ComponentContext by componentContext {
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())
@@ -82,6 +90,16 @@ private class ActivitiesComponentImpl(
         )
     }
 
+    init {
+        scope.launch {
+            store.labels.collect {
+                when (it) {
+                    is Label.NavigateToDailyChecklist -> navigateToChecklist(it.id)
+                }
+            }
+        }
+    }
+
     override val viewModel: StateFlow<ActivitiesViewModel> = store.states
         .map(this::mapToViewModel)
         .stateIn(
@@ -91,7 +109,7 @@ private class ActivitiesComponentImpl(
         )
 
     private fun mapToViewModel(
-        state: ActivitiesStore.State,
+        state: State,
     ): ActivitiesViewModel = ActivitiesViewModel(
         dailyChecklists = state.dailyChecklists.map {
             ActivitiesViewModel.Checklist(
@@ -113,18 +131,18 @@ private class ActivitiesComponentImpl(
     )
 
     override fun onDailyChecklistToggled() {
-        store.accept(ActivitiesStore.Intent.ToggleDailyChecklists)
+        store.accept(Intent.ToggleDailyChecklists)
     }
 
     override fun onTimedActivitiesToggled() {
-        store.accept(ActivitiesStore.Intent.ToggleTimedActivities)
+        store.accept(Intent.ToggleTimedActivities)
     }
 
     override fun onTimedActivityClick(id: Long) {
-        store.accept(ActivitiesStore.Intent.ClickTimedActivity(id = id))
+        store.accept(Intent.ClickTimedActivity(id = id))
     }
 
     override fun onDailyChecklistClick(id: Long) {
-        store.accept(ActivitiesStore.Intent.ClickDailyChecklist(id = id))
+        store.accept(Intent.ClickDailyChecklist(id = id))
     }
 }

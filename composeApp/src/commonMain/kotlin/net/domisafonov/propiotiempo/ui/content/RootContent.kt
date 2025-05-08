@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -55,6 +54,7 @@ fun RootContent(modifier: Modifier = Modifier, rootComponent: RootComponent) {
         Column(modifier = modifier.fillMaxSize()) {
             CurrentScreen(
                 modifier = Modifier.weight(1f)
+                    .fillMaxWidth()
                     .consumeWindowInsets(
                         WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
                     ),
@@ -80,11 +80,11 @@ private fun BottomNav(
         ),
     ) {
         val stack by rootComponent.screenStack.subscribeAsState()
-        val currentConfiguration = stack.active.instance
+        val currentConfigurationTail = stack.items.first().instance
         for (tab in TABS) {
             val label = stringResource(tab.label)
             BottomNavigationItem(
-                selected = tab.isActive(currentConfiguration),
+                selected = tab.isActive(currentConfigurationTail),
                 onClick = { tab.onClick(rootComponent) },
                 icon = { Icon(painter = painterResource(tab.icon), contentDescription = label) },
                 label = { Text(label) },
@@ -99,13 +99,18 @@ private fun CurrentScreen(
     rootComponent: RootComponent,
 ) {
     val stack by rootComponent.screenStack.subscribeAsState()
+    val childModifier = modifier.fillMaxSize()
     when (val component = stack.active.instance) {
         is RootComponent.Child.Activities -> ActivitiesContent(
-            modifier = modifier,
+            modifier = childModifier,
             component = component.component,
         )
         is RootComponent.Child.Schema -> SchemaContent(
-            modifier = modifier,
+            modifier = childModifier,
+            component = component.component,
+        )
+        is RootComponent.Child.DailyChecklist -> DailyChecklistContent(
+            modifier = childModifier,
             component = component.component,
         )
     }

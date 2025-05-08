@@ -104,3 +104,11 @@ fun formatDurationHoursMinutes(seconds: Int): String {
         return stringResource(Res.string.double_digit_hours_minutes, hs, ms)
     }
 }
+
+@Composable
+fun formatInstantHoursMinutes(instant: Instant): String {
+    val time = instant.toLocalDateTime(TimeZone.currentSystemDefault()).time
+    val hs = time.hour.toString().padStart(length = 2, padChar = '0')
+    val ms = time.minute.toString().padStart(length = 2, padChar = '0')
+    return stringResource(Res.string.double_digit_hours_minutes, hs, ms)
+}

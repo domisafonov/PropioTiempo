@@ -6,7 +6,9 @@
   <string name="timed_activities_header">Timed Activities</string>
   <string name="daily_checklists_header">Daily Checklists</string>
   <string name="daily_checklist_complete">Checklist complete</string>
-  <string name="daily_checklist_pending">Checklist pending completion</string>
+  <string name="daily_checklist_item_complete">Item complete</string>
+  <string name="daily_checklist_pending">Checklist completion pending </string>
+  <string name="daily_checklist_item_pending">Item completion pending</string>
   <string name="double_digit_hours_minutes">%1$s:%2$s</string>
   <string name="timed_activity_in_progress">In progress</string>
 </resources>

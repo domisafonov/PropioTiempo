@@ -30,6 +30,7 @@ import net.domisafonov.propiotiempo.component.ActivitiesComponent
 import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.FoldableListHeader
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
+import net.domisafonov.propiotiempo.ui.component.HourMinuteText
 import net.domisafonov.propiotiempo.ui.component.ListItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -171,11 +172,7 @@ fun TimeActivityItem(
                 )
             }
 
-            Text(
-                maxLines = 1,
-                text = formatDurationHoursMinutes(viewModel.todaysSeconds.toInt()),
-                fontFamily = FontFamily.Monospace,
-            )
+            HourMinuteText(seconds = viewModel.todaysSeconds.toInt())
         }
     }
 }
