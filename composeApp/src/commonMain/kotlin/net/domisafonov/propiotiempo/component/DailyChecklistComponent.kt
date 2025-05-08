@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
+import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUcImpl
 import net.domisafonov.propiotiempo.ui.content.DailyChecklistViewModel
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore
+import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.makeDailyChecklistStore
@@ -68,6 +70,9 @@ private class DailyChecklistComponentImpl(
             observeDailyChecklistItemsUc = ObserveDailyChecklistItemsUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
+            checkDailyChecklistItemUc = CheckDailyChecklistItemUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
             dailyChecklistId = dailyChecklistId,
         )
     }
@@ -94,10 +99,10 @@ private class DailyChecklistComponentImpl(
     )
 
     override fun onItemClick(id: Long) {
-        TODO("Not yet implemented")
+        store.accept(Intent.ToggleItem(id = id))
     }
 
     override fun onItemLongClick(id: Long) {
-        TODO("Not yet implemented")
+        store.accept(Intent.EditItem(id = id))
     }
 }

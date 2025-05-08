@@ -8,6 +8,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
+import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUc
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
@@ -18,7 +19,16 @@ import net.domisafonov.propiotiempo.ui.store.DailyChecklistStoreInternal.Message
 
 interface DailyChecklistStore : Store<Intent, State, Label> {
 
-    sealed interface Intent
+    sealed interface Intent {
+
+        data class ToggleItem(
+            val id: Long,
+        ) : Intent
+
+        data class EditItem(
+            val id: Long,
+        ) : Intent
+    }
 
     @Serializable
     data class State(
@@ -59,6 +69,7 @@ fun StoreFactory.makeDailyChecklistStore(
     stateKeeper: StateKeeper?,
     observeDailyChecklistItemsUc: ObserveDailyChecklistItemsUc,
     observeDailyChecklistNameUc: ObserveDailyChecklistNameUc,
+    checkDailyChecklistItemUc: CheckDailyChecklistItemUc,
     dailyChecklistId: Long,
 ): DailyChecklistStore = object : DailyChecklistStore, Store<Intent, State, Label> by create(
     name = DailyChecklistStore::class.qualifiedName,
@@ -85,6 +96,18 @@ fun StoreFactory.makeDailyChecklistStore(
                     .collect { dispatch(Message.ItemsUpdate(items = it)) }
             }
         }
+        onIntent<Intent.ToggleItem> { intent ->
+            val item = state().items.find { it.id == intent.id }
+                ?: return@onIntent // TODO: logging
+            if (item.checkedTime == null) {
+                launch {
+                    checkDailyChecklistItemUc.execute(dailyChecklistItemId = intent.id)
+                }
+            } else {
+                TODO()
+            }
+        }
+        onIntent<Intent.EditItem> { TODO() }
     },
     reducer = { message: Message -> when (message) {
         is Message.NameUpdate -> copy(name = message.name)

@@ -43,6 +43,11 @@ interface ActivityRepository {
         dailyChecklistId: Long,
         dayStart: Instant,
     ): Flow<List<DailyChecklistItem>>
+
+    suspend fun insertDailyChecklistCheck(
+        dailyChecklistItemId: Long,
+        time: Instant,
+    )
 }
 
 class ActivityRepositoryImpl(
@@ -132,4 +137,14 @@ class ActivityRepositoryImpl(
             }
             .asFlow()
             .mapToList(ioDispatcher)
+
+    override suspend fun insertDailyChecklistCheck(
+        dailyChecklistItemId: Long,
+        time: Instant,
+    ) = withContext(ioDispatcher) {
+        dbQueries.insert_daily_checklist_check(
+            daily_checklist_item_id = dailyChecklistItemId,
+            time = time,
+        )
+    }
 }
