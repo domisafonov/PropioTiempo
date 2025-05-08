@@ -18,6 +18,8 @@ import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysChecklistSummaryUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimeActivitySummaryUc
 import net.domisafonov.propiotiempo.data.usecase.SetSettingUc
 import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUc
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStoreInternal.Action
+import net.domisafonov.propiotiempo.ui.store.ActivitiesStoreInternal.Message
 
 interface ActivitiesStore : Store<Intent, State, Label> {
 
@@ -43,28 +45,31 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     companion object
 }
 
-private sealed interface Action {
-    data object ReadSettings : Action
-    data object SubToActivities : Action
-}
+private object ActivitiesStoreInternal {
 
-private sealed interface Message {
+    sealed interface Action {
+        data object ReadSettings : Action
+        data object SubToActivities : Action
+    }
 
-    data class SetSettings(
-        val isDailyChecklistViewActive: Boolean,
-        val isTimedActivitiesViewActive: Boolean,
-    ) : Message
+    sealed interface Message {
 
-    data class ChecklistsUpdate(
-        val dailyChecklists: List<ChecklistSummary>,
-    ) : Message
+        data class SetSettings(
+            val isDailyChecklistViewActive: Boolean,
+            val isTimedActivitiesViewActive: Boolean,
+        ) : Message
 
-    data class TimedActivitiesUpdate(
-        val timedActivities: List<TimeActivitySummary>,
-    ) : Message
+        data class ChecklistsUpdate(
+            val dailyChecklists: List<ChecklistSummary>,
+        ) : Message
 
-    data class ActivateDailyChecklists(val isActive: Boolean) : Message
-    data class ActivateTimedActivities(val isActive: Boolean) : Message
+        data class TimedActivitiesUpdate(
+            val timedActivities: List<TimeActivitySummary>,
+        ) : Message
+
+        data class ActivateDailyChecklists(val isActive: Boolean) : Message
+        data class ActivateTimedActivities(val isActive: Boolean) : Message
+    }
 }
 
 val ActivitiesStore.Companion.INITIAL_STATE get() = State(
@@ -82,10 +87,10 @@ fun StoreFactory.makeActivitiesStore(
     getSettingsUc: GetSettingsUc,
     setSettingsUc: SetSettingUc,
 ): ActivitiesStore = object : ActivitiesStore, Store<Intent, State, Label> by create(
-    name = ActivitiesStore::class.simpleName,
+    name = ActivitiesStore::class.qualifiedName,
     initialState = stateKeeper
         ?.consume(
-            key = State::class.simpleName!!,
+            key = State::class.qualifiedName!!,
             strategy = State.serializer(),
         )
         ?: ActivitiesStore.INITIAL_STATE,
@@ -174,7 +179,7 @@ fun StoreFactory.makeActivitiesStore(
     } },
 ) {}.also { store ->
     stateKeeper?.register(
-        key = State::class.simpleName!!,
+        key = State::class.qualifiedName!!,
         strategy = State.serializer(),
     ) { ActivitiesStore.INITIAL_STATE }
 }

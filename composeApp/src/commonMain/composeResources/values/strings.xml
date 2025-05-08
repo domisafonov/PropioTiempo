@@ -11,4 +11,5 @@
   <string name="daily_checklist_item_pending">Item completion pending</string>
   <string name="double_digit_hours_minutes">%1$s:%2$s</string>
   <string name="timed_activity_in_progress">In progress</string>
+  <string name="daily_checklist_item_ordinal">Item #%1$d</string>
 </resources>

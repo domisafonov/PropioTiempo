@@ -2,6 +2,7 @@ package net.domisafonov.propiotiempo.component
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
+import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
@@ -12,6 +13,8 @@ import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.ui.content.DailyChecklistViewModel
+import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore
+import net.domisafonov.propiotiempo.ui.store.makeDailyChecklistStore
 import kotlin.time.Duration.Companion.hours
 
 interface DailyChecklistComponent : ComponentContext {
@@ -48,13 +51,18 @@ private class DailyChecklistComponentImpl(
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())
 
-//    private val store =
+    private val store = instanceKeeper.getStore(key = DailyChecklistStore::class) {
+        storeFactory.makeDailyChecklistStore(
+            stateKeeper = stateKeeper,
+
+        )
+    }
 
     private val viewModelTmp = MutableStateFlow(DailyChecklistViewModel(
         name = "checklist",
         items = listOf(
             DailyChecklistViewModel.Item(id = 1, name = "first", checkedTime = Clock.System.now().minus(5.hours)),
-            DailyChecklistViewModel.Item(id = 2, name = "second", checkedTime = Clock.System.now().minus(3.hours)),
+            DailyChecklistViewModel.Item(id = 2, name = null, checkedTime = Clock.System.now().minus(3.hours)),
             DailyChecklistViewModel.Item(id = 3, name = "third", checkedTime = null),
         ),
     ))

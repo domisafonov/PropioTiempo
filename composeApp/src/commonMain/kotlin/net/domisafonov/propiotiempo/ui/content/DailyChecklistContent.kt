@@ -36,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.check_circle
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_complete
+import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_pending
 import propiotiempo.composeapp.generated.resources.pending
 
@@ -45,7 +46,7 @@ data class DailyChecklistViewModel(
 ) {
     data class Item(
         val id: Long,
-        val name: String,
+        val name: String?,
         val checkedTime: Instant?,
     )
 }
@@ -81,11 +82,12 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
             fontSize = 24.sp,
         )
 
-        for (item in viewModel.items) {
+        viewModel.items.forEachIndexed { i, item ->
             DailyChecklistItem(
                 modifier = Modifier
                     .clickable { TODO() },
                 viewModel = item,
+                listIndex = i,
             )
             HorizontalDivider()
         }
@@ -96,12 +98,14 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
 private fun DailyChecklistItem(
     modifier: Modifier = Modifier,
     viewModel: DailyChecklistViewModel.Item,
+    listIndex: Int,
 ) {
     ListItem(modifier = modifier) {
         Row {
-            Text(
+            DailyChecklistItemName(
                 modifier = Modifier.weight(1f),
-                text = viewModel.name,
+                viewModel = viewModel,
+                listIndex = listIndex,
             )
             if (viewModel.checkedTime == null) {
                 Icon(
@@ -125,5 +129,25 @@ private fun DailyChecklistItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DailyChecklistItemName(
+    modifier: Modifier = Modifier,
+    viewModel: DailyChecklistViewModel.Item,
+    listIndex: Int,
+) {
+    if (viewModel.name == null) {
+        Text(
+            modifier = modifier,
+            text = stringResource(Res.string.daily_checklist_item_ordinal, listIndex + 1),
+            fontWeight = FontWeight.Light,
+        )
+    } else {
+        Text(
+            modifier = modifier,
+            text = viewModel.name,
+        )
     }
 }

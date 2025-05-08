@@ -174,3 +174,20 @@ end_time_activity_interval:
 UPDATE time_activity_intervals
   SET end_time = :end_time
   WHERE activity_id = :activity_id AND start_time = :start_time;
+
+get_activity_name:
+SELECT name FROM activities WHERE id = :id;
+
+get_daily_checklist_items:
+SELECT
+  i.id AS item_id,
+  i.name AS name,
+  cc.time AS checked_time
+  FROM daily_checklist AS c
+  INNER JOIN daily_checklist_item_map AS m ON c.id = m.daily_checklist_id
+  INNER JOIN daily_checklist_items AS i ON m.daily_checklist_item_id = i.id
+  LEFT JOIN daily_checklist_checks AS cc
+    ON m.daily_checklist_item_id = cc.daily_checklist_item_id
+    AND cc.time > :day_start
+  WHERE c.id = :daily_checklist_id
+  ORDER BY m.ordinal;
