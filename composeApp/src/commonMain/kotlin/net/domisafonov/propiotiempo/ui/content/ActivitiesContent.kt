@@ -37,7 +37,10 @@ import propiotiempo.composeapp.generated.resources.check_circle
 import propiotiempo.composeapp.generated.resources.daily_checklist_complete
 import propiotiempo.composeapp.generated.resources.daily_checklist_pending
 import propiotiempo.composeapp.generated.resources.daily_checklists_header
+import propiotiempo.composeapp.generated.resources.open_daily_checklist
 import propiotiempo.composeapp.generated.resources.pending
+import propiotiempo.composeapp.generated.resources.start_timed_activity
+import propiotiempo.composeapp.generated.resources.stop_timed_activity
 import propiotiempo.composeapp.generated.resources.timed_activities_header
 import propiotiempo.composeapp.generated.resources.timed_activity_in_progress
 
@@ -88,9 +91,8 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 key = ActivitiesViewModel.TimeActivity::id,
             ) { item -> Column(modifier = Modifier.animateItem()) {
                 TimeActivityItem(
-                    modifier = Modifier
-                        .clickable { component.onTimedActivityClick(id = item.id) },
                     viewModel = item,
+                    onClick = { component.onTimedActivityClick(id = item.id) },
                 )
                 HorizontalDivider()
             } }
@@ -107,9 +109,8 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 key = ActivitiesViewModel.Checklist::id,
             ) { item -> Column(modifier = Modifier.animateItem()) {
                 ChecklistItem(
-                    modifier = Modifier
-                        .clickable { component.onDailyChecklistClick(id = item.id) },
                     viewModel = item,
+                    onClick = { component.onDailyChecklistClick(id = item.id) },
                 )
                 HorizontalDivider()
             } }
@@ -149,8 +150,22 @@ fun ChecklistsHeader(
 fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
+    onClick: () -> Unit,
 ) {
-    ListItem(modifier = modifier, minSurfaceContentsSize = 24.dp) {
+    ListItem(
+        modifier = modifier
+            .clickable(
+                onClickLabel = stringResource(
+                    if (viewModel.isActive) {
+                        Res.string.start_timed_activity
+                    } else {
+                        Res.string.stop_timed_activity
+                    }
+                ),
+                onClick = onClick,
+            ),
+        minSurfaceContentsSize = 24.dp
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 modifier = Modifier
@@ -179,8 +194,15 @@ fun TimeActivityItem(
 fun ChecklistItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.Checklist,
+    onClick: () -> Unit,
 ) {
-    ListItem(modifier = modifier) {
+    ListItem(
+        modifier = modifier
+            .clickable(
+                onClickLabel = stringResource(Res.string.open_daily_checklist),
+                onClick = onClick,
+            )
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 modifier = Modifier.weight(1f),

@@ -1,7 +1,7 @@
 package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -85,7 +85,12 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
         viewModel.items.forEachIndexed { i, item ->
             DailyChecklistItem(
                 modifier = Modifier
-                    .clickable { TODO() },
+                    .combinedClickable(
+                        onClickLabel = "TODO",
+                        onLongClickLabel = "TODO",
+                        onClick = { component.onItemClick(item.id) },
+                        onLongClick = { component.onItemLongClick(item.id) }
+                    ),
                 viewModel = item,
                 listIndex = i,
             )

@@ -27,6 +27,8 @@ import propiotiempo.composeapp.generated.resources.foldable_fold
 import propiotiempo.composeapp.generated.resources.foldable_unfold
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_down
 import propiotiempo.composeapp.generated.resources.keyboard_arrow_up
+import propiotiempo.composeapp.generated.resources.list_header_collapse
+import propiotiempo.composeapp.generated.resources.list_header_expand
 
 @Composable
 fun FoldableListHeader(
@@ -38,7 +40,16 @@ fun FoldableListHeader(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(
+                onClickLabel = stringResource(
+                    if (isOpen) {
+                        Res.string.list_header_collapse
+                    } else {
+                        Res.string.list_header_expand
+                    }
+                ),
+                onClick = onClick,
+            ),
         elevation = 2.dp,
     ) {
         Row(

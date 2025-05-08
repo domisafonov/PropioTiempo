@@ -21,7 +21,8 @@ interface DailyChecklistComponent : ComponentContext {
 
     val viewModel: StateFlow<DailyChecklistViewModel>
 
-    //
+    fun onItemClick(id: Long)
+    fun onItemLongClick(id: Long)
 }
 
 fun makeDailyChecklistComponent(
@@ -68,4 +69,12 @@ private class DailyChecklistComponentImpl(
     ))
     override val viewModel: StateFlow<DailyChecklistViewModel>
         get() = viewModelTmp.asStateFlow()
+
+    override fun onItemClick(id: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onItemLongClick(id: Long) {
+        TODO("Not yet implemented")
+    }
 }

@@ -12,4 +12,9 @@
   <string name="double_digit_hours_minutes">%1$s:%2$s</string>
   <string name="timed_activity_in_progress">In progress</string>
   <string name="daily_checklist_item_ordinal">Item #%1$d</string>
+  <string name="start_timed_activity">Start</string>
+  <string name="stop_timed_activity">Stop</string>
+  <string name="open_daily_checklist">Open</string>
+  <string name="list_header_expand">Expand</string>
+  <string name="list_header_collapse">Collapse</string>
 </resources>
