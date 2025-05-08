@@ -141,12 +141,14 @@ private fun DailyChecklistItemName(
     if (viewModel.name == null) {
         Text(
             modifier = modifier,
+            maxLines = 1,
             text = stringResource(Res.string.daily_checklist_item_ordinal, listIndex + 1),
             fontWeight = FontWeight.Light,
         )
     } else {
         Text(
             modifier = modifier,
+            maxLines = 1,
             text = viewModel.name,
         )
     }

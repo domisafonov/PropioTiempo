@@ -24,10 +24,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import net.domisafonov.propiotiempo.component.ActivitiesComponent
-import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.FoldableListHeader
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.HourMinuteText
