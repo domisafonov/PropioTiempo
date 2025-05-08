@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -56,45 +57,47 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
 
     val viewModel by component.viewModel.collectAsState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.surface)
-            .verticalScroll(
-                state = rememberScrollState(),
-            ),
-    ) {
-        Spacer(
-            modifier = Modifier
-                .windowInsetsTopHeight(WindowInsets.safeDrawing)
-        )
-
-        Text(
-            modifier = Modifier
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing
-                        .only(WindowInsetsSides.Horizontal)
-                        .union(WindowInsets(8.dp, 0.dp, 4.dp, 0.dp))
-                )
-                .padding(vertical = 12.dp),
-            text = viewModel.name,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-        )
-
-        viewModel.items.forEachIndexed { i, item ->
-            DailyChecklistItem(
+    Surface {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.surface)
+                .verticalScroll(
+                    state = rememberScrollState(),
+                ),
+        ) {
+            Spacer(
                 modifier = Modifier
-                    .combinedClickable(
-                        onClickLabel = "TODO",
-                        onLongClickLabel = "TODO",
-                        onClick = { component.onItemClick(item.id) },
-                        onLongClick = { component.onItemLongClick(item.id) }
-                    ),
-                viewModel = item,
-                listIndex = i,
+                    .windowInsetsTopHeight(WindowInsets.safeDrawing)
             )
-            HorizontalDivider()
+
+            Text(
+                modifier = Modifier
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing
+                            .only(WindowInsetsSides.Horizontal)
+                            .union(WindowInsets(8.dp, 0.dp, 4.dp, 0.dp))
+                    )
+                    .padding(vertical = 12.dp),
+                text = viewModel.name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+            )
+
+            viewModel.items.forEachIndexed { i, item ->
+                DailyChecklistItem(
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClickLabel = "TODO",
+                            onLongClickLabel = "TODO",
+                            onClick = { component.onItemClick(item.id) },
+                            onLongClick = { component.onItemLongClick(item.id) }
+                        ),
+                    viewModel = item,
+                    listIndex = i,
+                )
+                HorizontalDivider()
+            }
         }
     }
 }

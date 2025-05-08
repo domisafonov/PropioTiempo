@@ -105,6 +105,7 @@ class RootComponentImpl(
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
             ioDispatcher = Dispatchers.IO,
+            dailyChecklistId = dailyChecklistId,
         )
     }
 
@@ -124,7 +125,7 @@ class RootComponentImpl(
             is ScreenConfig.Schema -> RootComponent.Child.Schema(schemaComponent(ctx))
 
             is ScreenConfig.DailyChecklist -> RootComponent.Child.DailyChecklist(
-                dailyChecklistComponent(componentContext, config.id)
+                dailyChecklistComponent(ctx, config.id)
             )
         }
     }

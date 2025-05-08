@@ -5,11 +5,15 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.serializer
+import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
+import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
+import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUc
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Label
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
+import net.domisafonov.propiotiempo.ui.store.DailyChecklistStoreInternal.Action
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStoreInternal.Message
 
 interface DailyChecklistStore : Store<Intent, State, Label> {
@@ -18,7 +22,8 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
 
     @Serializable
     data class State(
-        val x: Int,
+        val name: String,
+        val items: List<DailyChecklistItem>,
     )
 
     sealed interface Label
@@ -28,18 +33,33 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
 
 private object DailyChecklistStoreInternal {
 
-    sealed interface Action
+    sealed interface Action {
+        data object SubToName : Action
+        data object SubToItems : Action
+    }
 
-    sealed interface Message
+    sealed interface Message {
+
+        data class NameUpdate(
+            val name: String,
+        ) : Message
+
+        data class ItemsUpdate(
+            val items: List<DailyChecklistItem>,
+        ) : Message
+    }
 }
 
 val DailyChecklistStore.Companion.INITIAL_STATE get() = State(
-    x = 1,
+    name = "",
+    items = emptyList(),
 )
 
 fun StoreFactory.makeDailyChecklistStore(
     stateKeeper: StateKeeper?,
-
+    observeDailyChecklistItemsUc: ObserveDailyChecklistItemsUc,
+    observeDailyChecklistNameUc: ObserveDailyChecklistNameUc,
+    dailyChecklistId: Long,
 ): DailyChecklistStore = object : DailyChecklistStore, Store<Intent, State, Label> by create(
     name = DailyChecklistStore::class.qualifiedName,
     initialState = stateKeeper
@@ -49,13 +69,26 @@ fun StoreFactory.makeDailyChecklistStore(
         )
         ?: DailyChecklistStore.INITIAL_STATE,
     bootstrapper = coroutineBootstrapper {
-
+        dispatch(Action.SubToName)
+        dispatch(Action.SubToItems)
     },
     executorFactory = coroutineExecutorFactory {
-
+        onAction<Action.SubToName> {
+            launch {
+                observeDailyChecklistNameUc.execute(id = dailyChecklistId)
+                    .collect { dispatch(Message.NameUpdate(name = it)) }
+            }
+        }
+        onAction<Action.SubToItems> {
+            launch {
+                observeDailyChecklistItemsUc.execute(dailyChecklistId = dailyChecklistId)
+                    .collect { dispatch(Message.ItemsUpdate(items = it)) }
+            }
+        }
     },
     reducer = { message: Message -> when (message) {
-        else -> TODO()
+        is Message.NameUpdate -> copy(name = message.name)
+        is Message.ItemsUpdate -> copy(items = message.items)
     } },
 ) {}.also { store ->
     stateKeeper?.register(

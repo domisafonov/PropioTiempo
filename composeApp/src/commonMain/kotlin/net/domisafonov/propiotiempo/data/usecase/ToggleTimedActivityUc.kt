@@ -14,6 +14,6 @@ class ToggleTimedActivityUcImpl(
     private val activityRepository by activityRepositoryProvider
 
     override suspend fun execute(id: Long) {
-        activityRepository.toggleTimedActivity(id = id, now = Clock.System.now())
+        activityRepository.toggleTimedActivity(timedActivityId = id, now = Clock.System.now())
     }
 }

@@ -2,12 +2,14 @@ package net.domisafonov.propiotiempo.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
+import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
 
 interface ActivityRepository {
@@ -30,7 +32,17 @@ interface ActivityRepository {
         dayStart: Instant,
     ): Flow<List<TimeActivitySummary>>
 
-    suspend fun toggleTimedActivity(id: Long, now: Instant)
+    suspend fun toggleTimedActivity(timedActivityId: Long, now: Instant)
+
+    fun observeDailyChecklistName(id: Long): Flow<String>
+
+    /**
+     * Observe items of a daily checklist for the day starting at [dayStart]
+     */
+    fun observeDailyChecklistItems(
+        dailyChecklistId: Long,
+        dayStart: Instant,
+    ): Flow<List<DailyChecklistItem>>
 }
 
 class ActivityRepositoryImpl(
@@ -75,25 +87,49 @@ class ActivityRepositoryImpl(
 
     // TODO: error handling
     override suspend fun toggleTimedActivity(
-        id: Long,
+        timedActivityId: Long,
         now: Instant,
     ) = withContext(ioDispatcher) {
         dbQueries.transactionWithResult {
             val startTime = dbQueries
-                .get_active_time_activity_interval(activity_id = id)
+                .get_active_time_activity_interval(activity_id = timedActivityId)
                 .executeAsOneOrNull()
             if (startTime == null) {
                 dbQueries.insert_time_activity_interval(
-                    activity_id = id,
+                    activity_id = timedActivityId,
                     start_time = now,
                 )
             } else {
                 dbQueries.end_time_activity_interval(
-                    activity_id = id,
+                    activity_id = timedActivityId,
                     start_time = startTime,
                     end_time = now,
                 )
             }
         }
     }
+
+    override fun observeDailyChecklistName(id: Long): Flow<String> =
+        dbQueries
+            .get_activity_name(id = id)
+            .asFlow()
+            .mapToOne(ioDispatcher)
+
+    override fun observeDailyChecklistItems(
+        dailyChecklistId: Long,
+        dayStart: Instant,
+    ): Flow<List<DailyChecklistItem>> =
+        dbQueries
+            .get_daily_checklist_items(
+                day_start = dayStart,
+                daily_checklist_id = dailyChecklistId,
+            ) { id, name, checked_time ->
+                DailyChecklistItem(
+                    id = id,
+                    name = name,
+                    checkedTime = checked_time,
+                )
+            }
+            .asFlow()
+            .mapToList(ioDispatcher)
 }
