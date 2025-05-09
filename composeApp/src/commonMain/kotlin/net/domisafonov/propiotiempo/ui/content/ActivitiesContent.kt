@@ -50,10 +50,11 @@ data class ActivitiesViewModel(
     val areDailiesShown: Boolean,
     val areTimeActivitiesShown: Boolean,
 ) {
+    // TODO: add n/m label
     data class Checklist(
         val id: Long,
         val name: String,
-        val isCompleted: Boolean // TODO: change to n of m?
+        val isCompleted: Boolean
     )
 
     data class TimeActivity(

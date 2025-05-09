@@ -34,8 +34,8 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     data class State(
         val dailyChecklists: List<ChecklistSummary>,
         val timedActivities: List<TimeActivitySummary>,
-        val isDailyChecklistViewActive: Boolean, // TODO: persist
-        val isTimedActivitiesViewActive: Boolean, // TODO: persist
+        val isDailyChecklistViewActive: Boolean,
+        val isTimedActivitiesViewActive: Boolean,
     )
 
     sealed interface Label {

@@ -124,7 +124,7 @@ class RootComponentImpl(
         )
     }
 
-    // TODO: predictive back for ios?
+    // TODO: predictive back?
     private val screenNavigation = StackNavigation<ScreenConfig>()
     override val screenStack: Value<ChildStack<*, RootComponent.Child>> = childStack(
         source = screenNavigation,
