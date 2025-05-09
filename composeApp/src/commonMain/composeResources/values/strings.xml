@@ -22,4 +22,6 @@
   <string name="default_confirmation_dialog_cancel">Cancel</string>
   <string name="daily_checklist_item_uncheck_confirmation">Cancel item completion?</string>
   <string name="navigate_back">Navigate back</string>
+  <string name="daily_checklist_item_check">Complete</string>
+  <string name="daily_checklist_item_uncheck">Cancel completion</string>
 </resources>

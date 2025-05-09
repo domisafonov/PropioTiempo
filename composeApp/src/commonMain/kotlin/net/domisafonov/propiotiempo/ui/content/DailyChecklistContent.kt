@@ -41,9 +41,11 @@ import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.arrow_back
 import propiotiempo.composeapp.generated.resources.check_circle
+import propiotiempo.composeapp.generated.resources.daily_checklist_item_check
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_complete
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_pending
+import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
 
@@ -109,7 +111,13 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
                 DailyChecklistItem(
                     modifier = Modifier
                         .combinedClickable(
-                            onClickLabel = "TODO",
+                            onClickLabel = stringResource(
+                                if (item.checkedTime == null) {
+                                    Res.string.daily_checklist_item_check
+                                } else {
+                                    Res.string.daily_checklist_item_uncheck
+                                }
+                            ),
                             onLongClickLabel = "TODO",
                             onClick = { component.onItemClick(item.id) },
                             onLongClick = { component.onItemLongClick(item.id) }
