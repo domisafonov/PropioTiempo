@@ -10,19 +10,23 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.tappableElement
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,10 +39,12 @@ import net.domisafonov.propiotiempo.ui.component.ListItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.arrow_back
 import propiotiempo.composeapp.generated.resources.check_circle
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_complete
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_pending
+import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
 
 data class DailyChecklistViewModel(
@@ -68,21 +74,36 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
         ) {
             Spacer(
                 modifier = Modifier
-                    .windowInsetsTopHeight(WindowInsets.safeDrawing)
+                    .windowInsetsTopHeight(WindowInsets.safeContent)
             )
 
-            Text(
-                modifier = Modifier
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing
-                            .only(WindowInsetsSides.Horizontal)
-                            .union(WindowInsets(8.dp, 0.dp, 4.dp, 0.dp))
+            Row(
+                modifier = Modifier.windowInsetsPadding(
+                    WindowInsets.tappableElement.only(WindowInsetsSides.Start)
+                ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = component::onNavigateBack,
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_back),
+                        contentDescription = stringResource(Res.string.navigate_back)
                     )
-                    .padding(vertical = 12.dp),
-                text = viewModel.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-            )
+                }
+                Text(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.safeDrawing
+                                .only(WindowInsetsSides.Horizontal)
+                                .union(WindowInsets(8.dp, 0.dp, 4.dp, 0.dp))
+                        )
+                        .padding(vertical = 12.dp),
+                    text = viewModel.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                )
+            }
 
             viewModel.items.forEachIndexed { i, item ->
                 DailyChecklistItem(

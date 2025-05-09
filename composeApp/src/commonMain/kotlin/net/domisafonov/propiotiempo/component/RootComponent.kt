@@ -10,6 +10,7 @@ import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
@@ -31,6 +32,7 @@ import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
 import net.domisafonov.propiotiempo.data.repository.makeSettingsRepositoryImpl
+import net.domisafonov.propiotiempo.ui.singleUse
 
 interface RootComponent : ComponentContext, DialogContainer {
 
@@ -118,9 +120,11 @@ class RootComponentImpl(
             mainDispatcher = Dispatchers.Main.immediate,
             dailyChecklistId = dailyChecklistId,
             dialogContainer = this,
+            navigateBack = { screenNavigation.pop() }.singleUse,
         )
     }
 
+    // TODO: predictive back for ios?
     private val screenNavigation = StackNavigation<ScreenConfig>()
     override val screenStack: Value<ChildStack<*, RootComponent.Child>> = childStack(
         source = screenNavigation,

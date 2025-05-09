@@ -28,7 +28,6 @@ import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.makeDailyChecklistStore
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck_confirmation
 
@@ -36,6 +35,7 @@ interface DailyChecklistComponent : ComponentContext {
 
     val viewModel: StateFlow<DailyChecklistViewModel>
 
+    fun onNavigateBack()
     fun onItemClick(id: Long)
     fun onItemLongClick(id: Long)
 }
@@ -48,6 +48,7 @@ fun makeDailyChecklistComponent(
     mainDispatcher: CoroutineDispatcher,
     dailyChecklistId: Long,
     dialogContainer: DialogContainer,
+    navigateBack: () -> Unit,
 ): DailyChecklistComponent = DailyChecklistComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
@@ -56,6 +57,7 @@ fun makeDailyChecklistComponent(
     mainDispatcher = mainDispatcher,
     dailyChecklistId = dailyChecklistId,
     dialogContainer = dialogContainer,
+    navigateBack = navigateBack,
 )
 
 private class DailyChecklistComponentImpl(
@@ -66,6 +68,7 @@ private class DailyChecklistComponentImpl(
     mainDispatcher: CoroutineDispatcher,
     dailyChecklistId: Long,
     dialogContainer: DialogContainer,
+    private val navigateBack: () -> Unit,
 ) : DailyChecklistComponent, ComponentContext by componentContext {
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())
@@ -126,6 +129,10 @@ private class DailyChecklistComponentImpl(
             )
         },
     )
+
+    override fun onNavigateBack() {
+        navigateBack()
+    }
 
     override fun onItemClick(id: Long) {
         store.accept(Intent.ToggleItem(id = id))
