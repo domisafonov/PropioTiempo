@@ -157,10 +157,10 @@ class RootComponentImpl(
     private val infoDialogComponent = { componentContext: ComponentContext, config: DialogConfig.InfoDialog ->
         makeInfoDialogComponent(
             componentContext = componentContext,
-            storeFactory = storeFactory,
+            mainDispatcher = Dispatchers.Main.immediate,
+            onResult = { dismissWithResult(it) },
             title = config.title,
             message = config.message,
-            onResult = { dismissWithResult(it) },
         )
     }
     private val confirmationDialogComponent = { componentContext: ComponentContext, config: DialogConfig.ConfirmationDialog  ->

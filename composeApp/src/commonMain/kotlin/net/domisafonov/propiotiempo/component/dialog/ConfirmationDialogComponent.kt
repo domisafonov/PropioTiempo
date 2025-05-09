@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer.ConfirmationResult
 import net.domisafonov.propiotiempo.ui.content.dialog.ConfirmationDialogViewModel
@@ -57,7 +58,7 @@ private class ConfirmationDialogComponentImpl(
                 okText = okText,
                 cancelText = cancelText,
             )
-        )
+        ).asStateFlow()
 
     override fun onConfirm() {
         scope.launch { onResult(ConfirmationResult.Confirmed) }
