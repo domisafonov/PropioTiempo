@@ -48,6 +48,11 @@ interface ActivityRepository {
         dailyChecklistItemId: Long,
         time: Instant,
     )
+
+    suspend fun deleteDailyChecklistCheck(
+        dailyChecklistItemId: Long,
+        time: Instant,
+    )
 }
 
 class ActivityRepositoryImpl(
@@ -94,22 +99,24 @@ class ActivityRepositoryImpl(
     override suspend fun toggleTimedActivity(
         timedActivityId: Long,
         now: Instant,
-    ) = withContext(ioDispatcher) {
-        dbQueries.transactionWithResult {
-            val startTime = dbQueries
-                .get_active_time_activity_interval(activity_id = timedActivityId)
-                .executeAsOneOrNull()
-            if (startTime == null) {
-                dbQueries.insert_time_activity_interval(
-                    activity_id = timedActivityId,
-                    start_time = now,
-                )
-            } else {
-                dbQueries.end_time_activity_interval(
-                    activity_id = timedActivityId,
-                    start_time = startTime,
-                    end_time = now,
-                )
+    ) {
+        withContext(ioDispatcher) {
+            dbQueries.transactionWithResult {
+                val startTime = dbQueries
+                    .get_active_time_activity_interval(activity_id = timedActivityId)
+                    .executeAsOneOrNull()
+                if (startTime == null) {
+                    dbQueries.insert_time_activity_interval(
+                        activity_id = timedActivityId,
+                        start_time = now,
+                    )
+                } else {
+                    dbQueries.end_time_activity_interval(
+                        activity_id = timedActivityId,
+                        start_time = startTime,
+                        end_time = now,
+                    )
+                }
             }
         }
     }
@@ -141,10 +148,24 @@ class ActivityRepositoryImpl(
     override suspend fun insertDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ) = withContext(ioDispatcher) {
-        dbQueries.insert_daily_checklist_check(
-            daily_checklist_item_id = dailyChecklistItemId,
-            time = time,
-        )
+    ) {
+        withContext(ioDispatcher) {
+            dbQueries.insert_daily_checklist_check(
+                daily_checklist_item_id = dailyChecklistItemId,
+                time = time,
+            )
+        }
+    }
+
+    override suspend fun deleteDailyChecklistCheck(
+        dailyChecklistItemId: Long,
+        time: Instant,
+    ) {
+        withContext(ioDispatcher) {
+            dbQueries.delete_daily_checklist_check(
+                daily_checklist_item_id = dailyChecklistItemId,
+                time = time,
+            )
+        }
     }
 }

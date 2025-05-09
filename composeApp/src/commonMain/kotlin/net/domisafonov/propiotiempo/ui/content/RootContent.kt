@@ -16,7 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import net.domisafonov.propiotiempo.component.RootComponent
+import net.domisafonov.propiotiempo.component.dialog.ConfirmationDialogComponent
 import net.domisafonov.propiotiempo.ui.AppTheme
+import net.domisafonov.propiotiempo.ui.content.dialog.ConfirmationDialogContent
+import net.domisafonov.propiotiempo.ui.content.dialog.InfoDialogContent
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -64,6 +67,16 @@ fun RootContent(modifier: Modifier = Modifier, rootComponent: RootComponent) {
                 modifier = Modifier.fillMaxWidth(),
                 rootComponent = rootComponent,
             )
+            rootComponent.dialogSlot.subscribeAsState().value.child?.instance?.let {
+                when (it) {
+                    is RootComponent.Dialog.InfoDialog -> InfoDialogContent(
+                        component = it.component,
+                    )
+                    is RootComponent.Dialog.ConfirmationDialog -> ConfirmationDialogContent(
+                        component = it.component,
+                    )
+                }
+            }
         }
     }
 }

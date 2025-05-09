@@ -17,4 +17,8 @@
   <string name="open_daily_checklist">Open</string>
   <string name="list_header_expand">Expand</string>
   <string name="list_header_collapse">Collapse</string>
+  <string name="default_confirmation_dialog_message">Confirm?</string>
+  <string name="default_confirmation_dialog_confirm">Ok</string>
+  <string name="default_confirmation_dialog_cancel">Cancel</string>
+  <string name="daily_checklist_item_uncheck_confirmation">Cancel item completion?</string>
 </resources>

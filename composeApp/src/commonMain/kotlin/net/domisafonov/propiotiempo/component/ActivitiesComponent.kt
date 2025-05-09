@@ -59,11 +59,11 @@ fun makeActivitiesComponent(
 private class ActivitiesComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
-    private val activityRepositoryProvider: Lazy<ActivityRepository>,
-    private val settingsRepositoryProvider: Lazy<SettingsRepository>,
+    activityRepositoryProvider: Lazy<ActivityRepository>,
+    settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
-    private val ioDispatcher: CoroutineDispatcher,
-    private val navigateToChecklist: (id: Long) -> Unit,
+    ioDispatcher: CoroutineDispatcher,
+    navigateToChecklist: (id: Long) -> Unit,
 ) : ActivitiesComponent, ComponentContext by componentContext {
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())

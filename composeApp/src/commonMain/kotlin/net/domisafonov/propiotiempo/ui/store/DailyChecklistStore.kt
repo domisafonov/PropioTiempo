@@ -11,6 +11,7 @@ import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUc
+import net.domisafonov.propiotiempo.data.usecase.UncheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Label
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
@@ -28,6 +29,10 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
         data class EditItem(
             val id: Long,
         ) : Intent
+
+        data class ItemUncheckConfirmed(
+            val id: Long,
+        ) : Intent
     }
 
     @Serializable
@@ -36,7 +41,9 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
         val items: List<DailyChecklistItem>,
     )
 
-    sealed interface Label
+    sealed interface Label {
+        data class ConfirmUncheckingItem(val id: Long): Label
+    }
 
     companion object
 }
@@ -70,6 +77,7 @@ fun StoreFactory.makeDailyChecklistStore(
     observeDailyChecklistItemsUc: ObserveDailyChecklistItemsUc,
     observeDailyChecklistNameUc: ObserveDailyChecklistNameUc,
     checkDailyChecklistItemUc: CheckDailyChecklistItemUc,
+    uncheckDailyChecklistItemUc: UncheckDailyChecklistItemUc,
     dailyChecklistId: Long,
 ): DailyChecklistStore = object : DailyChecklistStore, Store<Intent, State, Label> by create(
     name = DailyChecklistStore::class.qualifiedName,
@@ -104,10 +112,20 @@ fun StoreFactory.makeDailyChecklistStore(
                     checkDailyChecklistItemUc.execute(dailyChecklistItemId = intent.id)
                 }
             } else {
-                TODO()
+                publish(Label.ConfirmUncheckingItem(id = intent.id))
             }
         }
         onIntent<Intent.EditItem> { TODO() }
+        onIntent<Intent.ItemUncheckConfirmed> { intent ->
+            val checkedTime = state().items.find { it.id == intent.id }?.checkedTime
+                ?: return@onIntent // TODO: logging
+            launch {
+                uncheckDailyChecklistItemUc.execute(
+                    dailyChecklistItemId = intent.id,
+                    time = checkedTime,
+                )
+            }
+        }
     },
     reducer = { message: Message -> when (message) {
         is Message.NameUpdate -> copy(name = message.name)
