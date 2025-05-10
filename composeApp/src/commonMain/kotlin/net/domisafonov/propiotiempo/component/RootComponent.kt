@@ -18,11 +18,14 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.component.dialog.ConfirmationDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
+import net.domisafonov.propiotiempo.component.dialog.EditTimeDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.InfoDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeConfirmationDialogComponent
+import net.domisafonov.propiotiempo.component.dialog.makeEditTimeDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeInfoDialogComponent
 import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
@@ -51,6 +54,7 @@ interface RootComponent : ComponentContext, DialogContainer {
     sealed interface Dialog {
         data class InfoDialog(val component: InfoDialogComponent) : Dialog
         data class ConfirmationDialog(val component: ConfirmationDialogComponent) : Dialog
+        data class EditTimeDialog(val component: EditTimeDialogComponent) : Dialog
     }
 }
 
@@ -163,7 +167,7 @@ class RootComponentImpl(
             message = config.message,
         )
     }
-    private val confirmationDialogComponent = { componentContext: ComponentContext, config: DialogConfig.ConfirmationDialog  ->
+    private val confirmationDialogComponent = { componentContext: ComponentContext, config: DialogConfig.ConfirmationDialog ->
         makeConfirmationDialogComponent(
             componentContext = componentContext,
             mainDispatcher = Dispatchers.Main.immediate,
@@ -172,6 +176,16 @@ class RootComponentImpl(
             message = config.message,
             okText = config.okText,
             cancelText = config.cancelText,
+        )
+    }
+    private val editTimeDialogComponent = { componentContext: ComponentContext, config: DialogConfig.EditTimeDialog ->
+        makeEditTimeDialogComponent(
+            componentContext = componentContext,
+            storeFactory = storeFactory,
+            mainDispatcher = Dispatchers.Main.immediate,
+            onResult = { dismissWithResult(it) },
+            title = config.title,
+            time = config.time,
         )
     }
 
@@ -189,6 +203,9 @@ class RootComponentImpl(
             is DialogConfig.ConfirmationDialog -> RootComponent.Dialog.ConfirmationDialog(
                 confirmationDialogComponent(ctx, config)
             )
+            is DialogConfig.EditTimeDialog -> RootComponent.Dialog.EditTimeDialog(
+                editTimeDialogComponent(ctx, config)
+            )
         }
     }
     private val dismissEvents = Channel<DialogContainer.DialogResult>()
@@ -203,41 +220,46 @@ class RootComponentImpl(
         message: String?,
         okText: String?,
         cancelText: String?,
-    ): DialogContainer.ConfirmationResult? {
-
-        if (dialogSlot.value.child != null) {
-            return null
-        }
-
-        dialogNavigation.activate(
-            DialogConfig.ConfirmationDialog(
-                title = title,
-                message = message,
-                okText = okText,
-                cancelText = cancelText,
-            ),
-        )
-
-        return dismissEvents.receive() as? DialogContainer.ConfirmationResult // TODO: logging of null
-    }
+    ): DialogContainer.ConfirmationResult? = showDialog(
+        DialogConfig.ConfirmationDialog(
+            title = title,
+            message = message,
+            okText = okText,
+            cancelText = cancelText,
+        ),
+    )
 
     override suspend fun showInfoDialog(
         title: String?,
         message: String,
-    ): DialogContainer.InfoResult? {
+    ): DialogContainer.InfoResult? = showDialog(
+        DialogConfig.InfoDialog(
+            title = title,
+            message = message,
+        )
+    )
+
+    override suspend fun showEditTimeDialog(
+        title: String,
+        time: LocalTime,
+    ): DialogContainer.EditTimeResult? = showDialog(
+        DialogConfig.EditTimeDialog(
+            title = title,
+            time = time,
+        )
+    )
+
+    private suspend inline fun<reified R : DialogContainer.DialogResult> showDialog(
+        config: DialogConfig,
+    ): R? {
 
         if (dialogSlot.value.child != null) {
             return null
         }
 
-        dialogNavigation.activate(
-            DialogConfig.InfoDialog(
-                title = title,
-                message = message,
-            )
-        )
+        dialogNavigation.activate(config)
 
-        return dismissEvents.receive() as? DialogContainer.InfoResult // TODO: logging of null
+        return dismissEvents.receive() as? R // TODO: logging of null
     }
 }
 
@@ -272,5 +294,11 @@ private sealed interface DialogConfig {
         val message: String?,
         val okText: String?,
         val cancelText: String?,
+    ) : DialogConfig
+
+    @Serializable
+    data class EditTimeDialog(
+        val title: String,
+        val time: LocalTime,
     ) : DialogConfig
 }

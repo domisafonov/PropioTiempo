@@ -1,0 +1,117 @@
+package net.domisafonov.propiotiempo.component.dialog
+
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
+import com.arkivanov.mvikotlin.core.instancekeeper.getStore
+import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.arkivanov.mvikotlin.extensions.coroutines.states
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalTime
+import net.domisafonov.propiotiempo.component.dialog.DialogContainer.EditTimeResult
+import net.domisafonov.propiotiempo.ui.content.dialog.EditTimeDialogViewModel
+import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore
+import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.State
+import net.domisafonov.propiotiempo.ui.store.dialog.initialState
+import net.domisafonov.propiotiempo.ui.store.dialog.makeEditTimeDialogStore
+
+interface EditTimeDialogComponent : DialogComponent {
+
+    val viewModel: StateFlow<EditTimeDialogViewModel>
+
+    fun onDismiss()
+    fun onConfirm()
+    fun onCancel()
+
+    fun onTimeUpdate(time: LocalTime)
+}
+
+fun makeEditTimeDialogComponent(
+    componentContext: ComponentContext,
+    storeFactory: StoreFactory,
+    mainDispatcher: CoroutineDispatcher,
+    onResult: suspend (EditTimeResult) -> Unit,
+    title: String,
+    time: LocalTime,
+): EditTimeDialogComponent = EditTimeDialogComponentImpl(
+    componentContext = componentContext,
+    storeFactory = storeFactory,
+    mainDispatcher = mainDispatcher,
+    onResult = onResult,
+    title = title,
+    time = time,
+)
+
+private class EditTimeDialogComponentImpl(
+    componentContext: ComponentContext,
+    storeFactory: StoreFactory,
+    mainDispatcher: CoroutineDispatcher,
+    private val onResult: suspend (EditTimeResult) -> Unit,
+    private val title: String,
+    private val time: LocalTime,
+) : EditTimeDialogComponent, ComponentContext by componentContext {
+
+    private val scope = coroutineScope(mainDispatcher + SupervisorJob())
+
+    private val store = instanceKeeper.getStore(key = EditTimeDialogStore::class) {
+        storeFactory.makeEditTimeDialogStore(
+            stateKeeper = stateKeeper,
+            initialState = EditTimeDialogStore.initialState(
+                title = title,
+                time = time,
+            ),
+        )
+    }
+
+    init {
+        scope.launch {
+            store.labels.collect {
+                when (it) {
+                    else -> TODO()
+                }
+            }
+        }
+    }
+
+    override val viewModel: StateFlow<EditTimeDialogViewModel> = store.states
+        .map(this::mapToViewModel)
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Lazily,
+            initialValue = mapToViewModel(
+                EditTimeDialogStore.initialState(
+                    title = title,
+                    time = time,
+                ),
+            ),
+        )
+
+    private fun mapToViewModel(
+        state: State,
+    ): EditTimeDialogViewModel = EditTimeDialogViewModel(
+        title = state.title,
+        time = state.time,
+    )
+
+    override fun onDismiss() {
+        scope.launch { onResult(EditTimeResult.Dismissed) }
+    }
+
+    override fun onConfirm() {
+        TODO()
+    }
+
+    override fun onCancel() {
+        scope.launch { onResult(EditTimeResult.Cancelled) }
+    }
+
+    override fun onTimeUpdate(time: LocalTime) {
+        TODO("Not yet implemented")
+    }
+}

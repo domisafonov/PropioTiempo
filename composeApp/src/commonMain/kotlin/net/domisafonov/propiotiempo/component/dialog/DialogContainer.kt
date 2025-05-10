@@ -1,5 +1,7 @@
 package net.domisafonov.propiotiempo.component.dialog
 
+import kotlinx.datetime.LocalTime
+
 interface DialogContainer {
 
     suspend fun showInfoDialog(
@@ -14,6 +16,11 @@ interface DialogContainer {
         cancelText: String? = null,
     ): ConfirmationResult?
 
+    suspend fun showEditTimeDialog(
+        title: String,
+        time: LocalTime,
+    ): EditTimeResult?
+
     sealed interface DialogResult
 
     enum class InfoResult : DialogResult {
@@ -25,5 +32,11 @@ interface DialogContainer {
         Confirmed,
         Cancelled,
         Dismissed,
+    }
+
+    sealed interface EditTimeResult : DialogResult {
+        data class Confirmed(val time: LocalTime) : EditTimeResult
+        data object Cancelled : EditTimeResult
+        data object Dismissed : EditTimeResult
     }
 }
