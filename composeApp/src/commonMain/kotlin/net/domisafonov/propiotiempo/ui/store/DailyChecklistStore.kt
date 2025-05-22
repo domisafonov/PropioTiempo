@@ -43,6 +43,7 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
 
     sealed interface Label {
         data class ConfirmUncheckingItem(val id: Long): Label
+        data class EditCheckingTime(val id: Long) : Label
     }
 
     companion object
@@ -115,7 +116,9 @@ fun StoreFactory.makeDailyChecklistStore(
                 publish(Label.ConfirmUncheckingItem(id = intent.id))
             }
         }
-        onIntent<Intent.EditItem> { TODO() }
+        onIntent<Intent.EditItem> { intent ->
+            publish(Label.EditCheckingTime(id = intent.id))
+        }
         onIntent<Intent.ItemUncheckConfirmed> { intent ->
             val checkedTime = state().items.find { it.id == intent.id }?.checkedTime
                 ?: return@onIntent // TODO: logging

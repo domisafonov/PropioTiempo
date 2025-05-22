@@ -36,9 +36,7 @@ fun<T : Any> resetPeriodically(
     emitAtStart: Boolean = true,
     flowProvider: () -> Flow<T>,
 ): Flow<T> {
-    if (dayTime == null && !doResetMinutely) {
-        throw IllegalArgumentException()
-    }
+    require (dayTime != null || doResetMinutely)
     return periodicalTimer(
         startAt = dayTime,
         doResetMinutely = doResetMinutely,
@@ -51,9 +49,7 @@ private fun periodicalTimer(
     doResetMinutely: Boolean,
     emitAtStart: Boolean,
 ): Flow<Unit> = flow {
-    if (startAt == null && !doResetMinutely) {
-        throw IllegalArgumentException()
-    }
+    require(startAt != null || doResetMinutely)
 
     if (emitAtStart) {
         emit(Unit)
@@ -90,11 +86,15 @@ private fun millisToMinuteEnd(now: LocalTime = Clock.System.localTime()): Long =
     (60_000_000_000L - (now.second * 1_000_000_000L + now.nanosecond)) /
         1_000_000L
 
+fun Instant.toLocalTime(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): LocalTime = toLocalDateTime(timeZone = timeZone)
+    .time
+
 private fun Clock.localTime(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): LocalTime = now()
-    .toLocalDateTime(timeZone = timeZone)
-    .time
+    .toLocalTime(timeZone = timeZone)
 
 @Composable
 fun formatDurationHoursMinutes(seconds: Int): String {

@@ -112,6 +112,6 @@ private class EditTimeDialogComponentImpl(
     }
 
     override fun onTimeUpdate(time: LocalTime) {
-        TODO("Not yet implemented")
+        println("timeupd: $time")
     }
 }

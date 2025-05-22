@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
+import net.domisafonov.propiotiempo.data.toLocalTime
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUcImpl
@@ -104,6 +105,19 @@ private class DailyChecklistComponentImpl(
                     if (res == DialogContainer.ConfirmationResult.Confirmed) {
                         store.accept(Intent.ItemUncheckConfirmed(id = label.id))
                     }
+                }
+                is Label.EditCheckingTime -> {
+                    val item = store.state
+                        .items
+                        .find { it.id == label.id }
+                        ?: return@collect // TODO: null logging
+                    val checkedTime = item.checkedTime
+                        ?: return@collect // TODO: disable longclick in view, null logging
+                    val res = dialogContainer.showEditTimeDialog(
+                        title = "TODO",
+                        time = checkedTime.toLocalTime(),
+                    )
+                    println("res: $res")
                 }
             } }
         }
