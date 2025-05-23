@@ -10,6 +10,7 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -31,6 +34,7 @@ data class WheelPickerItem<I : Any>(
     val name: String,
 )
 
+// TODO: edit on click (pass composable lambda in), accessibility
 @Composable
 fun<I : Any> WheelPicker(
     modifier: Modifier = Modifier,
@@ -87,9 +91,25 @@ fun<I : Any> WheelPicker(
         oldSelection = currentId
     }
 
+    val surfaceColor = MaterialTheme.colors.surface
+    val transSurfaceColor = MaterialTheme.colors.surface.copy(alpha = 0f)
+    val topFade = paddingHeight / height
+    val bottomFade = (height - paddingHeight) / height
     VerticalPager(
         modifier = modifier
-            .size(width = itemWidth, height = height.dp),
+            .size(width = itemWidth, height = height.dp)
+            .drawWithCache {
+                val brush = Brush.verticalGradient(
+                    0f to surfaceColor,
+                    topFade to transSurfaceColor,
+                    bottomFade to transSurfaceColor,
+                    1f to surfaceColor,
+                )
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(brush = brush)
+                }
+            },
         state = pagerState,
         pageSize = PageSize.Fixed(itemHeight),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,7 +122,7 @@ fun<I : Any> WheelPicker(
     ) { i -> when {
         indices.isInner(i) -> Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
         ) {
             Text(
                 modifier = Modifier

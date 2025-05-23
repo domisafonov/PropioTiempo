@@ -1,11 +1,11 @@
 package net.domisafonov.propiotiempo.ui.content.dialog
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.datetime.LocalTime
@@ -30,7 +30,7 @@ fun EditTimeDialogContent(component: EditTimeDialogComponent) {
         ),
     ) {
         Surface(
-            elevation = 10.dp, // TODO
+            shape = MaterialTheme.shapes.medium,
         ) {
             WheelPicker(
                 modifier = Modifier,
