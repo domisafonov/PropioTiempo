@@ -20,6 +20,9 @@
   <string name="default_confirmation_dialog_message">Confirm?</string>
   <string name="default_confirmation_dialog_confirm">Ok</string>
   <string name="default_confirmation_dialog_cancel">Cancel</string>
+  <string name="edit_time_dialog_title">Edit: %1$s</string>
+  <string name="edit_dialog_confirm">Ok</string>
+  <string name="edit_dialog_cancel">Cancel</string>
   <string name="daily_checklist_item_uncheck_confirmation">Cancel item completion?</string>
   <string name="navigate_back">Navigate back</string>
   <string name="daily_checklist_item_check">Complete</string>

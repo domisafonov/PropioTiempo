@@ -1,5 +1,6 @@
 package net.domisafonov.propiotiempo.ui.component
 
+// TODO: unit tests
 class Indices(
     val extras: Int,
     val internalSize: Int,

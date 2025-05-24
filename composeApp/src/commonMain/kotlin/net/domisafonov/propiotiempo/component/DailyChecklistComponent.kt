@@ -21,6 +21,7 @@ import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UncheckDailyChecklistItemUcImpl
+import net.domisafonov.propiotiempo.data.usecase.UpdateDailyChecklistCheckTimeUcImpl
 import net.domisafonov.propiotiempo.ui.content.DailyChecklistViewModel
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
@@ -30,7 +31,9 @@ import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.makeDailyChecklistStore
 import org.jetbrains.compose.resources.getString
 import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck_confirmation
+import propiotiempo.composeapp.generated.resources.edit_time_dialog_title
 
 interface DailyChecklistComponent : ComponentContext {
 
@@ -89,6 +92,9 @@ private class DailyChecklistComponentImpl(
             uncheckDailyChecklistItemUc = UncheckDailyChecklistItemUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
+            updateDailyChecklistCheckTimeUc = UpdateDailyChecklistCheckTimeUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
             dailyChecklistId = dailyChecklistId,
         )
     }
@@ -107,17 +113,34 @@ private class DailyChecklistComponentImpl(
                     }
                 }
                 is Label.EditCheckingTime -> {
-                    val item = store.state
+                    val (itemIdx, item) = store.state
                         .items
-                        .find { it.id == label.id }
+                        .indexOfFirst { it.id == label.id }
+                        .takeIf { it != -1 }
+                        ?.let { it to store.state.items[it] }
                         ?: return@collect // TODO: null logging
                     val checkedTime = item.checkedTime
                         ?: return@collect // TODO: disable longclick in view, null logging
-                    val res = dialogContainer.showEditTimeDialog(
-                        title = "TODO",
-                        time = checkedTime.toLocalTime(),
+                    val res = dialogContainer
+                        .showEditTimeDialog(
+                            title = getString(
+                                Res.string.edit_time_dialog_title,
+                                item.name ?: getString(
+                                    Res.string.daily_checklist_item_ordinal,
+                                    itemIdx + 1
+                                )
+                            ),
+                            time = checkedTime.toLocalTime(),
+                        )
+                        as? DialogContainer.EditTimeResult.Confirmed
+                        ?: return@collect
+                    store.accept(
+                        Intent.UpdateItemsTime(
+                            itemId = label.id,
+                            oldTime = checkedTime,
+                            newTime = res.time,
+                        )
                     )
-                    println("res: $res")
                 }
             } }
         }

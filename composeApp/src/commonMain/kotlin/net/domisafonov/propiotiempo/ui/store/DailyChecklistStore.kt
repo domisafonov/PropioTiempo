@@ -6,12 +6,15 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUc
 import net.domisafonov.propiotiempo.data.usecase.UncheckDailyChecklistItemUc
+import net.domisafonov.propiotiempo.data.usecase.UpdateDailyChecklistCheckTimeUc
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Label
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
@@ -32,6 +35,12 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
 
         data class ItemUncheckConfirmed(
             val id: Long,
+        ) : Intent
+
+        data class UpdateItemsTime(
+            val itemId: Long,
+            val oldTime: Instant,
+            val newTime: LocalTime,
         ) : Intent
     }
 
@@ -79,6 +88,7 @@ fun StoreFactory.makeDailyChecklistStore(
     observeDailyChecklistNameUc: ObserveDailyChecklistNameUc,
     checkDailyChecklistItemUc: CheckDailyChecklistItemUc,
     uncheckDailyChecklistItemUc: UncheckDailyChecklistItemUc,
+    updateDailyChecklistCheckTimeUc: UpdateDailyChecklistCheckTimeUc,
     dailyChecklistId: Long,
 ): DailyChecklistStore = object : DailyChecklistStore, Store<Intent, State, Label> by create(
     name = DailyChecklistStore::class.qualifiedName,
@@ -126,6 +136,15 @@ fun StoreFactory.makeDailyChecklistStore(
                 uncheckDailyChecklistItemUc.execute(
                     dailyChecklistItemId = intent.id,
                     time = checkedTime,
+                )
+            }
+        }
+        onIntent<Intent.UpdateItemsTime> { intent ->
+            launch {
+                updateDailyChecklistCheckTimeUc.execute(
+                    dailyChecklistItemId = intent.itemId,
+                    oldTime = intent.oldTime,
+                    newTime = intent.newTime,
                 )
             }
         }

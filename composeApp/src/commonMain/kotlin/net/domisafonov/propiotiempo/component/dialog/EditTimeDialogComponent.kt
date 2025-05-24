@@ -4,7 +4,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
@@ -17,6 +16,7 @@ import kotlinx.datetime.LocalTime
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer.EditTimeResult
 import net.domisafonov.propiotiempo.ui.content.dialog.EditTimeDialogViewModel
 import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore
+import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.Intent
 import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.State
 import net.domisafonov.propiotiempo.ui.store.dialog.initialState
 import net.domisafonov.propiotiempo.ui.store.dialog.makeEditTimeDialogStore
@@ -29,7 +29,8 @@ interface EditTimeDialogComponent : DialogComponent {
     fun onConfirm()
     fun onCancel()
 
-    fun onTimeUpdate(time: LocalTime)
+    fun onHourUpdate(hour: Int)
+    fun onMinuteUpdate(minute: Int)
 }
 
 fun makeEditTimeDialogComponent(
@@ -69,16 +70,6 @@ private class EditTimeDialogComponentImpl(
         )
     }
 
-    init {
-        scope.launch {
-            store.labels.collect {
-                when (it) {
-                    else -> TODO()
-                }
-            }
-        }
-    }
-
     override val viewModel: StateFlow<EditTimeDialogViewModel> = store.states
         .map(this::mapToViewModel)
         .stateIn(
@@ -104,14 +95,20 @@ private class EditTimeDialogComponentImpl(
     }
 
     override fun onConfirm() {
-        TODO()
+        scope.launch { onResult(EditTimeResult.Confirmed(time = store.state.time)) }
     }
 
     override fun onCancel() {
         scope.launch { onResult(EditTimeResult.Cancelled) }
     }
 
-    override fun onTimeUpdate(time: LocalTime) {
-        println("timeupd: $time")
+    override fun onHourUpdate(hour: Int) {
+        require(hour in 0..24)
+        store.accept(Intent.UpdateHour(hour))
+    }
+
+    override fun onMinuteUpdate(minute: Int) {
+        require(minute in 0..59)
+        store.accept(Intent.UpdateMinute(minute))
     }
 }

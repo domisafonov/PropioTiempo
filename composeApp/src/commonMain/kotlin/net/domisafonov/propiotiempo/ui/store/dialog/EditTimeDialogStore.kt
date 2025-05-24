@@ -6,6 +6,8 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.withHour
+import net.domisafonov.propiotiempo.data.withMinute
 import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.Intent
 import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.Label
 import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.State
@@ -13,7 +15,10 @@ import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStoreInternal.
 
 interface EditTimeDialogStore : Store<Intent, State, Label> {
 
-    sealed interface Intent
+    sealed interface Intent {
+        data class UpdateHour(val hour: Int) : Intent
+        data class UpdateMinute(val minute: Int) : Intent
+    }
 
     @Serializable
     data class State(
@@ -30,7 +35,9 @@ private object EditTimeDialogStoreInternal {
 
     sealed interface Action
 
-    sealed interface Message
+    sealed interface Message {
+        data class UpdateTime(val time: LocalTime) : Message
+    }
 }
 
 fun EditTimeDialogStore.Companion.initialState(
@@ -53,10 +60,23 @@ fun StoreFactory.makeEditTimeDialogStore(
         )
         ?: initialState,
     executorFactory = coroutineExecutorFactory {
-
+        onIntent<Intent.UpdateHour> { intent ->
+            dispatch(
+                Message.UpdateTime(
+                    time = state().time.withHour(intent.hour),
+                )
+            )
+        }
+        onIntent<Intent.UpdateMinute> { intent ->
+            dispatch(
+                Message.UpdateTime(
+                    time = state().time.withMinute(intent.minute),
+                )
+            )
+        }
     },
     reducer = { message: Message -> when (message) {
-        else -> TODO()
+        is Message.UpdateTime -> copy(time = message.time)
     } },
 ) {}.also {
     stateKeeper?.register(

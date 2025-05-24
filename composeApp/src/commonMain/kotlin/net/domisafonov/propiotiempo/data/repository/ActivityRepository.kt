@@ -53,6 +53,12 @@ interface ActivityRepository {
         dailyChecklistItemId: Long,
         time: Instant,
     )
+
+    suspend fun updateDailyChecklistCheckTime(
+        dailyChecklistItemId: Long,
+        oldTime: Instant,
+        newTime: Instant,
+    )
 }
 
 class ActivityRepositoryImpl(
@@ -165,6 +171,20 @@ class ActivityRepositoryImpl(
             dbQueries.delete_daily_checklist_check(
                 daily_checklist_item_id = dailyChecklistItemId,
                 time = time,
+            )
+        }
+    }
+
+    override suspend fun updateDailyChecklistCheckTime(
+        dailyChecklistItemId: Long,
+        oldTime: Instant,
+        newTime: Instant,
+    ) {
+        withContext(ioDispatcher) {
+            dbQueries.update_daily_checklist_check_time(
+                new_time = newTime,
+                daily_checklist_item_id = dailyChecklistItemId,
+                old_time = oldTime,
             )
         }
     }

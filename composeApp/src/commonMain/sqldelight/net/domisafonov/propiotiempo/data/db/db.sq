@@ -196,3 +196,8 @@ delete_daily_checklist_check:
 DELETE
   FROM daily_checklist_checks
   WHERE daily_checklist_item_id = :daily_checklist_item_id AND time = :time;
+
+update_daily_checklist_check_time:
+UPDATE daily_checklist_checks
+  SET time = :new_time
+  WHERE daily_checklist_item_id = :daily_checklist_item_id AND time = :old_time;

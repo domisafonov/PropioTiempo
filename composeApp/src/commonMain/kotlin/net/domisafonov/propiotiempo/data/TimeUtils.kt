@@ -12,6 +12,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atDate
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -112,3 +113,25 @@ fun formatInstantHoursMinutes(instant: Instant): String {
     val ms = time.minute.toString().padStart(length = 2, padChar = '0')
     return stringResource(Res.string.double_digit_hours_minutes, hs, ms)
 }
+
+fun LocalTime.withHour(hour: Int) =
+    LocalTime(
+        hour = hour,
+        minute = minute,
+        second = second,
+        nanosecond = nanosecond,
+    )
+
+fun LocalTime.withMinute(minute: Int) =
+    LocalTime(
+        hour = hour,
+        minute = minute,
+        second = second,
+        nanosecond = nanosecond,
+    )
+
+fun LocalTime.atDateOf(
+    instant: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+) = atDate(instant.toLocalDateTime(timeZone = timeZone).date)
+    .toInstant(timeZone = timeZone)
