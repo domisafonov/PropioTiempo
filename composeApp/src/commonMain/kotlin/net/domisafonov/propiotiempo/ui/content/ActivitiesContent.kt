@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -164,8 +165,9 @@ fun TimeActivityItem(
                     }
                 ),
                 onClick = onClick,
-            ),
-        minSurfaceContentsSize = 24.dp
+            )
+            .minimumInteractiveComponentSize(),
+        minSurfaceContentsSize = 24.dp,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -173,6 +175,7 @@ fun TimeActivityItem(
                     .weight(1f),
                 maxLines = 1,
                 text = viewModel.name,
+                style = MaterialTheme.typography.body1,
             )
 
             if (viewModel.isActive) {
@@ -203,12 +206,14 @@ fun ChecklistItem(
                 onClickLabel = stringResource(Res.string.open_daily_checklist),
                 onClick = onClick,
             )
+            .minimumInteractiveComponentSize(),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 text = viewModel.name,
+                style = MaterialTheme.typography.body1,
             )
 
             val (icon, description) = if (viewModel.isCompleted) {

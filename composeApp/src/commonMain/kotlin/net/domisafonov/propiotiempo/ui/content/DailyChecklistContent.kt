@@ -23,14 +23,13 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.DailyChecklistComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
@@ -102,8 +101,7 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
                         )
                         .padding(vertical = 12.dp),
                     text = viewModel.name,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.h5,
                 )
             }
 
@@ -121,7 +119,8 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
                             onLongClickLabel = "TODO",
                             onClick = { component.onItemClick(item.id) },
                             onLongClick = { component.onItemLongClick(item.id) }
-                        ),
+                        )
+                        .minimumInteractiveComponentSize(),
                     viewModel = item,
                     listIndex = i,
                 )
@@ -180,13 +179,13 @@ private fun DailyChecklistItemName(
             modifier = modifier,
             maxLines = 1,
             text = stringResource(Res.string.daily_checklist_item_ordinal, listIndex + 1),
-            fontWeight = FontWeight.Light,
         )
     } else {
         Text(
             modifier = modifier,
             maxLines = 1,
             text = viewModel.name,
+            style = MaterialTheme.typography.body1,
         )
     }
 }

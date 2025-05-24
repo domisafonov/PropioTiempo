@@ -8,18 +8,19 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.domisafonov.propiotiempo.ui.listHeader
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
@@ -40,6 +41,7 @@ fun FoldableListHeader(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .minimumInteractiveComponentSize()
             .clickable(
                 onClickLabel = stringResource(
                     if (isOpen) {
@@ -66,7 +68,7 @@ fun FoldableListHeader(
                 modifier = Modifier
                     .weight(1f),
                 text = text,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.listHeader,
             )
 
             val (icon, desc) = if (isOpen) {

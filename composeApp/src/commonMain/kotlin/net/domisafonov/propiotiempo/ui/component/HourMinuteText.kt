@@ -1,12 +1,13 @@
 package net.domisafonov.propiotiempo.ui.component
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantHoursMinutes
+import net.domisafonov.propiotiempo.ui.numericTimeBody
 
 @Composable
 fun HourMinuteText(
@@ -39,6 +40,6 @@ fun HourMinuteTextFormatted(
         modifier = modifier,
         maxLines = 1,
         text = text,
-        fontFamily = FontFamily.Monospace,
+        style = MaterialTheme.typography.numericTimeBody,
     )
 }
