@@ -52,7 +52,8 @@ fun EditTimeDialogContent(component: EditTimeDialogComponent) {
             ) {
                 Text(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(12.dp),
                     text = viewModel.title,
                     style = MaterialTheme.typography.h4,
                 )

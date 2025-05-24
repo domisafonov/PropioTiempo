@@ -35,6 +35,7 @@ import net.domisafonov.propiotiempo.component.DailyChecklistComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.HourMinuteText
 import net.domisafonov.propiotiempo.ui.component.ListItem
+import net.domisafonov.propiotiempo.ui.unfilledBody
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
@@ -179,6 +180,7 @@ private fun DailyChecklistItemName(
             modifier = modifier,
             maxLines = 1,
             text = stringResource(Res.string.daily_checklist_item_ordinal, listIndex + 1),
+            style = MaterialTheme.typography.unfilledBody,
         )
     } else {
         Text(
