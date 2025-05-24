@@ -5,6 +5,7 @@ package net.domisafonov.propiotiempo.ui.content
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -95,6 +96,7 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
                 TimeActivityItem(
                     viewModel = item,
                     onClick = { component.onTimedActivityClick(id = item.id) },
+                    onLongClick = { component.onTimedActivityLongClick(id = item.id) }
                 )
                 HorizontalDivider()
             } }
@@ -153,10 +155,11 @@ fun TimeActivityItem(
     modifier: Modifier = Modifier,
     viewModel: ActivitiesViewModel.TimeActivity,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     ListItem(
         modifier = modifier
-            .clickable(
+            .combinedClickable(
                 onClickLabel = stringResource(
                     if (viewModel.isActive) {
                         Res.string.start_timed_activity
@@ -164,6 +167,8 @@ fun TimeActivityItem(
                         Res.string.stop_timed_activity
                     }
                 ),
+                onLongClickLabel = "TODO",
+                onLongClick = onLongClick,
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize(),

@@ -35,6 +35,7 @@ interface ActivitiesComponent : ComponentContext {
     fun onDailyChecklistToggled()
     fun onTimedActivitiesToggled()
     fun onTimedActivityClick(id: Long)
+    fun onTimedActivityLongClick(id: Long)
     fun onDailyChecklistClick(id: Long)
 }
 
@@ -46,6 +47,7 @@ fun makeActivitiesComponent(
     mainDispatcher: CoroutineDispatcher,
     ioDispatcher: CoroutineDispatcher,
     navigateToChecklist: (Long) -> Unit,
+    navigateToTimedActivityIntervals: (Long) -> Unit,
 ): ActivitiesComponent = ActivitiesComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
@@ -54,6 +56,7 @@ fun makeActivitiesComponent(
     mainDispatcher = mainDispatcher,
     ioDispatcher = ioDispatcher,
     navigateToChecklist = navigateToChecklist,
+    navigateToTimedActivityIntervals = navigateToTimedActivityIntervals,
 )
 
 private class ActivitiesComponentImpl(
@@ -64,6 +67,7 @@ private class ActivitiesComponentImpl(
     mainDispatcher: CoroutineDispatcher,
     ioDispatcher: CoroutineDispatcher,
     navigateToChecklist: (id: Long) -> Unit,
+    navigateToTimedActivityIntervals: (id: Long) -> Unit,
 ) : ActivitiesComponent, ComponentContext by componentContext {
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())
@@ -95,6 +99,8 @@ private class ActivitiesComponentImpl(
             store.labels.collect {
                 when (it) {
                     is Label.NavigateToDailyChecklist -> navigateToChecklist(it.id)
+                    is Label.NavigateToTimedActivityIntervals ->
+                        navigateToTimedActivityIntervals(it.id)
                 }
             }
         }
@@ -139,7 +145,11 @@ private class ActivitiesComponentImpl(
     }
 
     override fun onTimedActivityClick(id: Long) {
-        store.accept(Intent.ClickTimedActivity(id = id))
+        store.accept(Intent.ToggleTimedActivity(id = id))
+    }
+
+    override fun onTimedActivityLongClick(id: Long) {
+        store.accept(Intent.OpenTimedActivityIntervals(id = id))
     }
 
     override fun onDailyChecklistClick(id: Long) {

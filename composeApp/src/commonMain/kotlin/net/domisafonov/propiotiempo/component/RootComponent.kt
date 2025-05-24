@@ -49,6 +49,9 @@ interface RootComponent : ComponentContext, DialogContainer {
         data class Activities(val component: ActivitiesComponent) : Child
         data class Schema(val component: SchemaComponent) : Child
         data class DailyChecklist(val component: DailyChecklistComponent) : Child
+        data class TimedActivityIntervals(
+            val component: TimedActivityIntervalsComponent,
+        ) : Child
     }
 
     sealed interface Dialog {
@@ -105,6 +108,9 @@ class RootComponentImpl(
             ioDispatcher = Dispatchers.IO,
             navigateToChecklist = { id ->
                 screenNavigation.pushNew(ScreenConfig.DailyChecklist(id = id))
+            },
+            navigateToTimedActivityIntervals = { id ->
+                screenNavigation.pushNew(ScreenConfig.TimedActivityIntervals(id = id))
             }
         )
     }
@@ -123,6 +129,18 @@ class RootComponentImpl(
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
             dailyChecklistId = dailyChecklistId,
+            dialogContainer = this,
+            navigateBack = { screenNavigation.pop() }.singleUse,
+        )
+    }
+    private val timedActivityIntervalsComponent = { componentContext: ComponentContext, timedActivityId: Long ->
+        makeTimedActivityIntervalsComponent(
+            componentContext = componentContext,
+            storeFactory = storeFactory,
+            activityRepositoryProvider = activityRepositoryProvider,
+            settingsRepositoryProvider = settingsRepositoryProvider,
+            mainDispatcher = Dispatchers.Main.immediate,
+            timedActivityId = timedActivityId,
             dialogContainer = this,
             navigateBack = { screenNavigation.pop() }.singleUse,
         )
@@ -146,6 +164,10 @@ class RootComponentImpl(
 
             is ScreenConfig.DailyChecklist -> RootComponent.Child.DailyChecklist(
                 dailyChecklistComponent(ctx, config.id)
+            )
+
+            is ScreenConfig.TimedActivityIntervals -> RootComponent.Child.TimedActivityIntervals(
+                timedActivityIntervalsComponent(ctx, config.id)
             )
         }
     }
@@ -275,6 +297,11 @@ private sealed interface ScreenConfig {
 
     @Serializable
     data class DailyChecklist(
+        val id: Long,
+    ) : ScreenConfig
+
+    @Serializable
+    data class TimedActivityIntervals(
         val id: Long,
     ) : ScreenConfig
 }

@@ -26,7 +26,8 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     sealed interface Intent {
         object ToggleDailyChecklists : Intent
         object ToggleTimedActivities : Intent
-        data class ClickTimedActivity(val id: Long) : Intent
+        data class ToggleTimedActivity(val id: Long) : Intent
+        data class OpenTimedActivityIntervals(val id: Long) : Intent
         data class ClickDailyChecklist(val id: Long) : Intent
     }
 
@@ -40,6 +41,7 @@ interface ActivitiesStore : Store<Intent, State, Label> {
 
     sealed interface Label {
         data class NavigateToDailyChecklist(val id: Long) : Label
+        data class NavigateToTimedActivityIntervals(val id: Long) : Label
     }
 
     companion object
@@ -157,10 +159,14 @@ fun StoreFactory.makeActivitiesStore(
             )
         }
 
-        onIntent<Intent.ClickTimedActivity> {
+        onIntent<Intent.ToggleTimedActivity> {
             launch {
                 toggleTimedActivityUc.execute(id = it.id)
             }
+        }
+
+        onIntent<Intent.OpenTimedActivityIntervals> {
+            publish(Label.NavigateToTimedActivityIntervals(it.id))
         }
 
         onIntent<Intent.ClickDailyChecklist> {

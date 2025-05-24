@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import net.domisafonov.propiotiempo.component.RootComponent
-import net.domisafonov.propiotiempo.component.dialog.ConfirmationDialogComponent
 import net.domisafonov.propiotiempo.ui.AppTheme
 import net.domisafonov.propiotiempo.ui.content.dialog.ConfirmationDialogContent
 import net.domisafonov.propiotiempo.ui.content.dialog.EditTimeDialogContent
@@ -127,6 +126,10 @@ private fun CurrentScreen(
             component = component.component,
         )
         is RootComponent.Child.DailyChecklist -> DailyChecklistContent(
+            modifier = childModifier,
+            component = component.component,
+        )
+        is RootComponent.Child.TimedActivityIntervals -> TimedActivityIntervalsContent(
             modifier = childModifier,
             component = component.component,
         )
