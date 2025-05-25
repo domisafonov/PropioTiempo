@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import net.domisafonov.propiotiempo.data.model.PtSettings
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 
-interface ObserveSettingsUc {
+fun interface ObserveSettingsUc {
     fun execute(): Flow<PtSettings>
 }
 

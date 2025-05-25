@@ -3,7 +3,7 @@ package net.domisafonov.propiotiempo.data.usecase
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
-interface UncheckDailyChecklistItemUc {
+fun interface UncheckDailyChecklistItemUc {
     suspend fun execute(dailyChecklistItemId: Long, time: Instant)
 }
 

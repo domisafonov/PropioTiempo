@@ -19,7 +19,7 @@ import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.usecase.GetSettingsUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysChecklistSummaryUcImpl
-import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimeActivitySummaryUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimedActivitySummaryUcImpl
 import net.domisafonov.propiotiempo.data.usecase.SetSettingUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUcImpl
 import net.domisafonov.propiotiempo.ui.store.makeActivitiesStore
@@ -78,7 +78,7 @@ private class ActivitiesComponentImpl(
             observeTodaysChecklistSummaryUc = ObserveTodaysChecklistSummaryUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
-            observeTodaysTimeActivitySummaryUc = ObserveTodaysTimeActivitySummaryUcImpl(
+            observeTodaysTimedActivitySummaryUc = ObserveTodaysTimedActivitySummaryUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
             toggleTimedActivityUc = ToggleTimedActivityUcImpl(

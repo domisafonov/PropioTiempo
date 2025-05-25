@@ -10,7 +10,8 @@ import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
-import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
+import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
+import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
 
 interface ActivityRepository {
 
@@ -28,13 +29,13 @@ interface ActivityRepository {
      *
      * Each entry sums up an enabled time activity without historical data.
      */
-    fun observeTodaysTimeActivitySummary(
+    fun observeTodaysTimedActivitySummary(
         dayStart: Instant,
-    ): Flow<List<TimeActivitySummary>>
+    ): Flow<List<TimedActivitySummary>>
 
     suspend fun toggleTimedActivity(timedActivityId: Long, now: Instant)
 
-    fun observeDailyChecklistName(id: Long): Flow<String>
+    fun observeActivityName(id: Long): Flow<String>
 
     /**
      * Observe items of a daily checklist for the day starting at [dayStart]
@@ -59,6 +60,11 @@ interface ActivityRepository {
         oldTime: Instant,
         newTime: Instant,
     )
+
+    fun observeDaysTimedActivityIntervals(
+        activityId: Long,
+        dayStart: Instant,
+    ): Flow<List<TimedActivityInterval>>
 }
 
 class ActivityRepositoryImpl(
@@ -84,14 +90,14 @@ class ActivityRepositoryImpl(
             .asFlow()
             .mapToList(ioDispatcher)
 
-    override fun observeTodaysTimeActivitySummary(
+    override fun observeTodaysTimedActivitySummary(
         dayStart: Instant,
-    ): Flow<List<TimeActivitySummary>> =
+    ): Flow<List<TimedActivitySummary>> =
         dbQueries
             .get_time_activities_summary(
                 day_start = dayStart.epochSeconds,
             ) { id, name, sum, is_active ->
-                TimeActivitySummary(
+                TimedActivitySummary(
                     id = id,
                     name = name,
                     todaysSeconds = sum.toLong(),
@@ -127,7 +133,7 @@ class ActivityRepositoryImpl(
         }
     }
 
-    override fun observeDailyChecklistName(id: Long): Flow<String> =
+    override fun observeActivityName(id: Long): Flow<String> =
         dbQueries
             .get_activity_name(id = id)
             .asFlow()
@@ -188,4 +194,22 @@ class ActivityRepositoryImpl(
             )
         }
     }
+
+    override fun observeDaysTimedActivityIntervals(
+        activityId: Long,
+        dayStart: Instant,
+    ): Flow<List<TimedActivityInterval>> =
+        dbQueries
+            .get_days_time_activity_intervals(
+                time_activity_id = activityId,
+                day_start = dayStart,
+            ) { start_time, end_time ->
+                TimedActivityInterval(
+                    activityId = activityId,
+                    start = start_time,
+                    end = end_time,
+                )
+            }
+            .asFlow()
+            .mapToList(ioDispatcher)
 }

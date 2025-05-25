@@ -3,7 +3,7 @@ package net.domisafonov.propiotiempo.data.usecase
 import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
-interface CheckDailyChecklistItemUc {
+fun interface CheckDailyChecklistItemUc {
     suspend fun execute(dailyChecklistItemId: Long)
 }
 

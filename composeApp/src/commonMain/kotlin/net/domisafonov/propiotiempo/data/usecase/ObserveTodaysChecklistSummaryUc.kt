@@ -6,7 +6,7 @@ import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.resetPeriodically
 
-interface ObserveTodaysChecklistSummaryUc {
+fun interface ObserveTodaysChecklistSummaryUc {
 
     fun execute(): Flow<List<ChecklistSummary>>
 }

@@ -17,6 +17,8 @@ import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
+import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUcImpl
 import net.domisafonov.propiotiempo.ui.content.TimedActivityIntervalsViewModel
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore
@@ -69,6 +71,12 @@ private class TimedActivityIntervalsComponentImpl(
     private val store = instanceKeeper.getStore(key = TimedActivityIntervalsStore::class) {
         storeFactory.makeTimedActivityIntervalsStore(
             stateKeeper = stateKeeper,
+            observeActivityNameUc = ObserveActivityNameUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
+            observeDaysTimedActivityIntervalsUc = ObserveDaysTimedActivityIntervalsUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
             timedActivityId = timedActivityId,
         )
     }

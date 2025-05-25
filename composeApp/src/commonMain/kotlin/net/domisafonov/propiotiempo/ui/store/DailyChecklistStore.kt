@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
-import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUc
+import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUc
 import net.domisafonov.propiotiempo.data.usecase.UncheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.UpdateDailyChecklistCheckTimeUc
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Intent
@@ -85,7 +85,7 @@ val DailyChecklistStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeDailyChecklistStore(
     stateKeeper: StateKeeper?,
     observeDailyChecklistItemsUc: ObserveDailyChecklistItemsUc,
-    observeDailyChecklistNameUc: ObserveDailyChecklistNameUc,
+    observeActivityNameUc: ObserveActivityNameUc,
     checkDailyChecklistItemUc: CheckDailyChecklistItemUc,
     uncheckDailyChecklistItemUc: UncheckDailyChecklistItemUc,
     updateDailyChecklistCheckTimeUc: UpdateDailyChecklistCheckTimeUc,
@@ -105,7 +105,7 @@ fun StoreFactory.makeDailyChecklistStore(
     executorFactory = coroutineExecutorFactory {
         onAction<Action.SubToName> {
             launch {
-                observeDailyChecklistNameUc.execute(id = dailyChecklistId)
+                observeActivityNameUc.execute(id = dailyChecklistId)
                     .collect { dispatch(Message.NameUpdate(name = it)) }
             }
         }

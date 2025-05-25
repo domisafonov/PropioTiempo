@@ -1,5 +1,10 @@
 import kotlinx.datetime.Instant;
 
+-- TODO: a timezones table to interpret historical data according to the correct
+--  time representation
+-- TODO: activity-wise day offsets relative to local time (to the time recorded
+--  in the timezones table)
+
 -- must be referenced with older_version _at most_ 1 time
 -- being referenced with older_version implies is_enabled=0
 CREATE TABLE activities (
@@ -201,3 +206,12 @@ update_daily_checklist_check_time:
 UPDATE daily_checklist_checks
   SET time = :new_time
   WHERE daily_checklist_item_id = :daily_checklist_item_id AND time = :old_time;
+
+get_days_time_activity_intervals:
+SELECT
+  start_time, end_time
+  FROM time_activity_intervals AS i
+  WHERE
+    i.activity_id = :time_activity_id
+    AND (i.end_time IS NULL OR i.end_time >= :day_start)
+  ORDER BY i.start_time;

@@ -5,7 +5,7 @@ import kotlinx.datetime.LocalTime
 import net.domisafonov.propiotiempo.data.atDateOf
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
-interface UpdateDailyChecklistCheckTimeUc {
+fun interface UpdateDailyChecklistCheckTimeUc {
     suspend fun execute(
         dailyChecklistItemId: Long,
         oldTime: Instant,

@@ -5,7 +5,7 @@ import kotlinx.coroutines.withContext
 import net.domisafonov.propiotiempo.data.model.PtSettings
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 
-interface GetSettingsUc {
+fun interface GetSettingsUc {
     suspend fun execute(): PtSettings
 }
 

@@ -3,7 +3,7 @@ package net.domisafonov.propiotiempo.data.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TimeActivitySummary(
+data class TimedActivitySummary(
     val id: Long,
     val name: String,
     val todaysSeconds: Long,

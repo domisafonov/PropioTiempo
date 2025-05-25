@@ -3,16 +3,16 @@ package net.domisafonov.propiotiempo.data.usecase
 import kotlinx.coroutines.flow.Flow
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
-interface ObserveDailyChecklistNameUc {
+fun interface ObserveActivityNameUc {
     fun execute(id: Long): Flow<String>
 }
 
-class ObserveDailyChecklistNameUcImpl(
+class ObserveActivityNameUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
-) : ObserveDailyChecklistNameUc {
+) : ObserveActivityNameUc {
 
     private val activityRepository by activityRepositoryProvider
 
     override fun execute(id: Long): Flow<String> =
-        activityRepository.observeDailyChecklistName(id = id)
+        activityRepository.observeActivityName(id = id)
 }

@@ -19,7 +19,7 @@ import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.toLocalTime
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUcImpl
-import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistNameUcImpl
+import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UncheckDailyChecklistItemUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UpdateDailyChecklistCheckTimeUcImpl
 import net.domisafonov.propiotiempo.ui.content.DailyChecklistViewModel
@@ -80,7 +80,7 @@ private class DailyChecklistComponentImpl(
     private val store = instanceKeeper.getStore(key = DailyChecklistStore::class) {
         storeFactory.makeDailyChecklistStore(
             stateKeeper = stateKeeper,
-            observeDailyChecklistNameUc = ObserveDailyChecklistNameUcImpl(
+            observeActivityNameUc = ObserveActivityNameUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
             observeDailyChecklistItemsUc = ObserveDailyChecklistItemsUcImpl(

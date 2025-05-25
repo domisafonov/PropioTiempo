@@ -2,23 +2,23 @@ package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.coroutines.flow.Flow
 import net.domisafonov.propiotiempo.data.getDayStart
-import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
+import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.resetPeriodically
 
-interface ObserveTodaysTimeActivitySummaryUc {
+fun interface ObserveTodaysTimedActivitySummaryUc {
 
-    fun execute(): Flow<List<TimeActivitySummary>>
+    fun execute(): Flow<List<TimedActivitySummary>>
 }
 
-class ObserveTodaysTimeActivitySummaryUcImpl(
+class ObserveTodaysTimedActivitySummaryUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
-) : ObserveTodaysTimeActivitySummaryUc {
+) : ObserveTodaysTimedActivitySummaryUc {
 
     private val activityRepository by activityRepositoryProvider
 
-    override fun execute(): Flow<List<TimeActivitySummary>> =
+    override fun execute(): Flow<List<TimedActivitySummary>> =
         resetPeriodically(doResetMinutely = true) {
-            activityRepository.observeTodaysTimeActivitySummary(dayStart = getDayStart())
+            activityRepository.observeTodaysTimedActivitySummary(dayStart = getDayStart())
         }
 }

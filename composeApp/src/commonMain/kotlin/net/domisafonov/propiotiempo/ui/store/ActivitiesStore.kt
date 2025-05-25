@@ -9,13 +9,13 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.PtSettings
-import net.domisafonov.propiotiempo.data.model.TimeActivitySummary
+import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
 import net.domisafonov.propiotiempo.data.usecase.GetSettingsUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysChecklistSummaryUc
-import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimeActivitySummaryUc
+import net.domisafonov.propiotiempo.data.usecase.ObserveTodaysTimedActivitySummaryUc
 import net.domisafonov.propiotiempo.data.usecase.SetSettingUc
 import net.domisafonov.propiotiempo.data.usecase.ToggleTimedActivityUc
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStoreInternal.Action
@@ -34,7 +34,7 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     @Serializable
     data class State(
         val dailyChecklists: List<ChecklistSummary>,
-        val timedActivities: List<TimeActivitySummary>,
+        val timedActivities: List<TimedActivitySummary>,
         val isDailyChecklistViewActive: Boolean,
         val isTimedActivitiesViewActive: Boolean,
     )
@@ -66,7 +66,7 @@ private object ActivitiesStoreInternal {
         ) : Message
 
         data class TimedActivitiesUpdate(
-            val timedActivities: List<TimeActivitySummary>,
+            val timedActivities: List<TimedActivitySummary>,
         ) : Message
 
         data class ActivateDailyChecklists(val isActive: Boolean) : Message
@@ -84,7 +84,7 @@ val ActivitiesStore.Companion.INITIAL_STATE get() = State(
 fun StoreFactory.makeActivitiesStore(
     stateKeeper: StateKeeper?,
     observeTodaysChecklistSummaryUc: ObserveTodaysChecklistSummaryUc,
-    observeTodaysTimeActivitySummaryUc: ObserveTodaysTimeActivitySummaryUc,
+    observeTodaysTimedActivitySummaryUc: ObserveTodaysTimedActivitySummaryUc,
     toggleTimedActivityUc: ToggleTimedActivityUc,
     getSettingsUc: GetSettingsUc,
     setSettingsUc: SetSettingUc,
@@ -122,7 +122,7 @@ fun StoreFactory.makeActivitiesStore(
                     }
             }
             launch {
-            observeTodaysTimeActivitySummaryUc.execute()
+            observeTodaysTimedActivitySummaryUc.execute()
                     .collect {
                         dispatch(Message.TimedActivitiesUpdate(timedActivities = it))
                     }
