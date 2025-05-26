@@ -26,6 +26,7 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
@@ -53,7 +54,7 @@ data class DailyChecklistViewModel(
     val items: List<Item>,
 ) {
     data class Item(
-        val id: Long,
+val id: Long,
         val name: String?,
         val checkedTime: Instant?,
     )
@@ -138,7 +139,9 @@ private fun DailyChecklistItem(
     listIndex: Int,
 ) {
     ListItem(modifier = modifier) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             DailyChecklistItemName(
                 modifier = Modifier.weight(1f),
                 viewModel = viewModel,

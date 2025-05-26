@@ -2,34 +2,47 @@
 
 package net.domisafonov.propiotiempo.ui.content
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent
+import net.domisafonov.propiotiempo.data.formatDurationDaysHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantRangeHoursMinutes
+import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.ListItem
+import net.domisafonov.propiotiempo.ui.numericTimeBody
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.arrow_back
 import propiotiempo.composeapp.generated.resources.navigate_back
+import propiotiempo.composeapp.generated.resources.pending
 
 data class TimedActivityIntervalsViewModel(
     val name: String,
@@ -38,7 +51,8 @@ data class TimedActivityIntervalsViewModel(
     data class Interval(
         val activityId: Long,
         val start: Instant,
-        val end: Instant?,
+        val end: Instant,
+        val isActive: Boolean,
     )
 }
 
@@ -87,7 +101,15 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
             contentPadding = contentPadding,
         ) {
             items(items = viewModel.intervals, key = { it.start.epochSeconds }) { item ->
-                IntervalItem(viewModel = item)
+                Column {
+                    IntervalItem(
+                        modifier = Modifier
+                            .combinedClickable {} // TODO
+                            .minimumInteractiveComponentSize(),
+                        viewModel = item,
+                    )
+                    HorizontalDivider()
+                }
             }
         }
     }
@@ -101,19 +123,38 @@ private fun IntervalItem(
     ListItem(
         modifier = modifier,
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                text = if (viewModel.end == null) {
-                    formatInstantHoursMinutes(instant = viewModel.start)
-                } else {
+                modifier = Modifier
+                    .weight(1f),
+                text = if (viewModel.isActive) {
                     formatInstantRangeHoursMinutes(
                         start = viewModel.start,
                         end = viewModel.end,
                     )
+                } else {
+                    formatInstantHoursMinutes(instant = viewModel.start)
                 },
+                style = MaterialTheme.typography.numericTimeBody,
             )
 
-            // TODO
+            if (viewModel.isActive) {
+                Icon(
+                    painter = painterResource(Res.drawable.pending),
+                    contentDescription = "TODO",
+                )
+            }
+
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = formatDurationDaysHoursMinutes(
+                    start = viewModel.start,
+                    end = viewModel.end,
+                ),
+                style = MaterialTheme.typography.numericTimeBody,
+            )
         }
     }
 }

@@ -22,6 +22,7 @@ import propiotiempo.composeapp.generated.resources.days_and_double_digit_hours_m
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes_range
 import kotlin.math.min
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 fun getDayStart(): Instant {
@@ -40,29 +41,29 @@ fun<T : Any> resetPeriodically(
     flowProvider: () -> Flow<T>,
 ): Flow<T> {
     require (dayTime != null || doResetMinutely)
-    return periodicalTimer(
-        startAt = dayTime,
-        doResetMinutely = doResetMinutely,
+    return periodicTimer(
+        emitAt = dayTime,
+        doEmitMinutely = doResetMinutely,
         emitAtStart = emitAtStart,
     ).flatMapLatest { flowProvider() }
 }
 
-private fun periodicalTimer(
-    startAt: LocalTime?,
-    doResetMinutely: Boolean,
-    emitAtStart: Boolean,
+fun periodicTimer(
+    emitAt: LocalTime? = null,
+    doEmitMinutely: Boolean = false,
+    emitAtStart: Boolean = true,
 ): Flow<Unit> = flow {
-    require(startAt != null || doResetMinutely)
+    require(emitAt != null || doEmitMinutely)
 
     if (emitAtStart) {
         emit(Unit)
     }
     while (true) {
         val now = Clock.System.localTime()
-        val one = startAt
-            ?.let { millisToDayTime(dayTime = startAt, now = now) }
+        val one = emitAt
+            ?.let { millisToDayTime(dayTime = emitAt, now = now) }
             ?: Long.MAX_VALUE
-        val two = if (doResetMinutely) {
+        val two = if (doEmitMinutely) {
             millisToMinuteEnd(now = now)
         } else {
             Long.MAX_VALUE
@@ -102,8 +103,13 @@ private fun Clock.localTime(
 @Composable
 fun formatDurationHoursMinutes(seconds: Int): String =
     seconds.seconds.toComponents { hours, minutes, _, _ ->
-        formatInstantHoursMinutes(hours = hours, minutes = minutes)
+        // TODO: handle overflow
+        formatDurationHoursMinutes(hours = hours.toInt(), minutes = minutes)
     }
+
+@Composable
+fun formatDurationHoursMinutes(hours: Int, minutes: Int): String =
+   formatInstantHoursMinutes(hours = hours, minutes = minutes)
 
 @Composable
 fun formatInstantHoursMinutes(
@@ -111,12 +117,12 @@ fun formatInstantHoursMinutes(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val time = instant.toLocalDateTime(timeZone = timeZone).time
-    return formatInstantHoursMinutes(hours = time.hour.toLong(), minutes = time.minute)
+    return formatInstantHoursMinutes(hours = time.hour, minutes = time.minute)
 }
 
 @Composable
 fun formatInstantHoursMinutes(
-    hours: Long,
+    hours: Int,
     minutes: Int,
 ): String {
     require(hours in 0 .. 23)
@@ -153,12 +159,16 @@ fun formatDurationDaysHoursMinutes(
 ): String {
     require(start <= end)
     return (end - start).toComponents { days, hours, minutes, _, _  ->
-        stringResource(
-            Res.string.days_and_double_digit_hours_minutes,
-            days.toStringTwoDigit(),
-            hours.toStringTwoDigit(),
-            minutes.toStringTwoDigit(),
-        )
+        if (days == 0L) {
+            formatDurationHoursMinutes(hours = hours, minutes = minutes)
+        } else {
+            stringResource(
+                Res.string.days_and_double_digit_hours_minutes,
+                days.toStringTwoDigit(),
+                hours.toStringTwoDigit(),
+                minutes.toStringTwoDigit(),
+            )
+        }
     }
 }
 

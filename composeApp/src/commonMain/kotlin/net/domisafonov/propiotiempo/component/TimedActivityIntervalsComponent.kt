@@ -99,27 +99,34 @@ private class TimedActivityIntervalsComponentImpl(
 
     private fun mapToViewModel(
         state: State,
-    ): TimedActivityIntervalsViewModel = TimedActivityIntervalsViewModel(
-        name = state.activityName,
-        intervals = state.intervals
-            .map { interval ->
-                TimedActivityIntervalsViewModel.Interval(
-                    activityId = interval.activityId,
-                    start = interval.start,
-                    end = interval.end,
-                )
-            },
-    )
+    ): TimedActivityIntervalsViewModel = when (state) {
+        is State.Ready -> TimedActivityIntervalsViewModel(
+            name = state.activityName,
+            intervals = state.intervals
+                .map { interval ->
+                    TimedActivityIntervalsViewModel.Interval(
+                        activityId = interval.activityId,
+                        start = interval.start,
+                        end = interval.end ?: state.currentTime,
+                        isActive = interval.end != null,
+                    )
+                },
+        )
+        is State.Initializing -> TimedActivityIntervalsViewModel(
+            name = "",
+            intervals = emptyList(),
+        )
+    }
 
     override fun onNavigateBack() {
         navigateBack()
     }
 
-    override fun onItemClick(startTime: Instant) {
+        override fun onItemClick(startTime: Instant) {
         store.accept(Intent.EditInterval(start = startTime))
     }
 
-    override fun onItemLongClick(startTime: Instant) {
+        override fun onItemLongClick(startTime: Instant) {
         store.accept(Intent.ShowIntervalMenu(start = startTime))
     }
 }

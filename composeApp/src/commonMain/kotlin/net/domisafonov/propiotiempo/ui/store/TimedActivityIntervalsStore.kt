@@ -6,9 +6,11 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
+import net.domisafonov.propiotiempo.data.periodicTimer
 import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUc
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
@@ -30,10 +32,31 @@ interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
     }
 
     @Serializable
-    data class State(
-        val activityName: String,
-        val intervals: List<TimedActivityInterval>,
-    )
+    sealed interface State {
+
+        @Serializable
+        data class Initializing(
+            val activityName: String? = null,
+            val intervals: List<TimedActivityInterval>? = null,
+            val currentTime: Instant? = null,
+        ) : State {
+
+            fun tryInitialize(): State {
+                return Ready(
+                    activityName = activityName ?: return this,
+                    intervals = intervals ?: return this,
+                    currentTime = currentTime ?: return this,
+                )
+            }
+        }
+
+        @Serializable
+        data class Ready(
+            val activityName: String,
+            val intervals: List<TimedActivityInterval>,
+            val currentTime: Instant,
+        ) : State
+    }
 
     sealed interface Label
 
@@ -45,6 +68,7 @@ private object TimedActivityIntervalsStoreInternal {
     sealed interface Action {
         data object SubToActivityName : Action
         data object SubToIntervals : Action
+        data object SubToTime : Action
     }
 
     sealed interface Message {
@@ -56,13 +80,14 @@ private object TimedActivityIntervalsStoreInternal {
         data class UpdateIntervals(
             val intervals: List<TimedActivityInterval>,
         ) : Message
+
+        data class UpdateTime(
+            val time: Instant,
+        ) : Message
     }
 }
 
-val TimedActivityIntervalsStore.Companion.INITIAL_STATE get() = State(
-    activityName = "",
-    intervals = emptyList(),
-)
+val TimedActivityIntervalsStore.Companion.INITIAL_STATE get() = State.Initializing()
 
 fun StoreFactory.makeTimedActivityIntervalsStore(
     stateKeeper: StateKeeper?,
@@ -80,6 +105,7 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
     bootstrapper = coroutineBootstrapper {
         dispatch(Action.SubToActivityName)
         dispatch(Action.SubToIntervals)
+        dispatch(Action.SubToTime)
     },
     executorFactory = coroutineExecutorFactory {
         onAction<Action.SubToActivityName> {
@@ -94,10 +120,25 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
                     .collect { dispatch(Message.UpdateIntervals(intervals = it)) }
             }
         }
+        onAction<Action.SubToTime> {
+            launch {
+                periodicTimer(doEmitMinutely = true)
+                    .collect { dispatch(Message.UpdateTime(time = Clock.System.now())) }
+            }
+        }
     },
-    reducer = { message: Message -> when (message) {
-        is Message.UpdateActivityName -> copy(activityName = message.name)
-        is Message.UpdateIntervals -> copy(intervals = message.intervals)
+    reducer = { message: Message -> when (this) {
+        is State.Initializing -> when (message) {
+            is Message.UpdateActivityName -> copy(activityName = message.name)
+            is Message.UpdateIntervals -> copy(intervals = message.intervals)
+            is Message.UpdateTime -> copy(currentTime = message.time)
+        }.tryInitialize()
+
+        is State.Ready -> when (message) {
+            is Message.UpdateActivityName -> copy(activityName = message.name)
+            is Message.UpdateIntervals -> copy(intervals = message.intervals)
+            is Message.UpdateTime -> copy(currentTime = message.time)
+        }
     } },
 ) {}.also {
     stateKeeper?.register(
