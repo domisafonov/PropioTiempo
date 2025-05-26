@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeContent
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
@@ -89,7 +89,7 @@ private fun BottomNav(
     modifier: Modifier = Modifier,
     rootComponent: RootComponent,
 ) {
-    BottomNavigation(
+    NavigationBar(
         modifier = modifier,
         windowInsets = WindowInsets.safeContent.only(
             WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal
@@ -99,7 +99,7 @@ private fun BottomNav(
         val currentConfigurationTail = stack.items.first().instance
         for (tab in TABS) {
             val label = stringResource(tab.label)
-            BottomNavigationItem(
+            NavigationBarItem(
                 selected = tab.isActive(currentConfigurationTail),
                 onClick = { tab.onClick(rootComponent) },
                 icon = { Icon(painter = painterResource(tab.icon), contentDescription = label) },

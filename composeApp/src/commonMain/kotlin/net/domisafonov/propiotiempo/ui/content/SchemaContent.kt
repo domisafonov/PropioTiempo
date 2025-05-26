@@ -3,7 +3,7 @@ package net.domisafonov.propiotiempo.ui.content
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import net.domisafonov.propiotiempo.component.SchemaComponent

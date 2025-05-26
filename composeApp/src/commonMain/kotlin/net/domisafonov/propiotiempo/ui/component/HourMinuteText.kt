@@ -1,7 +1,7 @@
 package net.domisafonov.propiotiempo.ui.component
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.Instant

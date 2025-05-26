@@ -10,8 +10,8 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -91,8 +91,8 @@ fun<I : Any> WheelPicker(
         oldSelection = currentId
     }
 
-    val surfaceColor = MaterialTheme.colors.surface
-    val transSurfaceColor = MaterialTheme.colors.surface.copy(alpha = 0f)
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val transSurfaceColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f)
     val topFade = paddingHeight / height
     val bottomFade = (height - paddingHeight) / height
     VerticalPager(

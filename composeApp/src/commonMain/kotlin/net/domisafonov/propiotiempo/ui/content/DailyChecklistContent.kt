@@ -1,34 +1,28 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package net.domisafonov.propiotiempo.ui.content
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.tappableElement
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.DailyChecklistComponent
@@ -65,47 +59,40 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
 
     val viewModel by component.viewModel.collectAsState()
 
-    Surface {
+    val scrollState = rememberScrollState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        canScroll = { scrollState.canScrollBackward || scrollState.canScrollForward }
+    )
+
+    Scaffold(
+        modifier = modifier
+            .nestedScroll(connection = scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(
+                        onClick = component::onNavigateBack,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.arrow_back),
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
+                    }
+                },
+                title = { Text(viewModel.name) },
+                windowInsets = TopAppBarDefaults.windowInsets,
+                scrollBehavior = scrollBehavior,
+            )
+        },
+    ) { contentPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.surface)
+                .padding(contentPadding)
                 .verticalScroll(
-                    state = rememberScrollState(),
+                    state = scrollState,
                 ),
         ) {
-            Spacer(
-                modifier = Modifier
-                    .windowInsetsTopHeight(WindowInsets.safeContent)
-            )
-
-            Row(
-                modifier = Modifier.windowInsetsPadding(
-                    WindowInsets.tappableElement.only(WindowInsetsSides.Start)
-                ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = component::onNavigateBack,
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.arrow_back),
-                        contentDescription = stringResource(Res.string.navigate_back)
-                    )
-                }
-                Text(
-                    modifier = Modifier
-                        .windowInsetsPadding(
-                            WindowInsets.safeDrawing
-                                .only(WindowInsetsSides.Horizontal)
-                                .union(WindowInsets(8.dp, 0.dp, 4.dp, 0.dp))
-                        )
-                        .padding(vertical = 12.dp),
-                    text = viewModel.name,
-                    style = MaterialTheme.typography.h5,
-                )
-            }
-
             viewModel.items.forEachIndexed { i, item ->
                 DailyChecklistItem(
                     modifier = Modifier
@@ -187,7 +174,7 @@ private fun DailyChecklistItemName(
             modifier = modifier,
             maxLines = 1,
             text = viewModel.name,
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }

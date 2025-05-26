@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -74,7 +74,7 @@ fun ActivitiesContent(modifier: Modifier = Modifier, component: ActivitiesCompon
 
     LazyColumn(
         modifier = modifier.fillMaxSize()
-            .background(MaterialTheme.colors.surface)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         item {
             Spacer(
@@ -180,7 +180,7 @@ fun TimeActivityItem(
                     .weight(1f),
                 maxLines = 1,
                 text = viewModel.name,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             if (viewModel.isActive) {
@@ -218,7 +218,7 @@ fun ChecklistItem(
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 text = viewModel.name,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             val (icon, description) = if (viewModel.isCompleted) {
