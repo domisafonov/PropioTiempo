@@ -100,7 +100,15 @@ private class TimedActivityIntervalsComponentImpl(
     private fun mapToViewModel(
         state: State,
     ): TimedActivityIntervalsViewModel = TimedActivityIntervalsViewModel(
-        x = 1,
+        name = state.activityName,
+        intervals = state.intervals
+            .map { interval ->
+                TimedActivityIntervalsViewModel.Interval(
+                    activityId = interval.activityId,
+                    start = interval.start,
+                    end = interval.end,
+                )
+            },
     )
 
     override fun onNavigateBack() {

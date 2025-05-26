@@ -18,7 +18,9 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.days_and_double_digit_hours_minutes
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes
+import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes_range
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
@@ -98,21 +100,72 @@ private fun Clock.localTime(
     .toLocalTime(timeZone = timeZone)
 
 @Composable
-fun formatDurationHoursMinutes(seconds: Int): String {
+fun formatDurationHoursMinutes(seconds: Int): String =
     seconds.seconds.toComponents { hours, minutes, _, _ ->
-        val hs = hours.toString().padStart(length = 2, padChar = '0')
-        val ms = minutes.toString().padStart(length = 2, padChar = '0')
-        return stringResource(Res.string.double_digit_hours_minutes, hs, ms)
+        formatInstantHoursMinutes(hours = hours, minutes = minutes)
     }
+
+@Composable
+fun formatInstantHoursMinutes(
+    instant: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String {
+    val time = instant.toLocalDateTime(timeZone = timeZone).time
+    return formatInstantHoursMinutes(hours = time.hour.toLong(), minutes = time.minute)
 }
 
 @Composable
-fun formatInstantHoursMinutes(instant: Instant): String {
-    val time = instant.toLocalDateTime(TimeZone.currentSystemDefault()).time
-    val hs = time.hour.toString().padStart(length = 2, padChar = '0')
-    val ms = time.minute.toString().padStart(length = 2, padChar = '0')
-    return stringResource(Res.string.double_digit_hours_minutes, hs, ms)
+fun formatInstantHoursMinutes(
+    hours: Long,
+    minutes: Int,
+): String {
+    require(hours in 0 .. 23)
+    require(minutes in 0 .. 59)
+    return stringResource(
+        Res.string.double_digit_hours_minutes,
+        hours.toStringTwoDigit(),
+        minutes.toStringTwoDigit(),
+    )
 }
+
+@Composable
+fun formatInstantRangeHoursMinutes(
+    start: Instant,
+    end: Instant,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String {
+    require(start <= end)
+    val startTime = start.toLocalDateTime(timeZone = timeZone)
+    val endTime = end.toLocalDateTime(timeZone = timeZone)
+    return stringResource(
+        Res.string.double_digit_hours_minutes_range,
+        startTime.hour.toStringTwoDigit(),
+        startTime.minute.toStringTwoDigit(),
+        endTime.hour.toStringTwoDigit(),
+        endTime.minute.toStringTwoDigit(),
+    )
+}
+
+@Composable
+fun formatDurationDaysHoursMinutes(
+    start: Instant,
+    end: Instant,
+): String {
+    require(start <= end)
+    return (end - start).toComponents { days, hours, minutes, _, _  ->
+        stringResource(
+            Res.string.days_and_double_digit_hours_minutes,
+            days.toStringTwoDigit(),
+            hours.toStringTwoDigit(),
+            minutes.toStringTwoDigit(),
+        )
+    }
+}
+
+private fun Int.toStringTwoDigit(): String =
+    toString().padStart(length = 2, padChar = '0')
+private fun Long.toStringTwoDigit(): String =
+    toString().padStart(length = 2, padChar = '0')
 
 fun LocalTime.withHour(hour: Int) =
     LocalTime(
