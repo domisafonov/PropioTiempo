@@ -5,8 +5,13 @@ package net.domisafonov.propiotiempo.ui.content
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,13 +65,20 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
     val viewModel by component.viewModel.collectAsState()
 
     val scrollState = rememberScrollState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
-        canScroll = { scrollState.canScrollBackward || scrollState.canScrollForward }
-    )
+    val scrollBehavior = if (scrollState.canScrollBackward || scrollState.canScrollForward) {
+        TopAppBarDefaults.enterAlwaysScrollBehavior()
+    } else {
+        null
+    }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.safeContent.only(WindowInsetsSides.Top),
         modifier = modifier
-            .nestedScroll(connection = scrollBehavior.nestedScrollConnection),
+            .run {
+                scrollBehavior
+                    ?.let { nestedScroll(connection = it.nestedScrollConnection) }
+                    ?: this
+                 },
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -89,6 +101,7 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
             modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
+                .consumeWindowInsets(contentPadding)
                 .verticalScroll(
                     state = scrollState,
                 ),

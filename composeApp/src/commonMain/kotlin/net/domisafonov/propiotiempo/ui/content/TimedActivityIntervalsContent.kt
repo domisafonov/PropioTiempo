@@ -3,8 +3,8 @@
 package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,13 +48,19 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
     val viewModel by component.viewModel.collectAsState()
 
     val listState = rememberLazyListState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
-        canScroll = { listState.canScrollForward || listState.canScrollBackward }
-    )
+    val scrollBehavior = if (listState.canScrollForward || listState.canScrollBackward) {
+        TopAppBarDefaults.enterAlwaysScrollBehavior()
+    } else {
+        null
+    }
 
     Scaffold(
         modifier = modifier
-            .nestedScroll(connection = scrollBehavior.nestedScrollConnection),
+            .run {
+                scrollBehavior
+                    ?.let { nestedScroll(connection = it.nestedScrollConnection) }
+                    ?: this
+            },
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -75,7 +81,8 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
     ) { contentPadding ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .consumeWindowInsets(contentPadding),
             state = listState,
             contentPadding = contentPadding,
         ) {
