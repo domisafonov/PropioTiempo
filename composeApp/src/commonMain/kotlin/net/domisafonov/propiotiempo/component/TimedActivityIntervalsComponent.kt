@@ -108,7 +108,7 @@ private class TimedActivityIntervalsComponentImpl(
                         activityId = interval.activityId,
                         start = interval.start,
                         end = interval.end ?: state.currentTime,
-                        isActive = interval.end != null,
+                        isActive = interval.end == null,
                     )
                 },
         )

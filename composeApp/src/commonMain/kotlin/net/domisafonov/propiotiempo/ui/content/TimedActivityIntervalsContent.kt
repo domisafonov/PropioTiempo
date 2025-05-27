@@ -130,12 +130,12 @@ private fun IntervalItem(
                 modifier = Modifier
                     .weight(1f),
                 text = if (viewModel.isActive) {
+                    formatInstantHoursMinutes(instant = viewModel.start)
+                } else {
                     formatInstantRangeHoursMinutes(
                         start = viewModel.start,
                         end = viewModel.end,
                     )
-                } else {
-                    formatInstantHoursMinutes(instant = viewModel.start)
                 },
                 style = MaterialTheme.typography.numericTimeBody,
             )
