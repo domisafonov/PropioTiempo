@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import propiotiempo.composeapp.generated.resources.stop_timed_activity
 import propiotiempo.composeapp.generated.resources.timed_activities_header
 import propiotiempo.composeapp.generated.resources.timed_activity_in_progress
 
+@Immutable
 data class ActivitiesViewModel(
     val dailyChecklists: List<Checklist>,
     val timeActivities: List<TimeActivity>,
@@ -53,12 +55,14 @@ data class ActivitiesViewModel(
     val areTimeActivitiesShown: Boolean,
 ) {
     // TODO: add n/m label
+    @Immutable
     data class Checklist(
         val id: Long,
         val name: String,
         val isCompleted: Boolean
     )
 
+    @Immutable
     data class TimeActivity(
         val id: Long,
         val name: String,

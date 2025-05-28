@@ -2,13 +2,15 @@
 
 package net.domisafonov.propiotiempo.ui.content
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
@@ -24,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +38,7 @@ import net.domisafonov.propiotiempo.component.DailyChecklistComponent
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.HourMinuteText
 import net.domisafonov.propiotiempo.ui.component.ListItem
+import net.domisafonov.propiotiempo.ui.component.PaddedScaffoldContent
 import net.domisafonov.propiotiempo.ui.unfilledBody
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -49,12 +53,14 @@ import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
 
+@Immutable
 data class DailyChecklistViewModel(
     val name: String,
     val items: List<Item>,
 ) {
+    @Immutable
     data class Item(
-val id: Long,
+        val id: Long,
         val name: String?,
         val checkedTime: Instant?,
     )
@@ -98,36 +104,50 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
             )
         },
     ) { contentPadding ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .consumeWindowInsets(contentPadding)
-                .verticalScroll(
-                    state = scrollState,
-                ),
-        ) {
-            viewModel.items.forEachIndexed { i, item ->
-                DailyChecklistItem(
-                    modifier = Modifier
-                        .combinedClickable(
-                            onClickLabel = stringResource(
-                                if (item.checkedTime == null) {
-                                    Res.string.daily_checklist_item_check
-                                } else {
-                                    Res.string.daily_checklist_item_uncheck
-                                }
-                            ),
-                            onLongClickLabel = "TODO",
-                            onClick = { component.onItemClick(item.id) },
-                            onLongClick = { component.onItemLongClick(item.id) }
-                        )
-                        .minimumInteractiveComponentSize(),
-                    viewModel = item,
-                    listIndex = i,
-                )
-                HorizontalDivider()
-            }
+        PaddedScaffoldContent(contentPadding) {
+            ContentBody(
+                component = component,
+                viewModel = viewModel,
+                scrollState = scrollState,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContentBody(
+    modifier: Modifier = Modifier,
+    component: DailyChecklistComponent.Callbacks,
+    viewModel: DailyChecklistViewModel,
+    scrollState: ScrollState,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(
+                state = scrollState,
+            ),
+    ) {
+        viewModel.items.forEachIndexed { i, item ->
+            DailyChecklistItem(
+                modifier = Modifier
+                    .combinedClickable(
+                        onClickLabel = stringResource(
+                            if (item.checkedTime == null) {
+                                Res.string.daily_checklist_item_check
+                            } else {
+                                Res.string.daily_checklist_item_uncheck
+                            }
+                        ),
+                        onLongClickLabel = "TODO",
+                        onClick = { component.onItemClick(item.id) },
+                        onLongClick = { component.onItemLongClick(item.id) }
+                    )
+                    .minimumInteractiveComponentSize(),
+                viewModel = item,
+                listIndex = i,
+            )
+            HorizontalDivider()
         }
     }
 }

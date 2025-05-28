@@ -37,13 +37,15 @@ import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
 import net.domisafonov.propiotiempo.data.repository.makeSettingsRepositoryImpl
 import net.domisafonov.propiotiempo.ui.singleUse
 
-interface RootComponent : ComponentContext, DialogContainer {
+interface RootComponent : ComponentContext, DialogContainer, RootComponent.Callbacks {
 
     val screenStack: Value<ChildStack<*, Child>>
     val dialogSlot: Value<ChildSlot<*, Dialog>>
 
-    fun onActivitiesSelection()
-    fun onSchemaSelection()
+    interface Callbacks {
+        fun onActivitiesSelection()
+        fun onSchemaSelection()
+    }
 
     sealed interface Child {
         data class Activities(val component: ActivitiesComponent) : Child

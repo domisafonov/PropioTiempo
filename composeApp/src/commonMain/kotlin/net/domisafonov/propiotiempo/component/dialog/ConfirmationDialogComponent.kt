@@ -11,13 +11,15 @@ import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer.ConfirmationResult
 import net.domisafonov.propiotiempo.ui.content.dialog.ConfirmationDialogViewModel
 
-interface ConfirmationDialogComponent : DialogComponent {
+interface ConfirmationDialogComponent : DialogComponent, ConfirmationDialogComponent.Callbacks {
 
     val viewModel: StateFlow<ConfirmationDialogViewModel>
 
-    fun onConfirm()
-    fun onCancel()
-    fun onDismiss()
+    interface Callbacks {
+        fun onConfirm()
+        fun onCancel()
+        fun onDismiss()
+    }
 }
 
 fun makeConfirmationDialogComponent(

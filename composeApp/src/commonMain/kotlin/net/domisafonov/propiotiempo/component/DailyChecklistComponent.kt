@@ -35,13 +35,15 @@ import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck_confirmation
 import propiotiempo.composeapp.generated.resources.edit_time_dialog_title
 
-interface DailyChecklistComponent : ComponentContext {
+interface DailyChecklistComponent : ComponentContext, DailyChecklistComponent.Callbacks {
 
     val viewModel: StateFlow<DailyChecklistViewModel>
 
-    fun onNavigateBack()
-    fun onItemClick(id: Long)
-    fun onItemLongClick(id: Long)
+    interface Callbacks {
+        fun onNavigateBack()
+        fun onItemClick(id: Long)
+        fun onItemLongClick(id: Long)
+    }
 }
 
 fun makeDailyChecklistComponent(

@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.edit_dialog_cancel
 import propiotiempo.composeapp.generated.resources.edit_dialog_confirm
 
+@Immutable
 data class EditTimeDialogViewModel(
     val title: String,
     val time: LocalTime,

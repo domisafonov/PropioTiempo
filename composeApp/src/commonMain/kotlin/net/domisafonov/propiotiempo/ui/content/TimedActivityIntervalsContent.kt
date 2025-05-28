@@ -5,10 +5,12 @@ package net.domisafonov.propiotiempo.ui.content
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,10 +47,12 @@ import propiotiempo.composeapp.generated.resources.arrow_back
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
 
+@Immutable
 data class TimedActivityIntervalsViewModel(
     val name: String,
     val intervals: List<Interval>,
 ) {
+    @Immutable
     data class Interval(
         val activityId: Long,
         val start: Instant,

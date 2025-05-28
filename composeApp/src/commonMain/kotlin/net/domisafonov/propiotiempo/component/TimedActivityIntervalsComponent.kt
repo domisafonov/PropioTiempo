@@ -26,13 +26,15 @@ import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.State
 import net.domisafonov.propiotiempo.ui.store.makeTimedActivityIntervalsStore
 
-interface TimedActivityIntervalsComponent : ComponentContext {
+interface TimedActivityIntervalsComponent : ComponentContext, TimedActivityIntervalsComponent.Callbacks {
 
     val viewModel: StateFlow<TimedActivityIntervalsViewModel>
 
-    fun onNavigateBack()
-    fun onItemClick(startTime: Instant)
-    fun onItemLongClick(startTime: Instant)
+    interface Callbacks {
+        fun onNavigateBack()
+        fun onItemClick(startTime: Instant)
+        fun onItemLongClick(startTime: Instant)
+    }
 }
 
 fun makeTimedActivityIntervalsComponent(
