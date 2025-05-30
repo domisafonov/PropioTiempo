@@ -40,6 +40,7 @@ import net.domisafonov.propiotiempo.data.formatInstantRangeHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.ListItem
 import net.domisafonov.propiotiempo.ui.numericTimeBody
+import net.domisafonov.propiotiempo.ui.stickyRememberBoolean
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
@@ -67,7 +68,10 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
     val viewModel by component.viewModel.collectAsState()
 
     val listState = rememberLazyListState()
-    val scrollBehavior = if (listState.canScrollForward || listState.canScrollBackward) {
+    val isScrollEnabled = stickyRememberBoolean {
+        listState.canScrollForward || listState.canScrollBackward
+    }
+    val scrollBehavior = if (isScrollEnabled) {
         TopAppBarDefaults.enterAlwaysScrollBehavior()
     } else {
         null

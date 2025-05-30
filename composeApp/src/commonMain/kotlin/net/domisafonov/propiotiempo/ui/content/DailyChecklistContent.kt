@@ -39,6 +39,7 @@ import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.HourMinuteText
 import net.domisafonov.propiotiempo.ui.component.ListItem
 import net.domisafonov.propiotiempo.ui.component.PaddedScaffoldContent
+import net.domisafonov.propiotiempo.ui.stickyRememberBoolean
 import net.domisafonov.propiotiempo.ui.unfilledBody
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -72,7 +73,10 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
     val viewModel by component.viewModel.collectAsState()
 
     val scrollState = rememberScrollState()
-    val scrollBehavior = if (scrollState.canScrollBackward || scrollState.canScrollForward) {
+    val isScrollEnabled = stickyRememberBoolean {
+        scrollState.canScrollBackward || scrollState.canScrollForward
+    }
+    val scrollBehavior = if (isScrollEnabled) {
         TopAppBarDefaults.enterAlwaysScrollBehavior()
     } else {
         null
