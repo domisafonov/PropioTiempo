@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
+import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.toLocalTime
@@ -144,6 +145,7 @@ private class DailyChecklistComponentImpl(
                         )
                     )
                 }
+                is Label.Error -> dialogContainer.showErrorDialog(message = label.inner.message)
             } }
         }
     }

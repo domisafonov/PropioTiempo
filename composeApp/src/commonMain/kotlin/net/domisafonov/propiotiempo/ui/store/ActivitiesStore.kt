@@ -42,6 +42,7 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     sealed interface Label {
         data class NavigateToDailyChecklist(val id: Long) : Label
         data class NavigateToTimedActivityIntervals(val id: Long) : Label
+        data class Error(val inner: Exception) : Label
     }
 
     companion object
@@ -162,6 +163,7 @@ fun StoreFactory.makeActivitiesStore(
         onIntent<Intent.ToggleTimedActivity> {
             launch {
                 toggleTimedActivityUc.execute(id = it.id)
+                    ?.let { publish(Label.Error(it)) }
             }
         }
 

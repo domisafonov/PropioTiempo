@@ -29,4 +29,6 @@
   <string name="navigate_back">Navigate back</string>
   <string name="daily_checklist_item_check">Complete</string>
   <string name="daily_checklist_item_uncheck">Cancel completion</string>
+  <string name="default_error_title">Error</string>
+  <string name="default_error_message">Error occurred</string>
 </resources>

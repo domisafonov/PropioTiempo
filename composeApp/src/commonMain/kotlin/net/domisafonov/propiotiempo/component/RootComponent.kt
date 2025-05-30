@@ -108,6 +108,7 @@ class RootComponentImpl(
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
             ioDispatcher = Dispatchers.IO,
+            dialogContainer = this,
             navigateToChecklist = { id ->
                 screenNavigation.pushNew(ScreenConfig.DailyChecklist(id = id))
             },

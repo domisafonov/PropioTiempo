@@ -1,6 +1,10 @@
 package net.domisafonov.propiotiempo.component.dialog
 
 import kotlinx.datetime.LocalTime
+import org.jetbrains.compose.resources.getString
+import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.default_error_message
+import propiotiempo.composeapp.generated.resources.default_error_title
 
 interface DialogContainer {
 
@@ -39,4 +43,25 @@ interface DialogContainer {
         data object Cancelled : EditTimeResult
         data object Dismissed : EditTimeResult
     }
+}
+
+suspend fun DialogContainer.showErrorDialog(
+    title: String? = null,
+    message: String? = null,
+): DialogContainer.InfoResult? {
+
+    require(title == null || message != null)
+
+    val title = title
+        ?: if (message == null) {
+            null
+        } else {
+            getString(Res.string.default_error_title)
+        }
+    val message = message ?: getString(Res.string.default_error_message)
+
+    return showInfoDialog(
+        title = title,
+        message = message,
+    )
 }

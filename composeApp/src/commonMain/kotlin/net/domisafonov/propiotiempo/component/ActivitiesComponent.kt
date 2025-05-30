@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import net.domisafonov.propiotiempo.component.dialog.DialogContainer
+import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -48,6 +50,7 @@ fun makeActivitiesComponent(
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
     ioDispatcher: CoroutineDispatcher,
+    dialogContainer: DialogContainer,
     navigateToChecklist: (Long) -> Unit,
     navigateToTimedActivityIntervals: (Long) -> Unit,
 ): ActivitiesComponent = ActivitiesComponentImpl(
@@ -57,6 +60,7 @@ fun makeActivitiesComponent(
     settingsRepositoryProvider = settingsRepositoryProvider,
     mainDispatcher = mainDispatcher,
     ioDispatcher = ioDispatcher,
+    dialogContainer = dialogContainer,
     navigateToChecklist = navigateToChecklist,
     navigateToTimedActivityIntervals = navigateToTimedActivityIntervals,
 )
@@ -68,6 +72,7 @@ private class ActivitiesComponentImpl(
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
     ioDispatcher: CoroutineDispatcher,
+    dialogContainer: DialogContainer,
     navigateToChecklist: (id: Long) -> Unit,
     navigateToTimedActivityIntervals: (id: Long) -> Unit,
 ) : ActivitiesComponent, ComponentContext by componentContext {
@@ -98,11 +103,13 @@ private class ActivitiesComponentImpl(
 
     init {
         scope.launch {
-            store.labels.collect {
-                when (it) {
-                    is Label.NavigateToDailyChecklist -> navigateToChecklist(it.id)
+            store.labels.collect { label ->
+                when (label) {
+                    is Label.NavigateToDailyChecklist -> navigateToChecklist(label.id)
                     is Label.NavigateToTimedActivityIntervals ->
-                        navigateToTimedActivityIntervals(it.id)
+                        navigateToTimedActivityIntervals(label.id)
+                    is Label.Error ->
+                        dialogContainer.showErrorDialog(message = label.inner.message)
                 }
             }
         }

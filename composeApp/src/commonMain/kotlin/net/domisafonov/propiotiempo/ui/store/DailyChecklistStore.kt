@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.error.ModificationError
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
@@ -53,6 +54,7 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
     sealed interface Label {
         data class ConfirmUncheckingItem(val id: Long): Label
         data class EditCheckingTime(val id: Long) : Label
+        data class Error(val inner: ModificationError) : Label
     }
 
     companion object
@@ -121,6 +123,7 @@ fun StoreFactory.makeDailyChecklistStore(
             if (item.checkedTime == null) {
                 launch {
                     checkDailyChecklistItemUc.execute(dailyChecklistItemId = intent.id)
+                        ?.let { publish(Label.Error(it)) }
                 }
             } else {
                 publish(Label.ConfirmUncheckingItem(id = intent.id))
@@ -133,19 +136,23 @@ fun StoreFactory.makeDailyChecklistStore(
             val checkedTime = state().items.find { it.id == intent.id }?.checkedTime
                 ?: return@onIntent // TODO: logging
             launch {
-                uncheckDailyChecklistItemUc.execute(
-                    dailyChecklistItemId = intent.id,
-                    time = checkedTime,
-                )
+                uncheckDailyChecklistItemUc
+                    .execute(
+                        dailyChecklistItemId = intent.id,
+                        time = checkedTime,
+                    )
+                    ?.let { publish(Label.Error(it)) }
             }
         }
         onIntent<Intent.UpdateItemsTime> { intent ->
             launch {
-                updateDailyChecklistCheckTimeUc.execute(
-                    dailyChecklistItemId = intent.itemId,
-                    oldTime = intent.oldTime,
-                    newTime = intent.newTime,
-                )
+                updateDailyChecklistCheckTimeUc
+                    .execute(
+                        dailyChecklistItemId = intent.itemId,
+                        oldTime = intent.oldTime,
+                        newTime = intent.newTime,
+                    )
+                    ?.let { publish(Label.Error(it)) }
             }
         }
     },

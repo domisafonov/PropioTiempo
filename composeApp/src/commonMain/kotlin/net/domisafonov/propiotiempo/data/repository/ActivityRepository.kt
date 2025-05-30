@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
+import net.domisafonov.propiotiempo.data.error.ModificationError
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
@@ -33,7 +34,10 @@ interface ActivityRepository {
         dayStart: Instant,
     ): Flow<List<TimedActivitySummary>>
 
-    suspend fun toggleTimedActivity(timedActivityId: Long, now: Instant)
+    suspend fun toggleTimedActivity(
+        timedActivityId: Long,
+        now: Instant,
+    ): ModificationError?
 
     fun observeActivityName(id: Long): Flow<String>
 
@@ -48,18 +52,18 @@ interface ActivityRepository {
     suspend fun insertDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    )
+    ): ModificationError?
 
     suspend fun deleteDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    )
+    ): ModificationError?
 
     suspend fun updateDailyChecklistCheckTime(
         dailyChecklistItemId: Long,
         oldTime: Instant,
         newTime: Instant,
-    )
+    ): ModificationError?
 
     fun observeDaysTimedActivityIntervals(
         activityId: Long,
@@ -107,12 +111,11 @@ class ActivityRepositoryImpl(
             .asFlow()
             .mapToList(ioDispatcher)
 
-    // TODO: error handling
     override suspend fun toggleTimedActivity(
         timedActivityId: Long,
         now: Instant,
-    ) {
-        withContext(ioDispatcher) {
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
             dbQueries.transactionWithResult {
                 val startTime = dbQueries
                     .get_active_time_activity_interval(activity_id = timedActivityId)
@@ -130,6 +133,9 @@ class ActivityRepositoryImpl(
                     )
                 }
             }
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
         }
     }
 
@@ -160,24 +166,30 @@ class ActivityRepositoryImpl(
     override suspend fun insertDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ) {
-        withContext(ioDispatcher) {
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
             dbQueries.insert_daily_checklist_check(
                 daily_checklist_item_id = dailyChecklistItemId,
                 time = time,
             )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
         }
     }
 
     override suspend fun deleteDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ) {
-        withContext(ioDispatcher) {
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
             dbQueries.delete_daily_checklist_check(
                 daily_checklist_item_id = dailyChecklistItemId,
                 time = time,
             )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
         }
     }
 
@@ -185,13 +197,16 @@ class ActivityRepositoryImpl(
         dailyChecklistItemId: Long,
         oldTime: Instant,
         newTime: Instant,
-    ) {
-        withContext(ioDispatcher) {
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
             dbQueries.update_daily_checklist_check_time(
                 new_time = newTime,
                 daily_checklist_item_id = dailyChecklistItemId,
                 old_time = oldTime,
             )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
         }
     }
 
