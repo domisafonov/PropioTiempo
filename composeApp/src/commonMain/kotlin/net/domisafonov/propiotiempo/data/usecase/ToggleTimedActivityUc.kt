@@ -10,6 +10,7 @@ fun interface ToggleTimedActivityUc {
 
 class ToggleTimedActivityUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
+    private val clock: Clock,
 ) : ToggleTimedActivityUc {
 
     private val activityRepository by activityRepositoryProvider
@@ -18,6 +19,6 @@ class ToggleTimedActivityUcImpl(
         activityRepository
             .toggleTimedActivity(
                 timedActivityId = id,
-                now = Clock.System.now(),
+                now = clock.now(),
             )
 }

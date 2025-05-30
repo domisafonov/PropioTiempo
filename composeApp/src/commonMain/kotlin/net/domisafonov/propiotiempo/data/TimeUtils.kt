@@ -22,12 +22,11 @@ import propiotiempo.composeapp.generated.resources.days_and_double_digit_hours_m
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes
 import propiotiempo.composeapp.generated.resources.double_digit_hours_minutes_range
 import kotlin.math.min
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-fun getDayStart(): Instant {
+fun getDayStart(clock: Clock): Instant {
     val timezone = TimeZone.currentSystemDefault()
-    return Clock.System.now()
+    return clock.now()
         .toLocalDateTime(timeZone = timezone)
         .date
         .atTime(LocalTime.fromSecondOfDay(0))
@@ -35,6 +34,7 @@ fun getDayStart(): Instant {
 }
 
 fun<T : Any> resetPeriodically(
+    clock: Clock,
     dayTime: LocalTime? = LocalTime.fromSecondOfDay(0),
     doResetMinutely: Boolean = false,
     emitAtStart: Boolean = true,
@@ -42,6 +42,7 @@ fun<T : Any> resetPeriodically(
 ): Flow<T> {
     require (dayTime != null || doResetMinutely)
     return periodicTimer(
+        clock = clock,
         emitAt = dayTime,
         doEmitMinutely = doResetMinutely,
         emitAtStart = emitAtStart,
@@ -49,6 +50,7 @@ fun<T : Any> resetPeriodically(
 }
 
 fun periodicTimer(
+    clock: Clock,
     emitAt: LocalTime? = null,
     doEmitMinutely: Boolean = false,
     emitAtStart: Boolean = true,
@@ -59,7 +61,7 @@ fun periodicTimer(
         emit(Unit)
     }
     while (true) {
-        val now = Clock.System.localTime()
+        val now = clock.localTime()
         val one = emitAt
             ?.let { millisToDayTime(dayTime = emitAt, now = now) }
             ?: Long.MAX_VALUE
@@ -75,7 +77,7 @@ fun periodicTimer(
 
 private fun millisToDayTime(
     dayTime: LocalTime,
-    now: LocalTime = Clock.System.localTime(),
+    now: LocalTime,
 ): Long {
     val millisecondOfToday = now.toMillisecondOfDay()
     val diff = millisecondOfToday - dayTime.toMillisecondOfDay()
@@ -86,7 +88,7 @@ private fun millisToDayTime(
     }.toLong()
 }
 
-private fun millisToMinuteEnd(now: LocalTime = Clock.System.localTime()): Long =
+private fun millisToMinuteEnd(now: LocalTime): Long =
     (60_000_000_000L - (now.second * 1_000_000_000L + now.nanosecond)) /
         1_000_000L
 

@@ -13,16 +13,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
+import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
+import net.domisafonov.propiotiempo.data.atDateOf
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
+import net.domisafonov.propiotiempo.data.toLocalTime
+import net.domisafonov.propiotiempo.data.usecase.DeleteTimedActivityIntervalUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUcImpl
+import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalStartUcImpl
+import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalTimeUcImpl
 import net.domisafonov.propiotiempo.ui.content.TimedActivityIntervalsViewModel
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
+import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Label
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.State
 import net.domisafonov.propiotiempo.ui.store.makeTimedActivityIntervalsStore
 
@@ -43,6 +51,7 @@ fun makeTimedActivityIntervalsComponent(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
+    clock: Clock,
     timedActivityId: Long,
     dialogContainer: DialogContainer,
     navigateBack: () -> Unit,
@@ -52,6 +61,7 @@ fun makeTimedActivityIntervalsComponent(
     activityRepositoryProvider = activityRepositoryProvider,
     settingsRepositoryProvider = settingsRepositoryProvider,
     mainDispatcher = mainDispatcher,
+    clock = clock,
     timedActivityId = timedActivityId,
     dialogContainer = dialogContainer,
     navigateBack = navigateBack,
@@ -63,6 +73,7 @@ private class TimedActivityIntervalsComponentImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
+    clock: Clock,
     timedActivityId: Long,
     dialogContainer: DialogContainer,
     private val navigateBack: () -> Unit,
@@ -73,10 +84,23 @@ private class TimedActivityIntervalsComponentImpl(
     private val store = instanceKeeper.getStore(key = TimedActivityIntervalsStore::class) {
         storeFactory.makeTimedActivityIntervalsStore(
             stateKeeper = stateKeeper,
+            clock = clock,
             observeActivityNameUc = ObserveActivityNameUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
             observeDaysTimedActivityIntervalsUc = ObserveDaysTimedActivityIntervalsUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+                clock = clock,
+            ),
+            updateTimedActivityIntervalStartUc = UpdateTimedActivityIntervalStartUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+                clock = clock,
+            ),
+            updateTimedActivityIntervalTimeUc = UpdateTimedActivityIntervalTimeUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+                clock = clock,
+            ),
+            deleteTimedActivityIntervalUc = DeleteTimedActivityIntervalUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
             ),
             timedActivityId = timedActivityId,
@@ -86,7 +110,25 @@ private class TimedActivityIntervalsComponentImpl(
     init {
         scope.launch {
             store.labels.collect { label -> when (label) {
-                else -> Unit
+                is Label.EditIntervalStart -> {
+                    val res = dialogContainer
+                        .showEditTimeDialog(
+                            title = "TODO",
+                            time = label.intervalStart.toLocalTime(),
+                        )
+                        as? DialogContainer.EditTimeResult.Confirmed
+                    store.accept(
+                        Intent.IntervalStartEditConfirmed(
+                            oldStart = label.intervalStart,
+                            newStart = res?.time?.atDateOf(label.intervalStart)
+                                ?: return@collect,
+                        )
+                    )
+                }
+                is Label.EditInterval -> TODO()
+                is Label.ShowMenu -> TODO()
+                is Label.Error ->
+                    dialogContainer.showErrorDialog(message = label.inner.message)
             } }
         }
     }
@@ -124,11 +166,11 @@ private class TimedActivityIntervalsComponentImpl(
         navigateBack()
     }
 
-        override fun onItemClick(startTime: Instant) {
+    override fun onItemClick(startTime: Instant) {
         store.accept(Intent.EditInterval(start = startTime))
     }
 
-        override fun onItemLongClick(startTime: Instant) {
+    override fun onItemLongClick(startTime: Instant) {
         store.accept(Intent.ShowIntervalMenu(start = startTime))
     }
 }

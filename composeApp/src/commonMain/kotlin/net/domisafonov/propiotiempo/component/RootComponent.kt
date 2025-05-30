@@ -18,6 +18,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.component.dialog.ConfirmationDialogComponent
@@ -108,6 +109,7 @@ class RootComponentImpl(
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
             ioDispatcher = Dispatchers.IO,
+            clock = Clock.System,
             dialogContainer = this,
             navigateToChecklist = { id ->
                 screenNavigation.pushNew(ScreenConfig.DailyChecklist(id = id))
@@ -131,6 +133,7 @@ class RootComponentImpl(
             activityRepositoryProvider = activityRepositoryProvider,
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
+            clock = Clock.System,
             dailyChecklistId = dailyChecklistId,
             dialogContainer = this,
             navigateBack = { screenNavigation.pop() }.singleUse,
@@ -143,6 +146,7 @@ class RootComponentImpl(
             activityRepositoryProvider = activityRepositoryProvider,
             settingsRepositoryProvider = settingsRepositoryProvider,
             mainDispatcher = Dispatchers.Main.immediate,
+            clock = Clock.System,
             timedActivityId = timedActivityId,
             dialogContainer = this,
             navigateBack = { screenNavigation.pop() }.singleUse,

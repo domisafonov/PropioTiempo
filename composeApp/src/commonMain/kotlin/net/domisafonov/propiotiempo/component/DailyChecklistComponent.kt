@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -53,6 +54,7 @@ fun makeDailyChecklistComponent(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
+    clock: Clock,
     dailyChecklistId: Long,
     dialogContainer: DialogContainer,
     navigateBack: () -> Unit,
@@ -62,6 +64,7 @@ fun makeDailyChecklistComponent(
     activityRepositoryProvider = activityRepositoryProvider,
     settingsRepositoryProvider = settingsRepositoryProvider,
     mainDispatcher = mainDispatcher,
+    clock = clock,
     dailyChecklistId = dailyChecklistId,
     dialogContainer = dialogContainer,
     navigateBack = navigateBack,
@@ -73,6 +76,7 @@ private class DailyChecklistComponentImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     settingsRepositoryProvider: Lazy<SettingsRepository>,
     mainDispatcher: CoroutineDispatcher,
+    clock: Clock,
     dailyChecklistId: Long,
     dialogContainer: DialogContainer,
     private val navigateBack: () -> Unit,
@@ -88,9 +92,11 @@ private class DailyChecklistComponentImpl(
             ),
             observeDailyChecklistItemsUc = ObserveDailyChecklistItemsUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
+                clock = clock,
             ),
             checkDailyChecklistItemUc = CheckDailyChecklistItemUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
+                clock = clock,
             ),
             uncheckDailyChecklistItemUc = UncheckDailyChecklistItemUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,

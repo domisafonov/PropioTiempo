@@ -10,6 +10,7 @@ fun interface CheckDailyChecklistItemUc {
 
 class CheckDailyChecklistItemUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
+    private val clock: Clock,
 ) : CheckDailyChecklistItemUc {
 
     private val activityRepository by activityRepositoryProvider
@@ -17,6 +18,6 @@ class CheckDailyChecklistItemUcImpl(
     override suspend fun execute(dailyChecklistItemId: Long): ModificationError? =
         activityRepository.insertDailyChecklistCheck(
             dailyChecklistItemId = dailyChecklistItemId,
-            time = Clock.System.now(),
+            time = clock.now(),
         )
 }

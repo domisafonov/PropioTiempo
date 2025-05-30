@@ -7,6 +7,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.PtSettings
 import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
@@ -42,7 +43,7 @@ interface ActivitiesStore : Store<Intent, State, Label> {
     sealed interface Label {
         data class NavigateToDailyChecklist(val id: Long) : Label
         data class NavigateToTimedActivityIntervals(val id: Long) : Label
-        data class Error(val inner: Exception) : Label
+        data class Error(val inner: PtError) : Label
     }
 
     companion object

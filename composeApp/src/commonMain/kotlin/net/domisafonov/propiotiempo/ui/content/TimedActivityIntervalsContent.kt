@@ -113,7 +113,16 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
                 Column {
                     IntervalItem(
                         modifier = Modifier
-                            .combinedClickable {} // TODO
+                            .combinedClickable(
+                                onClickLabel = "TODO",
+                                onLongClickLabel = "TODO",
+                                onLongClick = {
+                                    component.onItemLongClick(startTime = item.start)
+                                },
+                                onClick = {
+                                    component.onItemClick(startTime = item.start)
+                                },
+                            )
                             .minimumInteractiveComponentSize(),
                         viewModel = item,
                     )

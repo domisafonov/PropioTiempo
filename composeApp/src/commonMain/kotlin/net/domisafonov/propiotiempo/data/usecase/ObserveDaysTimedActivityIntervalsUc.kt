@@ -1,6 +1,7 @@
 package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.getDayStart
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -11,6 +12,7 @@ fun interface ObserveDaysTimedActivityIntervalsUc {
 
 class ObserveDaysTimedActivityIntervalsUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
+    private val clock: Clock,
 ) : ObserveDaysTimedActivityIntervalsUc {
 
     private val activityRepository by activityRepositoryProvider
@@ -19,6 +21,6 @@ class ObserveDaysTimedActivityIntervalsUcImpl(
         activityRepository
             .observeDaysTimedActivityIntervals(
                 activityId = activityId,
-                dayStart = getDayStart(),
+                dayStart = getDayStart(clock = clock),
             )
 }

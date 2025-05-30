@@ -1,6 +1,7 @@
 package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.getDayStart
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -12,16 +13,17 @@ fun interface ObserveDailyChecklistItemsUc {
 
 class ObserveDailyChecklistItemsUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
+    private val clock: Clock,
 ) : ObserveDailyChecklistItemsUc {
 
     private val activityRepository by activityRepositoryProvider
 
     override fun execute(dailyChecklistId: Long): Flow<List<DailyChecklistItem>> =
-        resetPeriodically {
+        resetPeriodically(clock = clock) {
             activityRepository
                 .observeDailyChecklistItems(
                     dailyChecklistId = dailyChecklistId,
-                    dayStart = getDayStart(),
+                    dayStart = getDayStart(clock = clock),
                 )
         }
 }

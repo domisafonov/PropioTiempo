@@ -1,9 +1,9 @@
 package net.domisafonov.propiotiempo.data.error
 
 class ModificationError(
-    cause: Throwable,
+    cause: Exception,
     message: String? = null,
-) : Exception(
-    message,
-    cause,
+) : PtError(
+    message = message,
+    cause = cause,
 )

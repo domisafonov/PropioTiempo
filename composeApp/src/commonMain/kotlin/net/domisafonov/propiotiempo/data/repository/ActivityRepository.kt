@@ -69,6 +69,24 @@ interface ActivityRepository {
         activityId: Long,
         dayStart: Instant,
     ): Flow<List<TimedActivityInterval>>
+
+    suspend fun updateTimeActivityIntervalStart(
+        activityId: Long,
+        oldStart: Instant,
+        newStart: Instant,
+    ): ModificationError?
+
+    suspend fun updateTimeActivityIntervalTime(
+        activityId: Long,
+        oldStart: Instant,
+        newStart: Instant,
+        newEnd: Instant,
+    ): ModificationError?
+
+    suspend fun deleteTimeActivityInterval(
+        activityId: Long,
+        start: Instant,
+    ): ModificationError?
 }
 
 class ActivityRepositoryImpl(
@@ -227,4 +245,58 @@ class ActivityRepositoryImpl(
             }
             .asFlow()
             .mapToList(ioDispatcher)
+
+    override suspend fun updateTimeActivityIntervalStart(
+        activityId: Long,
+        oldStart: Instant,
+        newStart: Instant
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
+            dbQueries
+                .update_time_activity_interval_start(
+                    new_start_time = newStart,
+                    activity_id = activityId,
+                    old_start_time = oldStart,
+                )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
+        }
+    }
+
+    override suspend fun updateTimeActivityIntervalTime(
+        activityId: Long,
+        oldStart: Instant,
+        newStart: Instant,
+        newEnd: Instant
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
+            dbQueries
+                .update_time_activity_interval_time(
+                    new_start_time = newStart,
+                    new_end_time = newEnd,
+                    activity_id = activityId,
+                    old_start_time = oldStart,
+                )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
+        }
+    }
+
+    override suspend fun deleteTimeActivityInterval(
+        activityId: Long,
+        start: Instant
+    ): ModificationError? = withContext(ioDispatcher) {
+        try {
+            dbQueries
+                .delete_time_activity_interval(
+                    activity_id = activityId,
+                    start_time = start,
+                )
+            null
+        } catch (e: Exception) {
+            ModificationError(cause = e)
+        }
+    }
 }
