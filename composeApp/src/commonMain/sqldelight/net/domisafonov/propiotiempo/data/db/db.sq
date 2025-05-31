@@ -143,7 +143,7 @@ SELECT
     iif(
       i.start_time IS NULL,
       0,
-      ifnull(i.end_time, unixepoch()) - max(:day_start, i.start_time)
+      ifnull(i.end_time, :current_time) - max(:day_start, i.start_time)
     )
   ) AS sum,
   sum((i.start_time IS NOT NULL) - (i.end_time IS NOT NULL)) > 0 AS is_active

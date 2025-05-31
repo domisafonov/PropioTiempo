@@ -31,6 +31,7 @@ interface ActivityRepository {
      * Each entry sums up an enabled time activity without historical data.
      */
     fun observeTodaysTimedActivitySummary(
+        currentTime: Instant,
         dayStart: Instant,
     ): Flow<List<TimedActivitySummary>>
 
@@ -113,11 +114,13 @@ class ActivityRepositoryImpl(
             .mapToList(ioDispatcher)
 
     override fun observeTodaysTimedActivitySummary(
+        currentTime: Instant,
         dayStart: Instant,
     ): Flow<List<TimedActivitySummary>> =
         dbQueries
             .get_time_activities_summary(
                 day_start = dayStart.epochSeconds,
+                current_time = currentTime.epochSeconds,
             ) { id, name, sum, is_active ->
                 TimedActivitySummary(
                     id = id,

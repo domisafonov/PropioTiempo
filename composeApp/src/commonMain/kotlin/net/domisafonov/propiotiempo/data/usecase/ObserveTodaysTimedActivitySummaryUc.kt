@@ -22,6 +22,7 @@ class ObserveTodaysTimedActivitySummaryUcImpl(
     override fun execute(): Flow<List<TimedActivitySummary>> =
         resetPeriodically(clock = clock, doResetMinutely = true) {
             activityRepository.observeTodaysTimedActivitySummary(
+                currentTime = clock.now(),
                 dayStart = getDayStart(clock = clock),
             )
         }
