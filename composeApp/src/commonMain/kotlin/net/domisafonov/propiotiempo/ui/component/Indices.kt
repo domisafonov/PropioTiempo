@@ -46,7 +46,7 @@ class Indices(
     }
 
     fun validateInternal(internalIdx: Int) {
-        require(isInternalValid(internalIdx))
+        require(isInternalValid(internalIdx)) { "invalid internal index: $internalIdx" }
     }
 
     fun validateExternal(externalIdx: Int) {

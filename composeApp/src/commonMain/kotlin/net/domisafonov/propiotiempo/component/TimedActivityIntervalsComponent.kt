@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
+import net.domisafonov.propiotiempo.component.dialog.showEditTimeDialog
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.data.atDateOf
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
@@ -115,6 +116,8 @@ private class TimedActivityIntervalsComponentImpl(
                         .showEditTimeDialog(
                             title = "TODO",
                             time = label.intervalStart.toLocalTime(),
+                            onlyLaterThanOrEqual = label.laterThanOrEqual,
+                            onlyEarlierThanOrEqual = clock.now().toLocalTime(),
                         )
                         as? DialogContainer.EditTimeResult.Confirmed
                     store.accept(

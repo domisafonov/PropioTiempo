@@ -24,6 +24,7 @@ interface EditTimeDialogStore : Store<Intent, State, Label> {
     data class State(
         val title: String,
         val time: LocalTime,
+        val timeRange: ClosedRange<LocalTime>,
     )
 
     sealed interface Label
@@ -43,9 +44,11 @@ private object EditTimeDialogStoreInternal {
 fun EditTimeDialogStore.Companion.initialState(
     title: String,
     time: LocalTime,
+    timeRange: ClosedRange<LocalTime>,
 ) = State(
     title = title,
     time = time,
+    timeRange = timeRange,
 )
 
 fun StoreFactory.makeEditTimeDialogStore(
@@ -61,16 +64,20 @@ fun StoreFactory.makeEditTimeDialogStore(
         ?: initialState,
     executorFactory = coroutineExecutorFactory {
         onIntent<Intent.UpdateHour> { intent ->
+            val state = state()
             dispatch(
                 Message.UpdateTime(
-                    time = state().time.withHour(intent.hour),
+                    time = state.time.withHour(intent.hour)
+                        .coerceIn(state.timeRange),
                 )
             )
         }
         onIntent<Intent.UpdateMinute> { intent ->
+            val state = state()
             dispatch(
                 Message.UpdateTime(
-                    time = state().time.withMinute(intent.minute),
+                    time = state.time.withMinute(intent.minute)
+                        .coerceIn(state.timeRange),
                 )
             )
         }

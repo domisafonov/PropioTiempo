@@ -8,10 +8,12 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
 import net.domisafonov.propiotiempo.data.periodicTimer
+import net.domisafonov.propiotiempo.data.toLocalTime
 import net.domisafonov.propiotiempo.data.usecase.DeleteTimedActivityIntervalUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUc
@@ -73,6 +75,7 @@ interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
     sealed interface Label {
         data class EditIntervalStart(
             val timedActivityId: Long,
+            val laterThanOrEqual: LocalTime?,
             val intervalStart: Instant,
         ) : Label
         data class EditInterval(
@@ -158,13 +161,18 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
             }
         }
         onIntent<Intent.EditInterval> { intent ->
-            val interval = (state() as? State.Ready)?.intervals
+            val state = state()
+            val interval = (state as? State.Ready)?.intervals
                 ?.find { it.start == intent.start }
                 ?: return@onIntent // TODO: null logging
             publish(
                 if (interval.end == null) {
                     Label.EditIntervalStart(
                         timedActivityId = timedActivityId,
+                        laterThanOrEqual = state.intervals
+                            .getOrNull(state.intervals.size - 2)
+                            ?.end
+                            ?.toLocalTime(),
                         intervalStart = interval.start,
                     )
                 } else {

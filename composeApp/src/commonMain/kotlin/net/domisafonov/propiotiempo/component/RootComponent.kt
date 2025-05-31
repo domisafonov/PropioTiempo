@@ -28,6 +28,8 @@ import net.domisafonov.propiotiempo.component.dialog.InfoDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeConfirmationDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeEditTimeDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeInfoDialogComponent
+import net.domisafonov.propiotiempo.data.dayEnd
+import net.domisafonov.propiotiempo.data.dayStart
 import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.SchemaRepositoryImpl
@@ -215,6 +217,7 @@ class RootComponentImpl(
             onResult = { dismissWithResult(it) },
             title = config.title,
             time = config.time,
+            timeRange = config.timeRange,
         )
     }
 
@@ -271,10 +274,12 @@ class RootComponentImpl(
     override suspend fun showEditTimeDialog(
         title: String,
         time: LocalTime,
+        timeRange: ClosedRange<LocalTime>,
     ): DialogContainer.EditTimeResult? = showDialog(
         DialogConfig.EditTimeDialog(
             title = title,
-            time = time,
+            time = time.coerceIn(timeRange),
+            timeRange = timeRange,
         )
     )
 
@@ -334,5 +339,6 @@ private sealed interface DialogConfig {
     data class EditTimeDialog(
         val title: String,
         val time: LocalTime,
+        val timeRange: ClosedRange<LocalTime>,
     ) : DialogConfig
 }

@@ -31,7 +31,12 @@ import propiotiempo.composeapp.generated.resources.edit_dialog_confirm
 data class EditTimeDialogViewModel(
     val title: String,
     val time: LocalTime,
-)
+    val timeRange: ClosedRange<LocalTime>,
+) {
+    init {
+        require(time in timeRange)
+    }
+}
 
 @Composable
 fun EditTimeDialogContent(component: EditTimeDialogComponent) {
@@ -71,15 +76,25 @@ fun EditTimeDialogContent(component: EditTimeDialogComponent) {
                 ) {
                     WheelPicker(
                         modifier = Modifier,
-                        items = makeTwoDigitItems(start = 0, end = 23),
+                        items = makeTwoDigitItems(
+                            start = viewModel.timeRange.start.hour,
+                            end = viewModel.timeRange.endInclusive.hour,
+                        ),
                         selected = viewModel.time.hour,
                         itemLines = 3.5f,
                         onSelected = component::onHourUpdate,
                     )
 
+                    val minuteRange = makeMinuteRangeForHour(
+                        timeRange = viewModel.timeRange,
+                        hour = viewModel.time.hour,
+                    )
                     WheelPicker(
                         modifier = Modifier,
-                        items = makeTwoDigitItems(start = 0, end = 59),
+                        items = makeTwoDigitItems(
+                            start = minuteRange.start,
+                            end = minuteRange.endInclusive,
+                        ),
                         selected = viewModel.time.minute,
                         itemLines = 3.5f,
                         onSelected = component::onMinuteUpdate,
@@ -112,11 +127,25 @@ fun EditTimeDialogContent(component: EditTimeDialogComponent) {
 
 private fun makeTwoDigitItems(start: Int, end: Int): List<WheelPickerItem<Int>> {
     require(start in 0 .. 99)
-    require(end in (start + 1 .. 99))
+    require(end in (start  .. 99))
     return (start .. end).map { i ->
         WheelPickerItem(
             id = i,
             name = i.toString().padStart(length = 2, padChar = '0'),
         )
     }
+}
+
+fun makeMinuteRangeForHour(
+    timeRange: ClosedRange<LocalTime>,
+    hour: Int,
+): ClosedRange<Int> {
+    require(hour in 0 .. 23)
+
+    val lowMinuteBound = timeRange.start.minute
+        .takeIf { hour == timeRange.start.hour } ?: 0
+    val highMinuteBound = timeRange.endInclusive.minute
+        .takeIf { hour == timeRange.endInclusive.hour } ?: 59
+
+    return lowMinuteBound .. highMinuteBound
 }

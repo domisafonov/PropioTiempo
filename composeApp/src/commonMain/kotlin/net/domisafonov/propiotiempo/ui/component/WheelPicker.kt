@@ -59,18 +59,26 @@ fun<I : Any> WheelPicker(
         internalSize = items.size,
     )
 
-    val initialPage = indices.toExternal(
+    val selectedPage = indices.toExternal(
         items.indexOfFirst { it.id == selected }
             .also { require(it != -1) }
     )
 
     val pagerState = rememberPagerState(
-        initialPage = initialPage,
+        initialPage = selectedPage,
         pageCount = { indices.externalSize },
     )
 
+    var oldItems by remember { mutableStateOf(items) }
     var oldSelection: I by remember { mutableStateOf(selected) }
-    LaunchedEffect(pagerState.settledPage, pagerState.isScrollInProgress) {
+
+    LaunchedEffect(items, pagerState.settledPage, pagerState.targetPage, pagerState.isScrollInProgress) {
+        if (items != oldItems) {
+            oldItems = items
+            pagerState.requestScrollToPage(selectedPage)
+            return@LaunchedEffect
+        }
+
         val currentIdx = indices.toMaybeInternal(pagerState.settledPage)
         if (!pagerState.isScrollInProgress && pagerState.currentPageOffsetFraction != 0f) {
             pagerState.animateScrollToPage(
@@ -84,11 +92,13 @@ fun<I : Any> WheelPicker(
         }
         currentIdx ?: return@LaunchedEffect
 
-        val currentId = items[currentIdx].id
-        if (oldSelection != currentId) {
-            onSelected(currentId)
+        if (pagerState.settledPage == pagerState.targetPage) {
+            val currentId = items[currentIdx].id
+            if (oldSelection != currentId) {
+                onSelected(currentId)
+            }
+            oldSelection = currentId
         }
-        oldSelection = currentId
     }
 
     val surfaceColor = MaterialTheme.colorScheme.surface

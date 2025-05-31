@@ -14,6 +14,7 @@ fun interface UpdateTimedActivityIntervalStartUc {
     ): PtError?
 }
 
+// TODO: check not to intersect with previous intervals
 class UpdateTimedActivityIntervalStartUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     private val clock: Clock,

@@ -43,6 +43,7 @@ fun makeEditTimeDialogComponent(
     onResult: suspend (EditTimeResult) -> Unit,
     title: String,
     time: LocalTime,
+    timeRange: ClosedRange<LocalTime>,
 ): EditTimeDialogComponent = EditTimeDialogComponentImpl(
     componentContext = componentContext,
     storeFactory = storeFactory,
@@ -50,6 +51,7 @@ fun makeEditTimeDialogComponent(
     onResult = onResult,
     title = title,
     time = time,
+    timeRange = timeRange,
 )
 
 private class EditTimeDialogComponentImpl(
@@ -59,7 +61,12 @@ private class EditTimeDialogComponentImpl(
     private val onResult: suspend (EditTimeResult) -> Unit,
     private val title: String,
     private val time: LocalTime,
+    timeRange: ClosedRange<LocalTime>,
 ) : EditTimeDialogComponent, ComponentContext by componentContext {
+
+    init {
+        require(time in timeRange)
+    }
 
     private val scope = coroutineScope(mainDispatcher + SupervisorJob())
 
@@ -69,6 +76,7 @@ private class EditTimeDialogComponentImpl(
             initialState = EditTimeDialogStore.initialState(
                 title = title,
                 time = time,
+                timeRange = timeRange,
             ),
         )
     }
@@ -82,6 +90,7 @@ private class EditTimeDialogComponentImpl(
                 EditTimeDialogStore.initialState(
                     title = title,
                     time = time,
+                    timeRange = timeRange,
                 ),
             ),
         )
@@ -91,6 +100,7 @@ private class EditTimeDialogComponentImpl(
     ): EditTimeDialogViewModel = EditTimeDialogViewModel(
         title = state.title,
         time = state.time,
+        timeRange = state.timeRange,
     )
 
     override fun onDismiss() {

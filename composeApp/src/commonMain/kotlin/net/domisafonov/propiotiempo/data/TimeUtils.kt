@@ -200,3 +200,8 @@ fun LocalTime.atDateOf(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) = atDate(instant.toLocalDateTime(timeZone = timeZone).date)
     .toInstant(timeZone = timeZone)
+
+fun LocalTime.Companion.dayStart(): LocalTime = fromSecondOfDay(0)
+
+fun LocalTime.Companion.dayEnd(): LocalTime =
+    fromNanosecondOfDay(86400L * 1_000_000_000L - 1L)
