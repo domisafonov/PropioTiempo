@@ -28,8 +28,6 @@ import net.domisafonov.propiotiempo.component.dialog.InfoDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeConfirmationDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeEditTimeDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeInfoDialogComponent
-import net.domisafonov.propiotiempo.data.dayEnd
-import net.domisafonov.propiotiempo.data.dayStart
 import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.SchemaRepositoryImpl
@@ -40,15 +38,10 @@ import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
 import net.domisafonov.propiotiempo.data.repository.makeSettingsRepositoryImpl
 import net.domisafonov.propiotiempo.ui.singleUse
 
-interface RootComponent : ComponentContext, DialogContainer, RootComponent.Callbacks {
+interface RootComponent : ComponentContext, DialogContainer, RootComponentCallbacks {
 
     val screenStack: Value<ChildStack<*, Child>>
     val dialogSlot: Value<ChildSlot<*, Dialog>>
-
-    interface Callbacks {
-        fun onActivitiesSelection()
-        fun onSchemaSelection()
-    }
 
     sealed interface Child {
         data class Activities(val component: ActivitiesComponent) : Child
@@ -64,6 +57,11 @@ interface RootComponent : ComponentContext, DialogContainer, RootComponent.Callb
         data class ConfirmationDialog(val component: ConfirmationDialogComponent) : Dialog
         data class EditTimeDialog(val component: EditTimeDialogComponent) : Dialog
     }
+}
+
+interface RootComponentCallbacks {
+    fun onActivitiesSelection()
+    fun onSchemaSelection()
 }
 
 class RootComponentImpl(

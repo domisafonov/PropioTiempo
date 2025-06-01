@@ -11,14 +11,14 @@ import kotlinx.coroutines.launch
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer.InfoResult
 import net.domisafonov.propiotiempo.ui.content.dialog.InfoDialogViewModel
 
-interface InfoDialogComponent : DialogComponent, InfoDialogComponent.Callbacks {
+interface InfoDialogComponent : DialogComponent, InfoDialogComponentCallbacks {
 
     val viewModel: StateFlow<InfoDialogViewModel>
+}
 
-    interface Callbacks {
-        fun onOk()
-        fun onDismiss()
-    }
+interface InfoDialogComponentCallbacks {
+    fun onOk()
+    fun onDismiss()
 }
 
 fun makeInfoDialogComponent(

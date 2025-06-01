@@ -6,11 +6,9 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
@@ -35,6 +33,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.DailyChecklistComponent
+import net.domisafonov.propiotiempo.component.DailyChecklistComponentCallbacks
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
 import net.domisafonov.propiotiempo.ui.component.HourMinuteText
 import net.domisafonov.propiotiempo.ui.component.ListItem
@@ -121,7 +120,7 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
 @Composable
 private fun ContentBody(
     modifier: Modifier = Modifier,
-    component: DailyChecklistComponent.Callbacks,
+    component: DailyChecklistComponentCallbacks,
     viewModel: DailyChecklistViewModel,
     scrollState: ScrollState,
 ) {

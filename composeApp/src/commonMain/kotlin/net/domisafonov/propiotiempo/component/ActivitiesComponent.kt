@@ -31,17 +31,17 @@ import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
 
-interface ActivitiesComponent : ComponentContext, ActivitiesComponent.Callbacks {
+interface ActivitiesComponent : ComponentContext, ActivitiesComponentCallbacks {
 
     val viewModel: StateFlow<ActivitiesViewModel>
+}
 
-    interface Callbacks {
-        fun onDailyChecklistToggled()
-        fun onTimedActivitiesToggled()
-        fun onTimedActivityClick(id: Long)
-        fun onTimedActivityLongClick(id: Long)
-        fun onDailyChecklistClick(id: Long)
-    }
+interface ActivitiesComponentCallbacks {
+    fun onDailyChecklistToggled()
+    fun onTimedActivitiesToggled()
+    fun onTimedActivityClick(id: Long)
+    fun onTimedActivityLongClick(id: Long)
+    fun onDailyChecklistClick(id: Long)
 }
 
 fun makeActivitiesComponent(

@@ -21,19 +21,19 @@ import net.domisafonov.propiotiempo.ui.store.dialog.EditTimeDialogStore.State
 import net.domisafonov.propiotiempo.ui.store.dialog.initialState
 import net.domisafonov.propiotiempo.ui.store.dialog.makeEditTimeDialogStore
 
-interface EditTimeDialogComponent : DialogComponent, EditTimeDialogComponent.Callbacks {
+interface EditTimeDialogComponent : DialogComponent, EditTimeDialogComponentCallbacks {
 
     val viewModel: StateFlow<EditTimeDialogViewModel>
+}
 
-    interface Callbacks {
+interface EditTimeDialogComponentCallbacks {
 
-        fun onDismiss()
-        fun onConfirm()
-        fun onCancel()
+    fun onDismiss()
+    fun onConfirm()
+    fun onCancel()
 
-        fun onHourUpdate(hour: Int)
-        fun onMinuteUpdate(minute: Int)
-    }
+    fun onHourUpdate(hour: Int)
+    fun onMinuteUpdate(minute: Int)
 }
 
 fun makeEditTimeDialogComponent(
