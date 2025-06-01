@@ -8,13 +8,20 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showEditTimeDialog
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
@@ -27,6 +34,8 @@ import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUcImpl
 import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalStartUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalTimeUcImpl
+import net.domisafonov.propiotiempo.ui.component.commandChannel
+import net.domisafonov.propiotiempo.ui.component.commandFlow
 import net.domisafonov.propiotiempo.ui.content.TimedActivityIntervalsViewModel
 import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore
@@ -34,10 +43,21 @@ import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Label
 import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.State
 import net.domisafonov.propiotiempo.ui.store.makeTimedActivityIntervalsStore
+import org.jetbrains.compose.resources.getString
+import propiotiempo.composeapp.generated.resources.Res
+import propiotiempo.composeapp.generated.resources.edit_interval_start_dialog_title
 
 interface TimedActivityIntervalsComponent : ComponentContext, TimedActivityIntervalsComponentCallbacks {
 
     val viewModel: StateFlow<TimedActivityIntervalsViewModel>
+    val commands: Flow<Command>
+
+    sealed interface Command {
+        data class ItemMenuRequest(
+            val activityId: Long,
+            val intervalStart: Instant,
+        ) : Command
+    }
 }
 
 interface TimedActivityIntervalsComponentCallbacks {
@@ -114,7 +134,7 @@ private class TimedActivityIntervalsComponentImpl(
                 is Label.EditIntervalStart -> {
                     val res = dialogContainer
                         .showEditTimeDialog(
-                            title = "TODO",
+                            title = getString(Res.string.edit_interval_start_dialog_title),
                             time = label.intervalStart.toLocalTime(),
                             onlyLaterThanOrEqual = label.laterThanOrEqual,
                             onlyEarlierThanOrEqual = clock.now().toLocalTime(),
@@ -129,7 +149,12 @@ private class TimedActivityIntervalsComponentImpl(
                     )
                 }
                 is Label.EditInterval -> TODO()
-                is Label.ShowMenu -> TODO()
+                is Label.ShowMenu -> commandsImpl.trySend(
+                    Command.ItemMenuRequest(
+                        activityId = label.timedActivityId,
+                        intervalStart = label.intervalStart,
+                    )
+                )
                 is Label.Error ->
                     dialogContainer.showErrorDialog(message = label.inner.message)
             } }
@@ -164,6 +189,10 @@ private class TimedActivityIntervalsComponentImpl(
             intervals = emptyList(),
         )
     }
+
+    private val commandsImpl = commandChannel<Command>()
+    override val commands: SharedFlow<Command> = commandsImpl
+        .commandFlow(scope = scope)
 
     override fun onNavigateBack() {
         navigateBack()

@@ -222,7 +222,10 @@ class RootComponentImpl(
     private val dialogNavigation = SlotNavigation<DialogConfig>()
     override val dialogSlot: Value<ChildSlot<*, RootComponent.Dialog>> = childSlot(
         source = dialogNavigation,
-        serializer = DialogConfig.serializer(),
+
+        // more complex dialogs should rather be implemented per-screen
+        serializer = null,
+
         key = "DialogSlot",
         handleBackButton = true,
     ) { config, ctx ->
@@ -316,16 +319,13 @@ private sealed interface ScreenConfig {
     ) : ScreenConfig
 }
 
-@Serializable
 private sealed interface DialogConfig {
 
-    @Serializable
     data class InfoDialog(
         val title: String?,
         val message: String,
     ) : DialogConfig
 
-    @Serializable
     data class ConfirmationDialog(
         val title: String?,
         val message: String?,
@@ -333,7 +333,6 @@ private sealed interface DialogConfig {
         val cancelText: String?,
     ) : DialogConfig
 
-    @Serializable
     data class EditTimeDialog(
         val title: String,
         val time: LocalTime,

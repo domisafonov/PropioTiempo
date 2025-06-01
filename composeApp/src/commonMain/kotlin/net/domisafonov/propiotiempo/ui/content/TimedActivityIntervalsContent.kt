@@ -3,6 +3,7 @@
 package net.domisafonov.propiotiempo.ui.content
 
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +25,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,11 +34,15 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent
+import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.data.formatDurationDaysHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantRangeHoursMinutes
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
+import net.domisafonov.propiotiempo.ui.component.KeyedDropdownMenu
+import net.domisafonov.propiotiempo.ui.component.KeyedDropdownMenuState
 import net.domisafonov.propiotiempo.ui.component.ListItem
+import net.domisafonov.propiotiempo.ui.component.rememberKeyedDropdownMenuState
 import net.domisafonov.propiotiempo.ui.numericTimeBody
 import net.domisafonov.propiotiempo.ui.stickyRememberBoolean
 import org.jetbrains.compose.resources.painterResource
@@ -58,6 +66,21 @@ data class TimedActivityIntervalsViewModel(
     )
 }
 
+@Immutable
+data class MenuKey(
+    val activityId: Long,
+    val start: Instant,
+) {
+    companion object {
+        fun fromViewModel(
+            viewModel: TimedActivityIntervalsViewModel.Interval,
+        ): MenuKey = MenuKey(
+            activityId = viewModel.activityId,
+            start = viewModel.start,
+        )
+    }
+}
+
 @Composable
 fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: TimedActivityIntervalsComponent) {
 
@@ -71,6 +94,18 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
         TopAppBarDefaults.enterAlwaysScrollBehavior()
     } else {
         null
+    }
+
+    val dropdownMenuState = rememberKeyedDropdownMenuState<MenuKey>()
+    LaunchedEffect(component) {
+        component.commands.collect { command -> when (command) {
+            is Command.ItemMenuRequest -> dropdownMenuState.requestMenu(
+                key = MenuKey(
+                    activityId = command.activityId,
+                    start = command.intervalStart,
+                ),
+            )
+        } }
     }
 
     Scaffold(
@@ -120,6 +155,7 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
                                 },
                             )
                             .minimumInteractiveComponentSize(),
+                        dropdownMenuState = dropdownMenuState,
                         viewModel = item,
                     )
                     HorizontalDivider()
@@ -132,6 +168,7 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
 @Composable
 private fun IntervalItem(
     modifier: Modifier = Modifier,
+    dropdownMenuState: KeyedDropdownMenuState<MenuKey>,
     viewModel: TimedActivityIntervalsViewModel.Interval,
 ) {
     ListItem(
@@ -169,6 +206,21 @@ private fun IntervalItem(
                 ),
                 style = MaterialTheme.typography.numericTimeBody,
             )
+
+            KeyedDropdownMenu(
+                state = dropdownMenuState,
+                key = MenuKey.fromViewModel(viewModel),
+            ) { onDismissRequest, isExpanded ->
+                DropdownMenu(
+                    expanded = isExpanded,
+                    onDismissRequest = onDismissRequest,
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("text") },
+                        onClick = {},
+                    )
+                }
+            }
         }
     }
 }

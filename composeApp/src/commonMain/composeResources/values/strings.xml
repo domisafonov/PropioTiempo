@@ -31,4 +31,5 @@
   <string name="daily_checklist_item_uncheck">Cancel completion</string>
   <string name="default_error_title">Error</string>
   <string name="default_error_message">Error occurred</string>
+  <string name="edit_interval_start_dialog_title">Edit interval start</string>
 </resources>
