@@ -1,11 +1,11 @@
 package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.datetime.Clock
-import net.domisafonov.propiotiempo.data.error.ModificationError
+import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
 fun interface CheckDailyChecklistItemUc {
-    suspend fun execute(dailyChecklistItemId: Long): ModificationError?
+    suspend fun execute(dailyChecklistItemId: Long): PtError?
 }
 
 class CheckDailyChecklistItemUcImpl(
@@ -15,7 +15,7 @@ class CheckDailyChecklistItemUcImpl(
 
     private val activityRepository by activityRepositoryProvider
 
-    override suspend fun execute(dailyChecklistItemId: Long): ModificationError? =
+    override suspend fun execute(dailyChecklistItemId: Long): PtError? =
         activityRepository.insertDailyChecklistCheck(
             dailyChecklistItemId = dailyChecklistItemId,
             time = clock.now(),

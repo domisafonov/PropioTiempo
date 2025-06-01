@@ -151,7 +151,10 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
         onAction<Action.SubToIntervals> {
             launch {
                 observeDaysTimedActivityIntervalsUc.execute(timedActivityId)
-                    .collect { dispatch(Message.UpdateIntervals(intervals = it)) }
+                    .collect {
+                        dispatch(Message.UpdateTime(time = clock.now()))
+                        dispatch(Message.UpdateIntervals(intervals = it))
+                    }
             }
         }
         onAction<Action.SubToTime> {

@@ -159,7 +159,7 @@ fun formatDurationDaysHoursMinutes(
     start: Instant,
     end: Instant,
 ): String {
-    require(start <= end)
+    require(start <= end) { "interval's start ($start) is after than its end ($end)" }
     return (end - start).toComponents { days, hours, minutes, _, _  ->
         if (days == 0L) {
             formatDurationHoursMinutes(hours = hours, minutes = minutes)
@@ -205,3 +205,6 @@ fun LocalTime.Companion.dayStart(): LocalTime = fromSecondOfDay(0)
 
 fun LocalTime.Companion.dayEnd(): LocalTime =
     fromNanosecondOfDay(86400L * 1_000_000_000L - 1L)
+
+fun LocalTime.isSameMinute(other: LocalTime): Boolean =
+    hour == other.hour && minute == other.minute

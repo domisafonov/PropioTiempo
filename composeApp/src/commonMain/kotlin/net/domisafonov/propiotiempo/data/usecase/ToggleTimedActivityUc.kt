@@ -1,11 +1,11 @@
 package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.datetime.Clock
-import net.domisafonov.propiotiempo.data.error.ModificationError
+import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 
 fun interface ToggleTimedActivityUc {
-    suspend fun execute(id: Long): ModificationError?
+    suspend fun execute(id: Long): PtError?
 }
 
 class ToggleTimedActivityUcImpl(
@@ -15,7 +15,7 @@ class ToggleTimedActivityUcImpl(
 
     private val activityRepository by activityRepositoryProvider
 
-    override suspend fun execute(id: Long): ModificationError? =
+    override suspend fun execute(id: Long): PtError? =
         activityRepository
             .toggleTimedActivity(
                 timedActivityId = id,

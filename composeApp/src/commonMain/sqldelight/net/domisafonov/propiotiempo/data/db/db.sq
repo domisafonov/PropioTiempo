@@ -152,8 +152,7 @@ SELECT
   LEFT JOIN time_activity_intervals AS i
     ON ta.id = i.activity_id
     AND (i.end_time IS NULL OR i.end_time >= :day_start)
-  WHERE
-    a.is_enabled = TRUE
+  WHERE a.is_enabled = TRUE
   GROUP BY a.id
   ORDER BY a.name;
 
@@ -222,3 +221,32 @@ delete_time_activity_interval:
 DELETE
   FROM time_activity_intervals
   WHERE activity_id = :activity_id AND start_time = :start_time;
+
+do_intersecting_time_activity_intervals_exist:
+SELECT
+  count(*) > 0
+  FROM time_activity_intervals
+    CROSS JOIN (
+      SELECT iif(
+        :checked_interval_end_time IS NULL,
+        (
+          SELECT end_time
+            FROM time_activity_intervals
+            WHERE
+              activity_id = :activity_id
+              AND start_time = :replaced_interval_start_time
+        ),
+        :checked_interval_end_time
+      ) AS ci_end_time
+    )
+  WHERE
+    activity_id = :activity_id
+    AND start_time != :replaced_interval_start_time
+    AND (
+      ci_end_time IS NULL
+      OR start_time <= ci_end_time
+    )
+    AND (
+      end_time IS NULL
+      OR end_time >= :checked_interval_start_time
+    );

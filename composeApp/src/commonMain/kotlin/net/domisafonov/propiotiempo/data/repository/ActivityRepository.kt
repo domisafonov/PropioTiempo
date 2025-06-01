@@ -9,6 +9,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.error.ModificationError
+import net.domisafonov.propiotiempo.data.error.PtError
+import net.domisafonov.propiotiempo.data.error.TimeError
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
@@ -38,7 +40,7 @@ interface ActivityRepository {
     suspend fun toggleTimedActivity(
         timedActivityId: Long,
         now: Instant,
-    ): ModificationError?
+    ): PtError?
 
     fun observeActivityName(id: Long): Flow<String>
 
@@ -53,18 +55,18 @@ interface ActivityRepository {
     suspend fun insertDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ): ModificationError?
+    ): PtError?
 
     suspend fun deleteDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ): ModificationError?
+    ): PtError?
 
     suspend fun updateDailyChecklistCheckTime(
         dailyChecklistItemId: Long,
         oldTime: Instant,
         newTime: Instant,
-    ): ModificationError?
+    ): PtError?
 
     fun observeDaysTimedActivityIntervals(
         activityId: Long,
@@ -75,19 +77,19 @@ interface ActivityRepository {
         activityId: Long,
         oldStart: Instant,
         newStart: Instant,
-    ): ModificationError?
+    ): PtError?
 
     suspend fun updateTimeActivityIntervalTime(
         activityId: Long,
         oldStart: Instant,
         newStart: Instant,
         newEnd: Instant,
-    ): ModificationError?
+    ): PtError?
 
     suspend fun deleteTimeActivityInterval(
         activityId: Long,
         start: Instant,
-    ): ModificationError?
+    ): PtError?
 }
 
 class ActivityRepositoryImpl(
@@ -135,9 +137,9 @@ class ActivityRepositoryImpl(
     override suspend fun toggleTimedActivity(
         timedActivityId: Long,
         now: Instant,
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
-            dbQueries.transactionWithResult {
+            dbQueries.transaction {
                 val startTime = dbQueries
                     .get_active_time_activity_interval(activity_id = timedActivityId)
                     .executeAsOneOrNull()
@@ -187,7 +189,7 @@ class ActivityRepositoryImpl(
     override suspend fun insertDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
             dbQueries.insert_daily_checklist_check(
                 daily_checklist_item_id = dailyChecklistItemId,
@@ -202,7 +204,7 @@ class ActivityRepositoryImpl(
     override suspend fun deleteDailyChecklistCheck(
         dailyChecklistItemId: Long,
         time: Instant,
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
             dbQueries.delete_daily_checklist_check(
                 daily_checklist_item_id = dailyChecklistItemId,
@@ -218,7 +220,7 @@ class ActivityRepositoryImpl(
         dailyChecklistItemId: Long,
         oldTime: Instant,
         newTime: Instant,
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
             dbQueries.update_daily_checklist_check_time(
                 new_time = newTime,
@@ -253,15 +255,28 @@ class ActivityRepositoryImpl(
         activityId: Long,
         oldStart: Instant,
         newStart: Instant
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
-            dbQueries
-                .update_time_activity_interval_start(
-                    new_start_time = newStart,
-                    activity_id = activityId,
-                    old_start_time = oldStart,
-                )
-            null
+            dbQueries.transactionWithResult {
+                val doIntersectionsExist = dbQueries
+                    .do_intersecting_time_activity_intervals_exist(
+                        checked_interval_end_time = null,
+                        activity_id = activityId,
+                        replaced_interval_start_time = oldStart,
+                        checked_interval_start_time = newStart,
+                    )
+                    .executeAsOne()
+                if (doIntersectionsExist) {
+                    return@transactionWithResult TimeError.IntersectingIntervals()
+                }
+                dbQueries
+                    .update_time_activity_interval_start(
+                        new_start_time = newStart,
+                        activity_id = activityId,
+                        old_start_time = oldStart,
+                    )
+                null
+            }
         } catch (e: Exception) {
             ModificationError(cause = e)
         }
@@ -272,7 +287,7 @@ class ActivityRepositoryImpl(
         oldStart: Instant,
         newStart: Instant,
         newEnd: Instant
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
             dbQueries
                 .update_time_activity_interval_time(
@@ -290,7 +305,7 @@ class ActivityRepositoryImpl(
     override suspend fun deleteTimeActivityInterval(
         activityId: Long,
         start: Instant
-    ): ModificationError? = withContext(ioDispatcher) {
+    ): PtError? = withContext(ioDispatcher) {
         try {
             dbQueries
                 .delete_time_activity_interval(

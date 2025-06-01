@@ -4,7 +4,9 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.error.TimeError
+import net.domisafonov.propiotiempo.data.isSameMinute
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import net.domisafonov.propiotiempo.data.toLocalTime
 
 fun interface UpdateTimedActivityIntervalStartUc {
     suspend fun execute(
@@ -14,7 +16,6 @@ fun interface UpdateTimedActivityIntervalStartUc {
     ): PtError?
 }
 
-// TODO: check not to intersect with previous intervals
 class UpdateTimedActivityIntervalStartUcImpl(
     activityRepositoryProvider: Lazy<ActivityRepository>,
     private val clock: Clock,
@@ -27,13 +28,21 @@ class UpdateTimedActivityIntervalStartUcImpl(
         oldStart: Instant,
         newStart: Instant,
     ): PtError? {
-        if (newStart > clock.now()) {
-            return TimeError.LaterThanNow()
+        val now = clock.now()
+        val correctedNewStart = if (newStart > clock.now()) {
+            val localNow = now.toLocalTime()
+            if (newStart.toLocalTime().isSameMinute(localNow)) {
+                now
+            } else {
+                return TimeError.LaterThanNow()
+            }
+        } else {
+            newStart
         }
         return activityRepository.updateTimeActivityIntervalStart(
             activityId = activityId,
             oldStart = oldStart,
-            newStart = newStart,
+            newStart = correctedNewStart,
         )
     }
 }

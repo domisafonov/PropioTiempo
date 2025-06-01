@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
-import net.domisafonov.propiotiempo.data.error.ModificationError
+import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.usecase.CheckDailyChecklistItemUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDailyChecklistItemsUc
@@ -54,7 +54,7 @@ interface DailyChecklistStore : Store<Intent, State, Label> {
     sealed interface Label {
         data class ConfirmUncheckingItem(val id: Long): Label
         data class EditCheckingTime(val id: Long) : Label
-        data class Error(val inner: ModificationError) : Label
+        data class Error(val inner: PtError) : Label
     }
 
     companion object
