@@ -64,6 +64,7 @@ interface TimedActivityIntervalsComponentCallbacks {
     fun onNavigateBack()
     fun onItemClick(startTime: Instant)
     fun onItemLongClick(startTime: Instant)
+    fun onItemDelete(startTime: Instant)
 }
 
 fun makeTimedActivityIntervalsComponent(
@@ -204,5 +205,9 @@ private class TimedActivityIntervalsComponentImpl(
 
     override fun onItemLongClick(startTime: Instant) {
         store.accept(Intent.ShowIntervalMenu(start = startTime))
+    }
+
+    override fun onItemDelete(startTime: Instant) {
+        store.accept(Intent.DeleteItem(start = startTime))
     }
 }

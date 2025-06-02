@@ -49,6 +49,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.arrow_back
+import propiotiempo.composeapp.generated.resources.menu_item_delete_interval
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
 
@@ -141,7 +142,7 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
             contentPadding = contentPadding,
         ) {
             items(items = viewModel.intervals, key = { it.start.epochSeconds }) { item ->
-                Column {
+                Column(modifier = Modifier.animateItem()) {
                     IntervalItem(
                         modifier = Modifier
                             .combinedClickable(
@@ -157,6 +158,7 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
                             .minimumInteractiveComponentSize(),
                         dropdownMenuState = dropdownMenuState,
                         viewModel = item,
+                        onMenuDelete = { component.onItemDelete(startTime = item.start) }
                     )
                     HorizontalDivider()
                 }
@@ -170,6 +172,7 @@ private fun IntervalItem(
     modifier: Modifier = Modifier,
     dropdownMenuState: KeyedDropdownMenuState<MenuKey>,
     viewModel: TimedActivityIntervalsViewModel.Interval,
+    onMenuDelete: () -> Unit,
 ) {
     ListItem(
         modifier = modifier,
@@ -216,8 +219,8 @@ private fun IntervalItem(
                     onDismissRequest = onDismissRequest,
                 ) {
                     DropdownMenuItem(
-                        text = { Text("text") },
-                        onClick = {},
+                        text = { Text(stringResource(Res.string.menu_item_delete_interval)) },
+                        onClick = onMenuDelete,
                     )
                 }
             }

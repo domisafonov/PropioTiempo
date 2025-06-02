@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.error.ModificationError
+import net.domisafonov.propiotiempo.data.error.NoSuchElementError
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.error.TimeError
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
@@ -307,12 +308,16 @@ class ActivityRepositoryImpl(
         start: Instant
     ): PtError? = withContext(ioDispatcher) {
         try {
-            dbQueries
+            val res = dbQueries
                 .delete_time_activity_interval(
                     activity_id = activityId,
                     start_time = start,
                 )
-            null
+            if (res < 1) {
+                NoSuchElementError()
+            } else {
+                null
+            }
         } catch (e: Exception) {
             ModificationError(cause = e)
         }

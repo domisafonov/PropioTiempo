@@ -32,4 +32,5 @@
   <string name="default_error_title">Error</string>
   <string name="default_error_message">Error occurred</string>
   <string name="edit_interval_start_dialog_title">Edit interval start</string>
+  <string name="menu_item_delete_interval">Delete interval</string>
 </resources>

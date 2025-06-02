@@ -43,6 +43,9 @@ interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
         data class ShowIntervalMenu(
             val start: Instant,
         ) : Intent
+        data class DeleteItem(
+            val start: Instant,
+        ) : Intent
     }
 
     @Serializable
@@ -220,6 +223,16 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
                     intervalStart = interval.start,
                 )
             )
+        }
+        onIntent<Intent.DeleteItem> { intent ->
+            launch {
+                deleteTimedActivityIntervalUc
+                    .execute(
+                        activityId = timedActivityId,
+                        start = intent.start,
+                    )
+                    ?.let { publish(Label.Error(it)) }
+            }
         }
     },
     reducer = { message: Message -> when (this) {
