@@ -1,6 +1,12 @@
-package net.domisafonov.propiotiempo.component
+package net.domisafonov.propiotiempo.component.timedactivityintervals
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
+import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
+import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -8,20 +14,17 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent.Command
+import kotlinx.serialization.Serializable
+import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showEditTimeDialog
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
@@ -36,13 +39,13 @@ import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalStar
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalTimeUcImpl
 import net.domisafonov.propiotiempo.ui.component.commandChannel
 import net.domisafonov.propiotiempo.ui.component.commandFlow
-import net.domisafonov.propiotiempo.ui.content.TimedActivityIntervalsViewModel
-import net.domisafonov.propiotiempo.ui.store.INITIAL_STATE
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Label
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.State
-import net.domisafonov.propiotiempo.ui.store.makeTimedActivityIntervalsStore
+import net.domisafonov.propiotiempo.ui.content.timedactivityintervals.TimedActivityIntervalsViewModel
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.INITIAL_STATE
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.Intent
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.Label
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.State
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.makeTimedActivityIntervalsStore
 import org.jetbrains.compose.resources.getString
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.edit_interval_start_dialog_title
@@ -52,11 +55,17 @@ interface TimedActivityIntervalsComponent : ComponentContext, TimedActivityInter
     val viewModel: StateFlow<TimedActivityIntervalsViewModel>
     val commands: Flow<Command>
 
+    val dialogSlot: Value<ChildSlot<*, Dialog>>
+
     sealed interface Command {
         data class ItemMenuRequest(
             val activityId: Long,
             val intervalStart: Instant,
         ) : Command
+    }
+
+    sealed interface Dialog {
+        data class EditIntervalDialog(val component: EditTimedActivityIntervalDialogComponent) : Dialog
     }
 }
 
@@ -149,7 +158,11 @@ private class TimedActivityIntervalsComponentImpl(
                         )
                     )
                 }
-                is Label.EditInterval -> TODO()
+                is Label.EditInterval -> dialogNavigation.activate(
+                    DialogConfig.EditIntervalDialog(
+                        intervalStart = label.intervalStart,
+                    )
+                )
                 is Label.ShowMenu -> commandsImpl.trySend(
                     Command.ItemMenuRequest(
                         activityId = label.timedActivityId,
@@ -195,6 +208,33 @@ private class TimedActivityIntervalsComponentImpl(
     override val commands: SharedFlow<Command> = commandsImpl
         .commandFlow(scope = scope)
 
+    private val editIntervalDialogComponent = { componentContext: ComponentContext, config: DialogConfig.EditIntervalDialog ->
+        makeEditTimedActivityIntervalDialogComponent(
+            componentContext = componentContext,
+            storeFactory = storeFactory,
+            activityRepositoryProvider = activityRepositoryProvider,
+            settingsRepositoryProvider = settingsRepositoryProvider,
+            mainDispatcher = mainDispatcher,
+            clock = clock,
+            timedActivityId = timedActivityId,
+            editedIntervalStart = config.intervalStart,
+            onDismiss = dialogNavigation::dismiss,
+        )
+    }
+    private val dialogNavigation = SlotNavigation<DialogConfig>()
+    override val dialogSlot: Value<ChildSlot<*, TimedActivityIntervalsComponent.Dialog>> = childSlot(
+        source = dialogNavigation,
+        serializer = DialogConfig.serializer(),
+        key = "TimedActivityIntervalsDialogSlot",
+        handleBackButton = true,
+    ) { config, ctx ->
+        when (config) {
+            is DialogConfig.EditIntervalDialog -> TimedActivityIntervalsComponent.Dialog.EditIntervalDialog(
+                component = editIntervalDialogComponent(ctx, config),
+            )
+        }
+    }
+
     override fun onNavigateBack() {
         navigateBack()
     }
@@ -209,5 +249,13 @@ private class TimedActivityIntervalsComponentImpl(
 
     override fun onItemDelete(startTime: Instant) {
         store.accept(Intent.DeleteItem(start = startTime))
+    }
+
+    @Serializable
+    private sealed interface DialogConfig {
+
+        data class EditIntervalDialog(
+            val intervalStart: Instant,
+        ) : DialogConfig
     }
 }

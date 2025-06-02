@@ -28,6 +28,8 @@ import net.domisafonov.propiotiempo.component.dialog.InfoDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeConfirmationDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeEditTimeDialogComponent
 import net.domisafonov.propiotiempo.component.dialog.makeInfoDialogComponent
+import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent
+import net.domisafonov.propiotiempo.component.timedactivityintervals.makeTimedActivityIntervalsComponent
 import net.domisafonov.propiotiempo.data.repository.ActivityRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.ReportRepositoryImpl
 import net.domisafonov.propiotiempo.data.repository.SchemaRepositoryImpl
@@ -92,7 +94,7 @@ class RootComponentImpl(
         ReportRepositoryImpl(database = database)
     }
 
-    // TODO: the current idea is to load it in a special way on the starting screen
+    // TODO: the current idea is to load it in a special way on the starting screen.
     //  IO on main/composer threads is still not impossible
     private val settingsRepositoryProvider = lazy {
         makeSettingsRepositoryImpl(
@@ -296,46 +298,46 @@ class RootComponentImpl(
 
         return dismissEvents.receive() as? R // TODO: logging of null
     }
-}
 
-// TODO: first run things
-@Serializable
-private sealed interface ScreenConfig {
-
+    // TODO: first run things
     @Serializable
-    data object Activities : ScreenConfig
+    private sealed interface ScreenConfig {
 
-    @Serializable
-    data object Schema : ScreenConfig
+        @Serializable
+        data object Activities : ScreenConfig
 
-    @Serializable
-    data class DailyChecklist(
-        val id: Long,
-    ) : ScreenConfig
+        @Serializable
+        data object Schema : ScreenConfig
 
-    @Serializable
-    data class TimedActivityIntervals(
-        val id: Long,
-    ) : ScreenConfig
-}
+        @Serializable
+        data class DailyChecklist(
+            val id: Long,
+        ) : ScreenConfig
 
-private sealed interface DialogConfig {
+        @Serializable
+        data class TimedActivityIntervals(
+            val id: Long,
+        ) : ScreenConfig
+    }
 
-    data class InfoDialog(
-        val title: String?,
-        val message: String,
-    ) : DialogConfig
+    private sealed interface DialogConfig {
 
-    data class ConfirmationDialog(
-        val title: String?,
-        val message: String?,
-        val okText: String?,
-        val cancelText: String?,
-    ) : DialogConfig
+        data class InfoDialog(
+            val title: String?,
+            val message: String,
+        ) : DialogConfig
 
-    data class EditTimeDialog(
-        val title: String,
-        val time: LocalTime,
-        val timeRange: ClosedRange<LocalTime>,
-    ) : DialogConfig
+        data class ConfirmationDialog(
+            val title: String?,
+            val message: String?,
+            val okText: String?,
+            val cancelText: String?,
+        ) : DialogConfig
+
+        data class EditTimeDialog(
+            val title: String,
+            val time: LocalTime,
+            val timeRange: ClosedRange<LocalTime>,
+        ) : DialogConfig
+    }
 }

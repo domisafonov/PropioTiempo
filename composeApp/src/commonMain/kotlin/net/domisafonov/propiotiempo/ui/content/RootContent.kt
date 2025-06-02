@@ -20,6 +20,7 @@ import net.domisafonov.propiotiempo.ui.AppTheme
 import net.domisafonov.propiotiempo.ui.content.dialog.ConfirmationDialogContent
 import net.domisafonov.propiotiempo.ui.content.dialog.EditTimeDialogContent
 import net.domisafonov.propiotiempo.ui.content.dialog.InfoDialogContent
+import net.domisafonov.propiotiempo.ui.content.timedactivityintervals.TimedActivityIntervalsContent
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource

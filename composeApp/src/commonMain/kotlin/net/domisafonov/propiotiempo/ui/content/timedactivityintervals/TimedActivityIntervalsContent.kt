@@ -1,9 +1,8 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package net.domisafonov.propiotiempo.ui.content
+package net.domisafonov.propiotiempo.ui.content.timedactivityintervals
 
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -32,9 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import kotlinx.datetime.Instant
-import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent
-import net.domisafonov.propiotiempo.component.TimedActivityIntervalsComponent.Command
+import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent
+import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.data.formatDurationDaysHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantRangeHoursMinutes
@@ -163,6 +163,14 @@ fun TimedActivityIntervalsContent(modifier: Modifier = Modifier, component: Time
                     HorizontalDivider()
                 }
             }
+        }
+    }
+
+    component.dialogSlot.subscribeAsState().value.child?.instance?.let {
+        when (it) {
+            is TimedActivityIntervalsComponent.Dialog.EditIntervalDialog -> EditTimedActivityIntervalDialogContent(
+                component = it.component,
+            )
         }
     }
 }

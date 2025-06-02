@@ -1,4 +1,4 @@
-package net.domisafonov.propiotiempo.ui.store
+package net.domisafonov.propiotiempo.ui.store.timedactivityintervals
 
 import com.arkivanov.essenty.statekeeper.StateKeeper
 import com.arkivanov.mvikotlin.core.store.Store
@@ -19,11 +19,11 @@ import net.domisafonov.propiotiempo.data.usecase.ObserveActivityNameUc
 import net.domisafonov.propiotiempo.data.usecase.ObserveDaysTimedActivityIntervalsUc
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalStartUc
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalTimeUc
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Intent
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.Label
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStore.State
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStoreInternal.Action
-import net.domisafonov.propiotiempo.ui.store.TimedActivityIntervalsStoreInternal.Message
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.Intent
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.Label
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.State
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStoreInternal.Action
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStoreInternal.Message
 
 interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
 
@@ -34,11 +34,6 @@ interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
         data class IntervalStartEditConfirmed(
             val oldStart: Instant,
             val newStart: Instant,
-        ) : Intent
-        data class IntervalEditConfirmed(
-            val oldStart: Instant,
-            val newStart: Instant,
-            val newEnd: Instant,
         ) : Intent
         data class ShowIntervalMenu(
             val start: Instant,
@@ -82,9 +77,7 @@ interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
             val intervalStart: Instant,
         ) : Label
         data class EditInterval(
-            val timedActivityId: Long,
             val intervalStart: Instant,
-            val intervalEnd: Instant,
         ) : Label
         data class ShowMenu(
             val timedActivityId: Long,
@@ -182,11 +175,7 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
                         intervalStart = interval.start,
                     )
                 } else {
-                    Label.EditInterval(
-                        timedActivityId = timedActivityId,
-                        intervalStart = interval.start,
-                        intervalEnd = interval.end,
-                    )
+                    Label.EditInterval(intervalStart = interval.start)
                 }
             )
         }
@@ -199,18 +188,6 @@ fun StoreFactory.makeTimedActivityIntervalsStore(
                         newStart = intent.newStart,
                     )
                     ?.let { publish(Label.Error(it)) }
-            }
-        }
-        onIntent<Intent.IntervalEditConfirmed> { intent ->
-            launch {
-                updateTimedActivityIntervalTimeUc
-                    .execute(
-                        activityId = timedActivityId,
-                        oldStart = intent.oldStart,
-                        newStart = intent.newStart,
-                        newEnd = intent.newEnd,
-                    )
-                    ?.let { publish((Label.Error(it))) }
             }
         }
         onIntent<Intent.ShowIntervalMenu> { intent ->
