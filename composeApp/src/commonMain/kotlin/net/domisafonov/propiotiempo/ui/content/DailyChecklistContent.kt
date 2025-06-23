@@ -72,7 +72,7 @@ fun DailyChecklistContent(modifier: Modifier = Modifier, component: DailyCheckli
     val viewModel by component.viewModel.collectAsState()
 
     val scrollState = rememberScrollState()
-    val isScrollEnabled = stickyRememberBoolean {
+    val isScrollEnabled = stickyRememberBoolean(ignoreFirstValue = true) {
         scrollState.canScrollBackward || scrollState.canScrollForward
     }
     val scrollBehavior = if (isScrollEnabled) {

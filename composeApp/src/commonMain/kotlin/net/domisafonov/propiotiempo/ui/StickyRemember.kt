@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 @Composable
 inline fun stickyRememberBoolean(
     stickyState: Boolean = true,
+    ignoreFirstValue: Boolean = false,
     crossinline calculation: @DisallowComposableCalls () -> Boolean,
 ): Boolean {
     var wasInStickyState by remember { mutableStateOf(false) }
@@ -17,9 +18,16 @@ inline fun stickyRememberBoolean(
         return stickyState
     }
 
+    val wasRunBefore = remember { RunBeforeState(wasRun = false) }
     val result = calculation()
-    if (result == stickyState) {
+    val isIgnoredFirstRun = ignoreFirstValue && !wasRunBefore.wasRun
+    wasRunBefore.wasRun = true
+    if (result == stickyState && !isIgnoredFirstRun) {
         wasInStickyState = true
     }
     return result
 }
+
+data class RunBeforeState(
+    var wasRun: Boolean,
+)
