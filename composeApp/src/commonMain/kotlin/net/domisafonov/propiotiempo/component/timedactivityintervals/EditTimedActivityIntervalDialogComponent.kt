@@ -18,9 +18,11 @@ import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.usecase.DeleteTimedActivityIntervalUcImpl
+import net.domisafonov.propiotiempo.data.usecase.GetTimedActivityIntervalUcImpl
 import net.domisafonov.propiotiempo.data.usecase.UpdateTimedActivityIntervalTimeUcImpl
 import net.domisafonov.propiotiempo.ui.content.timedactivityintervals.EditTimedActivityIntervalDialogViewModel
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStore
+import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStore.Intent
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStore.State
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.makeEditTimedActivityIntervalDialogStore
@@ -34,6 +36,7 @@ interface EditTimedActivityIntervalDialogComponentCallbacks {
     fun onDismiss()
     fun onConfirm()
     fun onCancel()
+    fun onDeleteInterval()
 }
 
 fun makeEditTimedActivityIntervalDialogComponent(
@@ -76,6 +79,9 @@ private class EditTimedActivityIntervalDialogComponentImpl(
         storeFactory.makeEditTimedActivityIntervalDialogStore(
             stateKeeper = stateKeeper,
             clock = clock,
+            getTimedActivityIntervalUc = GetTimedActivityIntervalUcImpl(
+                activityRepositoryProvider = activityRepositoryProvider,
+            ),
             updateTimedActivityIntervalTimeUc = UpdateTimedActivityIntervalTimeUcImpl(
                 activityRepositoryProvider = activityRepositoryProvider,
                 clock = clock,
@@ -107,19 +113,28 @@ private class EditTimedActivityIntervalDialogComponentImpl(
 
     private fun mapToViewModel(
         state: State,
-    ): EditTimedActivityIntervalDialogViewModel = EditTimedActivityIntervalDialogViewModel(
-        x = 1,
-    )
+    ): EditTimedActivityIntervalDialogViewModel = when (state) {
+        is State.Initializing -> EditTimedActivityIntervalDialogViewModel.Initializing
+        is State.Ready -> EditTimedActivityIntervalDialogViewModel.Ready(
+            startTime = state.startTime,
+            endTime = state.endTime,
+            timeRange = TODO()
+        )
+    }
 
     override fun onDismiss() {
         onDismiss.invoke()
     }
 
     override fun onConfirm() {
-        TODO("Not yet implemented")
+        store.accept(Intent.ConfirmEdit)
     }
 
     override fun onCancel() {
-        TODO("Not yet implemented")
+        store.accept(Intent.CancelEdit)
+    }
+
+    override fun onDeleteInterval() {
+        store.accept(Intent.DeleteInterval)
     }
 }

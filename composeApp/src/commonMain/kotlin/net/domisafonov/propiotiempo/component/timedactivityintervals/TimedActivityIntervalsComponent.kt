@@ -254,6 +254,7 @@ private class TimedActivityIntervalsComponentImpl(
     @Serializable
     private sealed interface DialogConfig {
 
+        @Serializable
         data class EditIntervalDialog(
             val intervalStart: Instant,
         ) : DialogConfig

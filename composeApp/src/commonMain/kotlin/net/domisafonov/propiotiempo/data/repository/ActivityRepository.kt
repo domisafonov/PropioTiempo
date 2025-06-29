@@ -14,6 +14,7 @@ import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.error.TimeError
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
+import net.domisafonov.propiotiempo.data.model.LimitedTimedActivityInterval
 import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
 
@@ -91,6 +92,11 @@ interface ActivityRepository {
         activityId: Long,
         start: Instant,
     ): PtError?
+
+    suspend fun getTimeActivityInterval(
+        activityId: Long,
+        start: Instant,
+    ): LimitedTimedActivityInterval?
 }
 
 class ActivityRepositoryImpl(
@@ -321,5 +327,25 @@ class ActivityRepositoryImpl(
         } catch (e: Exception) {
             ModificationError(cause = e)
         }
+    }
+
+    override suspend fun getTimeActivityInterval(
+        activityId: Long,
+        start: Instant,
+    ): LimitedTimedActivityInterval? = withContext(ioDispatcher) {
+        dbQueries
+            .get_time_activity_interval_with_limits(
+                activity_id = activityId,
+                start_time = start,
+            ) { end_time, lower_limit, upper_limit ->
+                LimitedTimedActivityInterval(
+                    activityId = activityId,
+                    start = start,
+                    end = end_time,
+                    lowerEditLimit = lower_limit,
+                    upperEditLimit = upper_limit,
+                )
+            }
+            .executeAsOneOrNull()
     }
 }

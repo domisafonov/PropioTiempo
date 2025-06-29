@@ -4,10 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -24,12 +21,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 import net.domisafonov.propiotiempo.component.timedactivityintervals.EditTimedActivityIntervalDialogComponent
 
 @Immutable
-data class EditTimedActivityIntervalDialogViewModel(
-    val x: Int,
-)
+sealed interface EditTimedActivityIntervalDialogViewModel {
+
+    data object Initializing : EditTimedActivityIntervalDialogViewModel
+
+    data class Ready(
+        val startTime: LocalDateTime,
+        val endTime: LocalDateTime,
+        val timeRange: ClosedRange<LocalDateTime>,
+    ) : EditTimedActivityIntervalDialogViewModel
+}
 
 @Composable
 fun EditTimedActivityIntervalDialogContent(component: EditTimedActivityIntervalDialogComponent) {

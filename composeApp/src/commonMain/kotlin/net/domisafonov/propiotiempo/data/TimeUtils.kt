@@ -38,6 +38,7 @@ fun<T : Any> resetPeriodically(
     dayTime: LocalTime? = LocalTime.fromSecondOfDay(0),
     doResetMinutely: Boolean = false,
     emitAtStart: Boolean = true,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
     flowProvider: () -> Flow<T>,
 ): Flow<T> {
     require (dayTime != null || doResetMinutely)
@@ -46,6 +47,7 @@ fun<T : Any> resetPeriodically(
         emitAt = dayTime,
         doEmitMinutely = doResetMinutely,
         emitAtStart = emitAtStart,
+        timeZone = timeZone,
     ).flatMapLatest { flowProvider() }
 }
 
@@ -54,24 +56,27 @@ fun periodicTimer(
     emitAt: LocalTime? = null,
     doEmitMinutely: Boolean = false,
     emitAtStart: Boolean = true,
-): Flow<Unit> = flow {
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): Flow<Instant> = flow {
     require(emitAt != null || doEmitMinutely)
 
+    var now = clock.now()
     if (emitAtStart) {
-        emit(Unit)
+        emit(now)
     }
     while (true) {
-        val now = clock.localTime()
+        val localNow = now.toLocalTime(timeZone = timeZone)
         val one = emitAt
-            ?.let { millisToDayTime(dayTime = emitAt, now = now) }
+            ?.let { millisToDayTime(dayTime = emitAt, now = localNow) }
             ?: Long.MAX_VALUE
         val two = if (doEmitMinutely) {
-            millisToMinuteEnd(now = now)
+            millisToMinuteEnd(now = localNow)
         } else {
             Long.MAX_VALUE
         }
         delay(min(one, two))
-        emit(Unit)
+        now = clock.now()
+        emit(now)
     }
 }
 
@@ -96,11 +101,6 @@ fun Instant.toLocalTime(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): LocalTime = toLocalDateTime(timeZone = timeZone)
     .time
-
-private fun Clock.localTime(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): LocalTime = now()
-    .toLocalTime(timeZone = timeZone)
 
 @Composable
 fun formatDurationHoursMinutes(seconds: Int): String =

@@ -250,3 +250,22 @@ SELECT
       end_time IS NULL
       OR end_time >= :checked_interval_start_time
     );
+
+-- using subqueries in any form here makes sqlite do multiple full table scans
+get_time_activity_interval_with_limits:
+SELECT *
+  FROM (
+    SELECT
+      max(CASE WHEN start_time = :start_time THEN end_time END) AS end_time,
+      max(CASE WHEN start_time < :start_time THEN end_time END) AS lower_limit,
+      min(
+        CASE WHEN
+          start_time != :start_time
+          AND end_time > :start_time
+        THEN start_time END
+      ) AS upper_limit
+    FROM time_activity_intervals
+    WHERE activity_id = :activity_id
+    GROUP BY activity_id
+  )
+  WHERE end_time IS NOT NULL;
