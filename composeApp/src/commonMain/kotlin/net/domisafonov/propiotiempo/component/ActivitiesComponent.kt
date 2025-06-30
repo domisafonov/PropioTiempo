@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore
@@ -30,6 +29,7 @@ import net.domisafonov.propiotiempo.ui.content.ActivitiesViewModel
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Intent
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.Label
 import net.domisafonov.propiotiempo.ui.store.ActivitiesStore.State
+import kotlin.time.Clock
 
 interface ActivitiesComponent : ComponentContext, ActivitiesComponentCallbacks {
 

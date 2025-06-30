@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.DailyChecklistComponent
 import net.domisafonov.propiotiempo.component.DailyChecklistComponentCallbacks
 import net.domisafonov.propiotiempo.ui.component.HorizontalDivider
@@ -52,6 +51,7 @@ import propiotiempo.composeapp.generated.resources.daily_checklist_item_pending
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
+import kotlin.time.Instant
 
 @Immutable
 data class DailyChecklistViewModel(

@@ -1,3 +1,5 @@
+@file:UseSerializers(InstantSerializer::class)
+
 package net.domisafonov.propiotiempo.ui.store.timedactivityintervals
 
 import com.arkivanov.essenty.statekeeper.StateKeeper
@@ -6,11 +8,11 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.domisafonov.propiotiempo.data.error.PtError
+import net.domisafonov.propiotiempo.data.model.InstantSerializer
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
 import net.domisafonov.propiotiempo.data.periodicTimer
 import net.domisafonov.propiotiempo.data.toLocalTime
@@ -24,6 +26,8 @@ import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivit
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStore.State
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStoreInternal.Action
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.TimedActivityIntervalsStoreInternal.Message
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface TimedActivityIntervalsStore : Store<Intent, State, Label> {
 

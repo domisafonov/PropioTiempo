@@ -6,7 +6,6 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.data.error.PtError
@@ -21,6 +20,7 @@ import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.Label
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStore.State
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStoreInternal.Action
 import net.domisafonov.propiotiempo.ui.store.DailyChecklistStoreInternal.Message
+import kotlin.time.Instant
 
 interface DailyChecklistStore : Store<Intent, State, Label> {
 

@@ -1,11 +1,11 @@
 package net.domisafonov.propiotiempo.data.usecase
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.getDayStart
 import net.domisafonov.propiotiempo.data.model.ChecklistSummary
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.resetPeriodically
+import kotlin.time.Clock
 
 fun interface ObserveTodaysChecklistSummaryUc {
 

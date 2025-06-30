@@ -62,6 +62,10 @@ kotlin {
             implementation(libs.multiplatform.settings.noarg)
         }
     }
+
+    sourceSets.all {
+        languageSettings.optIn("kotlin.time.ExperimentalTime")
+    }
 }
 
 sqldelight {

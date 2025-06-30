@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showEditTimeDialog
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
@@ -37,6 +36,7 @@ import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_ordinal
 import propiotiempo.composeapp.generated.resources.daily_checklist_item_uncheck_confirmation
 import propiotiempo.composeapp.generated.resources.edit_time_dialog_title
+import kotlin.time.Clock
 
 interface DailyChecklistComponent : ComponentContext, DailyChecklistComponentCallbacks {
 

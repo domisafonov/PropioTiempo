@@ -1,4 +1,4 @@
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 -- TODO: a timezones table to interpret historical data according to the correct
 --  time representation

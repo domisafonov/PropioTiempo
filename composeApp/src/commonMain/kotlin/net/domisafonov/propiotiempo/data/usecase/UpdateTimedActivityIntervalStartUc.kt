@@ -1,12 +1,12 @@
 package net.domisafonov.propiotiempo.data.usecase
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.error.TimeError
 import net.domisafonov.propiotiempo.data.isSameMinute
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.toLocalTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 fun interface UpdateTimedActivityIntervalStartUc {
     suspend fun execute(

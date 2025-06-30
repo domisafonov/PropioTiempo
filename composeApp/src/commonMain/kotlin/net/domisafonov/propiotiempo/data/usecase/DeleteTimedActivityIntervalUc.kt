@@ -1,8 +1,8 @@
 package net.domisafonov.propiotiempo.data.usecase
 
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import kotlin.time.Instant
 
 fun interface DeleteTimedActivityIntervalUc {
     suspend fun execute(

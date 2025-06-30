@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         val rootComponent = RootComponentImpl(
             componentContext = defaultComponentContext(),
             storeFactory = DefaultStoreFactory(),
-            databaseDriverProvider = lazy {
+            databaseDriverProvider = {
                 val schema = DatabaseSource.Schema.synchronous()
                 AndroidSqliteDriver(
                     schema = schema,

@@ -14,11 +14,11 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import net.domisafonov.propiotiempo.component.dialog.ConfirmationDialogComponent
@@ -39,6 +39,7 @@ import net.domisafonov.propiotiempo.data.db.InstantLongAdapter
 import net.domisafonov.propiotiempo.data.db.Time_activity_intervals
 import net.domisafonov.propiotiempo.data.repository.makeSettingsRepositoryImpl
 import net.domisafonov.propiotiempo.ui.singleUse
+import kotlin.time.Clock
 
 interface RootComponent : ComponentContext, DialogContainer, RootComponentCallbacks {
 
@@ -69,12 +70,14 @@ interface RootComponentCallbacks {
 class RootComponentImpl(
     componentContext: ComponentContext,
     storeFactory: StoreFactory,
-    databaseDriverProvider: Lazy<SqlDriver>,
+    databaseDriverProvider: () -> SqlDriver,
 ) : RootComponent, ComponentContext by componentContext {
 
+    private lateinit var databaseDriver: SqlDriver
     private val database by lazy {
+        databaseDriver = databaseDriverProvider()
         DatabaseSource.Companion(
-            driver = databaseDriverProvider.value,
+            driver = databaseDriver,
             daily_checklist_checksAdapter = Daily_checklist_checks.Adapter(
                 timeAdapter = InstantLongAdapter,
             ),
@@ -84,6 +87,15 @@ class RootComponentImpl(
             )
         )
     }
+
+    init {
+        doOnDestroy {
+            if (this::databaseDriver.isInitialized) {
+                databaseDriver.close()
+            }
+        }
+    }
+
     private val activityRepositoryProvider = lazy {
         ActivityRepositoryImpl(database = database, ioDispatcher = Dispatchers.IO)
     }

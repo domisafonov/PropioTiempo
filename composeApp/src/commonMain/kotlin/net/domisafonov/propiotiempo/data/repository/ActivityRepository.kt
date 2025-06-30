@@ -6,7 +6,6 @@ import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.db.DatabaseSource
 import net.domisafonov.propiotiempo.data.error.ModificationError
 import net.domisafonov.propiotiempo.data.error.NoSuchElementError
@@ -17,6 +16,7 @@ import net.domisafonov.propiotiempo.data.model.DailyChecklistItem
 import net.domisafonov.propiotiempo.data.model.LimitedTimedActivityInterval
 import net.domisafonov.propiotiempo.data.model.TimedActivitySummary
 import net.domisafonov.propiotiempo.data.model.TimedActivityInterval
+import kotlin.time.Instant
 
 interface ActivityRepository {
 

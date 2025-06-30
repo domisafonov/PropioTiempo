@@ -15,7 +15,7 @@ fun MainViewController() = ComposeUIViewController {
     val rootComponent = RootComponentImpl(
         componentContext = DefaultComponentContext(lifecycle = ApplicationLifecycle()),
         storeFactory = DefaultStoreFactory(),
-        databaseDriverProvider = lazy {
+        databaseDriverProvider = {
             NativeSqliteDriver(
                 schema = DatabaseSource.Schema.synchronous(),
                 name = "propiotiempo.db", // TODO: proper path

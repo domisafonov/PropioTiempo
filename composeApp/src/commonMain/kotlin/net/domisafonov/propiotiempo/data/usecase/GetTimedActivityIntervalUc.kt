@@ -1,10 +1,10 @@
 package net.domisafonov.propiotiempo.data.usecase
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.domisafonov.propiotiempo.data.model.LimitedLocalTimedActivityInterval
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import kotlin.time.Instant
 
 fun interface GetTimedActivityIntervalUc {
     suspend fun execute(

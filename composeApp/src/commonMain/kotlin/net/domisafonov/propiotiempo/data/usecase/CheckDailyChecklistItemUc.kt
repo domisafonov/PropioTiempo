@@ -1,8 +1,8 @@
 package net.domisafonov.propiotiempo.data.usecase
 
-import kotlinx.datetime.Clock
 import net.domisafonov.propiotiempo.data.error.PtError
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
+import kotlin.time.Clock
 
 fun interface CheckDailyChecklistItemUc {
     suspend fun execute(dailyChecklistItemId: Long): PtError?

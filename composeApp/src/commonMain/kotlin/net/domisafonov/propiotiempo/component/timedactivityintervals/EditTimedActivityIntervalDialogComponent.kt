@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.usecase.DeleteTimedActivityIntervalUcImpl
@@ -26,6 +24,8 @@ import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedAct
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStore.State
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.INITIAL_STATE
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.makeEditTimedActivityIntervalDialogStore
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface EditTimedActivityIntervalDialogComponent : ComponentContext, EditTimedActivityIntervalDialogComponentCallbacks {
 

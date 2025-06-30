@@ -1,7 +1,10 @@
+@file:UseSerializers(InstantSerializer::class)
+
 package net.domisafonov.propiotiempo.data.model
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import kotlin.time.Instant
 
 @Serializable
 data class TimedActivityInterval(

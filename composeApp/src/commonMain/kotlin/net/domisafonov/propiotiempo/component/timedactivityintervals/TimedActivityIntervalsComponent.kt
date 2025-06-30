@@ -1,3 +1,5 @@
+@file:UseSerializers(InstantSerializer::class)
+
 package net.domisafonov.propiotiempo.component.timedactivityintervals
 
 import com.arkivanov.decompose.ComponentContext
@@ -21,14 +23,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.component.dialog.DialogContainer
 import net.domisafonov.propiotiempo.component.dialog.showEditTimeDialog
 import net.domisafonov.propiotiempo.component.dialog.showErrorDialog
 import net.domisafonov.propiotiempo.data.atDateOf
+import net.domisafonov.propiotiempo.data.model.InstantSerializer
 import net.domisafonov.propiotiempo.data.repository.ActivityRepository
 import net.domisafonov.propiotiempo.data.repository.SettingsRepository
 import net.domisafonov.propiotiempo.data.toLocalTime
@@ -49,6 +51,8 @@ import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.makeTimedAct
 import org.jetbrains.compose.resources.getString
 import propiotiempo.composeapp.generated.resources.Res
 import propiotiempo.composeapp.generated.resources.edit_interval_start_dialog_title
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface TimedActivityIntervalsComponent : ComponentContext, TimedActivityIntervalsComponentCallbacks {
 

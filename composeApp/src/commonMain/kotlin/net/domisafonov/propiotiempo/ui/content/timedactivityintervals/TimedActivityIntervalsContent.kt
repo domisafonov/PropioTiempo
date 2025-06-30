@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent
 import net.domisafonov.propiotiempo.component.timedactivityintervals.TimedActivityIntervalsComponent.Command
 import net.domisafonov.propiotiempo.data.formatDurationDaysHoursMinutes
@@ -52,6 +51,7 @@ import propiotiempo.composeapp.generated.resources.arrow_back
 import propiotiempo.composeapp.generated.resources.menu_item_delete_interval
 import propiotiempo.composeapp.generated.resources.navigate_back
 import propiotiempo.composeapp.generated.resources.pending
+import kotlin.time.Instant
 
 @Immutable
 data class TimedActivityIntervalsViewModel(

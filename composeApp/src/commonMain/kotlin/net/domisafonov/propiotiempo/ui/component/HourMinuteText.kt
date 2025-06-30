@@ -4,10 +4,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import kotlinx.datetime.Instant
 import net.domisafonov.propiotiempo.data.formatDurationHoursMinutes
 import net.domisafonov.propiotiempo.data.formatInstantHoursMinutes
 import net.domisafonov.propiotiempo.ui.numericTimeBody
+import kotlin.time.Instant
 
 @Composable
 fun HourMinuteText(

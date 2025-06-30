@@ -1,6 +1,6 @@
 package net.domisafonov.propiotiempo.data.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class LimitedTimedActivityInterval(
     val activityId: Long,

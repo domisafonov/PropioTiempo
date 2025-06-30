@@ -1,3 +1,5 @@
+@file:UseSerializers(InstantSerializer::class)
+
 package net.domisafonov.propiotiempo.ui.store.timedactivityintervals
 
 import com.arkivanov.essenty.statekeeper.StateKeeper
@@ -6,12 +8,12 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import net.domisafonov.propiotiempo.data.model.InstantSerializer
 import net.domisafonov.propiotiempo.data.periodicTimer
 import net.domisafonov.propiotiempo.data.usecase.DeleteTimedActivityIntervalUc
 import net.domisafonov.propiotiempo.data.usecase.GetTimedActivityIntervalUc
@@ -21,6 +23,8 @@ import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedAct
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStore.Label
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStoreInternal.Action
 import net.domisafonov.propiotiempo.ui.store.timedactivityintervals.EditTimedActivityIntervalDialogStoreInternal.Message
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface EditTimedActivityIntervalDialogStore : Store<Intent, State, Label> {
 
